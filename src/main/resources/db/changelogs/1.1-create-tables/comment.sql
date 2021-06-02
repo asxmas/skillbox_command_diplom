@@ -7,7 +7,7 @@ CREATE TABLE "public"."post_comment"
     "time"         TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     "post_id"      INTEGER                     NOT NULL,
     "parent_id"    INTEGER,
-    "author_id"    INTEGER,
+    "author_id"    INTEGER                     NOT NULL,
     "comment_text" TEXT                        NOT NULL,
     "is_blocked"   BOOLEAN                     NOT NULL,
     CONSTRAINT "post_comment_pk" PRIMARY KEY ("id")

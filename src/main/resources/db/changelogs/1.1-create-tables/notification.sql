@@ -4,7 +4,6 @@
 CREATE TABLE "public"."notification"
 (
     "id"        INTEGER                     NOT NULL,
-    "column_2"  INTEGER,
     "type_id"   INTEGER                     NOT NULL,
     "sent_time" TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     "person_id" INTEGER                     NOT NULL,
