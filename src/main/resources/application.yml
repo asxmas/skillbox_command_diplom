@@ -2,9 +2,9 @@ spring:
   datasource:
     password: postgres
     url: jdbc:postgresql://localhost:5432/skillbox_team13
-#  liquibase:
-#    enabled: true
-#    change-log: db/db.yml
+  liquibase:
+    enabled: true
+    change-log: db/db.yml
   jpa:
     hibernate:
       ddl-auto: none
