@@ -1,4 +1,4 @@
-package ru.skillbox.team13.entiny;
+package ru.skillbox.team13.entity;
 
 import lombok.Data;
 
@@ -11,6 +11,8 @@ public class File {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     int id;
+
+    @Column(name = "post_id")
     int postId;
     String name;
     String path;

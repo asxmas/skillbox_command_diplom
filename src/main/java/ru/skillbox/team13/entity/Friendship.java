@@ -1,4 +1,4 @@
-package ru.skillbox.team13.entiny;
+package ru.skillbox.team13.entity;
 
 import lombok.Data;
 
@@ -6,13 +6,19 @@ import javax.persistence.*;
 
 @Data
 @Entity
-@Table(name = "post_comment")
+@Table(name = "friendship")
 public class Friendship {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     int id;
-    int statusID;
+
+    @Column(name = "status_id")
+    int statusId;
+
+    @Column(name = "src_person_id")
     int srcPersonId;
+
+    @Column(name = "dst_person_id")
     int dstPersonId;
 
 }

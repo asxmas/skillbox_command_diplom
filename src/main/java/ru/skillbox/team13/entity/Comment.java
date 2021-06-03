@@ -1,4 +1,4 @@
-package ru.skillbox.team13.entiny;
+package ru.skillbox.team13.entity;
 
 import lombok.Data;
 
@@ -14,10 +14,20 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.AUTO)
     int id;
     LocalDateTime time;
+
+    @Column(name = "post_id")
     int postId;
+
+    @Column(name = "parent_id")
     int parentId;
+
+    @Column(name = "author_id")
     int authorId;
+
+    @Column(name = "comment_text")
     String commentText;
+
+    @Column(name = "is_blocked")
     boolean isBlocked;
 
 

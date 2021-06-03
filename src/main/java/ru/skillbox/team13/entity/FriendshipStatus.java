@@ -1,20 +1,18 @@
-package ru.skillbox.team13.entiny;
-
+package ru.skillbox.team13.entity;
 import lombok.Data;
+
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "block_history")
-public class BlockHistory {
+@Table(name = "friendship_status")
+public class FriendshipStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     int id;
     LocalDateTime time;
-    int personId;
-    int postId;
-    int commentId;
-    String action;
+    String name;
+    String code;
 }
