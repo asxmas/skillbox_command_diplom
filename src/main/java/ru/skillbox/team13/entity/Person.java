@@ -26,6 +26,9 @@ public class Person {
     @Column(name = "birth_date")
     private LocalDateTime birthDate;
 
+    @Column(name = "e_mail")
+    private String email;
+
     private String phone;
     private String password;
     private String photo;
@@ -38,8 +41,9 @@ public class Person {
     @Column(name = "is_approved")
     private boolean isApproved;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "messages_permission")
-    private String messagesPermission;
+    private MessagePermission messagesPermission;
 
     @Column(name = "last_online_time")
     private LocalDateTime lastOnlineTime;
@@ -47,4 +51,7 @@ public class Person {
     @Column(name = "is_blocked")
     private boolean isBlocked;
 
+    public enum MessagePermission {
+        ALL, FRIENDS
+    }
 }

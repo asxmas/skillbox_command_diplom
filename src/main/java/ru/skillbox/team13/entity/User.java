@@ -17,7 +17,13 @@ public class User {
 
     @Column(name = "e_mail")
     private String email;
-    private String password;
-    private Enum type;
 
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Type type;
+
+    public enum Type {
+        MODERATOR, ADMIN
+    }
 }

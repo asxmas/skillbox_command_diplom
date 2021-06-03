@@ -3,9 +3,9 @@
 -- changeset lc:1-1-notification-type
 CREATE TABLE "public"."notification_type"
 (
-    "id"   INTEGER     NOT NULL,
-    "code" INTEGER     NOT NULL,
-    "name" VARCHAR(25) NOT NULL,
+    "id"   INTEGER      NOT NULL,
+    "code" VARCHAR(25)  NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
     CONSTRAINT "notification_type_pk" PRIMARY KEY ("id")
 );
 COMMENT ON TABLE "public"."notification_type" IS 'тип оповещения';

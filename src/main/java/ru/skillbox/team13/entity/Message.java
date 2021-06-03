@@ -12,18 +12,22 @@ public class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int id;
-    LocalDateTime time;
+    private int id;
+    private LocalDateTime time;
 
     @Column(name = "author_id")
-    int authorId;
+    private int authorId;
 
-    @Column(name = "recipeint_id")
-    int recipientId;
+    @Column(name = "recipient_id")
+    private int recipientId;
 
     @Column(name = "message_text")
-    String messageText;
+    private String messageText;
 
     @Column(name = "read_status")
-    String readStatus;
+    private ReadStatus readStatus;
+
+    public enum ReadStatus {
+        SENT, READ
+    }
 }

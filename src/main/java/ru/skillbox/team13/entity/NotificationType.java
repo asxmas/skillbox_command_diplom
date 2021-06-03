@@ -12,6 +12,17 @@ public class NotificationType {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    private int code;
+
+    @Enumerated(EnumType.STRING)
+    private Code code;
+
     private String name;
+
+    public enum Code {
+        POST,
+        POST_COMMENT,
+        COMMENT_COMMENT,
+        FRIEND_REQUEST,
+        MESSAGE
+    }
 }

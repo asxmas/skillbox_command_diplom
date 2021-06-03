@@ -13,7 +13,7 @@ public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    LocalDateTime time;
+    private LocalDateTime time;
 
     @Column(name = "post_id")
     private int postId;

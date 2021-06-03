@@ -1,4 +1,5 @@
 package ru.skillbox.team13.entity;
+
 import lombok.Data;
 
 
@@ -14,5 +15,15 @@ public class FriendshipStatus {
     private int id;
     private LocalDateTime time;
     private String name;
-    private String code;
+
+    @Enumerated(EnumType.STRING)
+    private Code code;
+
+    public enum Code {
+        REQUEST,
+        FRIEND,
+        BLOCKED,
+        DECLINED,
+        SUBSCRIBED
+    }
 }

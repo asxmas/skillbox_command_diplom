@@ -6,7 +6,7 @@ import javax.persistence.*;
 
 @Data
 @Entity
-@Table(name = "tag2post")
+@Table(name = "post2tag")
 public class Tag2Post {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

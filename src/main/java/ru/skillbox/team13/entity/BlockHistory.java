@@ -12,7 +12,7 @@ public class BlockHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    LocalDateTime time;
+    private LocalDateTime time;
 
     @Column(name = "person_id")
     private int personId;
@@ -21,6 +21,13 @@ public class BlockHistory {
     private int postId;
 
     @Column(name = "comment_id")
-    int commentId;
-    private String action;
+    private int commentId;
+
+    @Enumerated(EnumType.STRING)
+    private Action action;
+
+    public enum Action {
+        BLOCK,
+        UNBLOCK
+    }
 }
