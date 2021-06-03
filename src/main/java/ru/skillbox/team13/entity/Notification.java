@@ -12,18 +12,18 @@ import java.time.LocalDateTime;
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int id;
+    private int id;
 
     @Column(name = "type_id")
-    int typeId;
+    private int typeId;
 
     @Column(name = "sent_time")
-    LocalDateTime sentTime;
+    private LocalDateTime sentTime;
 
     @Column(name = "person_id")
-    int personId;
+    private int personId;
 
     @Column(name = "entity_id")
-    int entityId;
-    String contact;
+    private int entityId;
+    private String contact;
 }

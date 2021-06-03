@@ -10,15 +10,15 @@ import javax.persistence.*;
 public class Friendship {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int id;
+    private int id;
 
     @Column(name = "status_id")
-    int statusId;
+    private int statusId;
 
     @Column(name = "src_person_id")
-    int srcPersonId;
+    private int srcPersonId;
 
     @Column(name = "dst_person_id")
-    int dstPersonId;
+    private int dstPersonId;
 
 }

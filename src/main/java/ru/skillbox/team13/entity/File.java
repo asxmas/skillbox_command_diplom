@@ -10,10 +10,10 @@ import javax.persistence.*;
 public class File {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int id;
+    private int id;
 
     @Column(name = "post_id")
-    int postId;
-    String name;
-    String path;
+    private int postId;
+    private String name;
+    private String path;
 }

@@ -12,19 +12,19 @@ public class Post {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int id;
+    private int id;
 
-    LocalDateTime time;
+    private LocalDateTime time;
 
     @Column(name = "author_id")
-    int authorId;
+    private int authorId;
 
-    String title;
+    private String title;
 
     @Column(name = "post_text")
-    String postText;
+    private String postText;
 
     @Column(name = "is_blocked")
-    boolean isBlocked;
+    private boolean isBlocked;
 
 }

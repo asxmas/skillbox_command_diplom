@@ -12,23 +12,23 @@ import java.time.LocalDateTime;
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int id;
+    private int id;
     LocalDateTime time;
 
     @Column(name = "post_id")
-    int postId;
+    private int postId;
 
     @Column(name = "parent_id")
-    int parentId;
+    private int parentId;
 
     @Column(name = "author_id")
-    int authorId;
+    private int authorId;
 
     @Column(name = "comment_text")
-    String commentText;
+    private String commentText;
 
     @Column(name = "is_blocked")
-    boolean isBlocked;
+    private boolean isBlocked;
 
 
 }

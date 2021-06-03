@@ -11,16 +11,16 @@ import java.time.LocalDateTime;
 public class BlockHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int id;
+    private int id;
     LocalDateTime time;
 
     @Column(name = "person_id")
-    int personId;
+    private int personId;
 
     @Column(name = "post_id")
-    int postId;
+    private int postId;
 
     @Column(name = "comment_id")
     int commentId;
-    String action;
+    private String action;
 }

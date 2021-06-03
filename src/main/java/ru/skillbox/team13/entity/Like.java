@@ -11,13 +11,13 @@ import java.time.LocalDateTime;
 public class Like {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int id;
-    LocalDateTime time;
+    private int id;
+    private LocalDateTime time;
 
     @Column(name = "person_id")
-    int personId;
+    private int personId;
 
     @Column(name = "post_id")
-    int postId;
+    private int postId;
 
 }

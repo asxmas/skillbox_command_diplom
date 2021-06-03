@@ -11,13 +11,13 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int id;
+    private int id;
 
-    String name;
+    private String name;
 
     @Column(name = "e_mail")
-    String e_mail;
-    String password;
-    Enum type;
+    private String email;
+    private String password;
+    private Enum type;
 
 }

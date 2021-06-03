@@ -11,7 +11,7 @@ public class NotificationType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int id;
-    int code;
-    String name;
+    private int id;
+    private int code;
+    private String name;
 }

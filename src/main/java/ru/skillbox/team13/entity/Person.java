@@ -12,39 +12,39 @@ public class Person {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int id;
+    private int id;
 
     @Column(name = "first_name")
-    String firstName;
+    private String firstName;
 
     @Column(name = "last_name")
-    String lastName;
+    private String lastName;
 
     @Column(name = "reg_date")
-    LocalDateTime regDate;
+    private LocalDateTime regDate;
 
     @Column(name = "birth_date")
-    LocalDateTime birthDate;
+    private LocalDateTime birthDate;
 
-    String phone;
-    String password;
-    String photo;
-    String about;
-    String town;
+    private String phone;
+    private String password;
+    private String photo;
+    private String about;
+    private String town;
 
     @Column(name = "confirmation_code")
-    String confirmationCode;
+    private String confirmationCode;
 
     @Column(name = "is_approved")
-    boolean isApproved;
+    private boolean isApproved;
 
     @Column(name = "messages_permission")
-    String messagesPermission;
+    private String messagesPermission;
 
     @Column(name = "last_online_time")
-    LocalDateTime lastOnlineTime;
+    private LocalDateTime lastOnlineTime;
 
     @Column(name = "is_blocked")
-    boolean isBlocked;
+    private boolean isBlocked;
 
 }

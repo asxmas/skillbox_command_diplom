@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 public class FriendshipStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int id;
-    LocalDateTime time;
-    String name;
-    String code;
+    private int id;
+    private LocalDateTime time;
+    private String name;
+    private String code;
 }

@@ -10,12 +10,12 @@ import javax.persistence.*;
 public class Tag2Post {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    int id;
+    private int id;
 
     @Column(name = "post_id")
-    int postId;
+    private int postId;
 
     @Column(name = "tag_id")
-    int tagId;
+    private int tagId;
 
 }
