@@ -6,16 +6,19 @@ import javax.persistence.*;
 
 @Data
 @Entity
-@Table(name = "post2tag")
-public class Tag2Post {
+@Table(name = "post_file")
+public class PostFile {
     @Id
     @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
 
     @Column(name = "post_id", nullable = false)
     private int postId;
 
-    @Column(name = "tag_id", nullable = false)
-    private int tagId;
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "path", nullable = false)
+    private String path;
 }

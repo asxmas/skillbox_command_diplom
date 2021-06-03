@@ -8,11 +8,11 @@ import javax.persistence.*;
 @Entity
 @Table(name = "tag")
 public class Tag {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
 
+    @Column(name = "tag", nullable = false)
     private String tag;
-
 }

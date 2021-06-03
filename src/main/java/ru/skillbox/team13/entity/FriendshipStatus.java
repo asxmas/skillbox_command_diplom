@@ -1,6 +1,7 @@
 package ru.skillbox.team13.entity;
 
 import lombok.Data;
+import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
 
 
 import javax.persistence.*;
@@ -11,19 +12,17 @@ import java.time.LocalDateTime;
 @Table(name = "friendship_status")
 public class FriendshipStatus {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
+
+    @Column(name = "time", nullable = false)
     private LocalDateTime time;
+
+    @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "code", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Code code;
-
-    public enum Code {
-        REQUEST,
-        FRIEND,
-        BLOCKED,
-        DECLINED,
-        SUBSCRIBED
-    }
+    private FriendshipStatusCode code;
 }

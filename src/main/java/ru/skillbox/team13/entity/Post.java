@@ -9,22 +9,23 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "post")
 public class Post {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
 
+    @Column(name = "time", nullable = false)
     private LocalDateTime time;
 
-    @Column(name = "author_id")
+    @Column(name = "author_id", nullable = false)
     private int authorId;
 
+    @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "post_text")
+    @Column(name = "post_text", nullable = false)
     private String postText;
 
-    @Column(name = "is_blocked")
+    @Column(name = "is_blocked", nullable = false)
     private boolean isBlocked;
-
 }

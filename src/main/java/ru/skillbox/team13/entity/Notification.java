@@ -11,19 +11,22 @@ import java.time.LocalDateTime;
 @Table(name = "notification")
 public class Notification {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
 
-    @Column(name = "type_id")
+    @Column(name = "type_id", nullable = false)
     private int typeId;
 
-    @Column(name = "sent_time")
+    @Column(name = "sent_time", nullable = false)
     private LocalDateTime sentTime;
 
-    @Column(name = "person_id")
+    @Column(name = "person_id", nullable = false)
     private int personId;
 
-    @Column(name = "entity_id")
+    @Column(name = "entity_id", nullable = false)
     private int entityId;
+
+    @Column(name = "contact", nullable = false)
     private String contact;
 }
