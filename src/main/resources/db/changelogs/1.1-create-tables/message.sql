@@ -13,3 +13,4 @@ CREATE TABLE "public"."message"
 );
 COMMENT ON TABLE "public"."message" IS 'личные сообщения';
 COMMENT ON COLUMN "public"."message"."time" IS 'дата и время отправки';
+COMMENT ON COLUMN message.message_text IS 'статус прочтения: SENT (не прочитано) и READ (прочитано)';

@@ -11,6 +11,12 @@ ALTER TABLE "public"."post_like"
 ALTER TABLE "public"."post"
     ADD CONSTRAINT "post_person_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."person" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 
+ALTER TABLE "public"."friendship"
+    ADD CONSTRAINT "friendship_person_dst_id_fk_2" FOREIGN KEY ("dst_person_id") REFERENCES "public"."person" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+ALTER TABLE "public"."friendship"
+    ADD CONSTRAINT "friendship_person_src_id_fk" FOREIGN KEY ("src_person_id") REFERENCES "public"."person" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+
 ALTER TABLE "public"."message"
     ADD CONSTRAINT "message_author_person_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."person" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 
@@ -34,6 +40,9 @@ ALTER TABLE "public"."post_like"
 
 ALTER TABLE "public"."block_history"
     ADD CONSTRAINT "block_history_person_id_fk" FOREIGN KEY ("id") REFERENCES "public"."person" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+ALTER TABLE "public"."friendship"
+    ADD CONSTRAINT "friendship_friendship_status_id_fk" FOREIGN KEY ("status_id") REFERENCES "public"."friendship_status" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 
 ALTER TABLE "public"."post2tag"
     ADD CONSTRAINT "post2tag_post_id_fk" FOREIGN KEY ("post_id") REFERENCES "public"."post" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
