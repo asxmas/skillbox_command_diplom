@@ -7,4 +7,5 @@ spring:
     change-log: db/db.yml
   jpa:
     hibernate:
+      show-sql: true
       ddl-auto: none
