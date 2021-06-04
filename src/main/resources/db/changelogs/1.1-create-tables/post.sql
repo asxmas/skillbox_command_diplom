@@ -3,13 +3,13 @@
 -- changeset lc:1-1-post
 CREATE TABLE "public"."post"
 (
-    "id"         INTEGER                     NOT NULL,
-    "time"       TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    "author_id"  INTEGER                     NOT NULL,
-    "title"      VARCHAR(1000)               NOT NULL,
-    "post_text"  TEXT                        NOT NULL,
     "is_blocked" BOOLEAN                     NOT NULL,
-    CONSTRAINT "post_pk" PRIMARY KEY ("id")
+    "post_text"  VARCHAR(255)                NOT NULL,
+    "time"       TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    "title"      VARCHAR(255)                NOT NULL,
+    "id"         INTEGER                     NOT NULL,
+    "author_id"  INTEGER                     NOT NULL,
+    CONSTRAINT "post_pkey" PRIMARY KEY ("id")
 );
 COMMENT ON TABLE "public"."post" IS 'посты';
 COMMENT ON COLUMN "public"."post"."time" IS 'дата и время публикации';

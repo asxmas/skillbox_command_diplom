@@ -4,9 +4,9 @@
 CREATE TABLE "public"."notification_type"
 (
     "id"   INTEGER      NOT NULL,
-    "code" VARCHAR(25)  NOT NULL,
+    "code" VARCHAR(255) NOT NULL,
     "name" VARCHAR(255) NOT NULL,
-    CONSTRAINT "notification_type_pk" PRIMARY KEY ("id")
+    CONSTRAINT "notification_type_pkey" PRIMARY KEY ("id")
 );
 COMMENT ON TABLE "public"."notification_type" IS 'тип оповещения';
 COMMENT ON COLUMN "public"."notification_type"."code" IS 'код типа';
