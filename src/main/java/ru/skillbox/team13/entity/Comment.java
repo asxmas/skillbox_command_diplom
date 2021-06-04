@@ -1,30 +1,33 @@
 package ru.skillbox.team13.entity;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "post_comment")
-public class Comment {
-    @Id
-    @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private int id;
-
+public class Comment extends Notified {
     @Column(name = "time", nullable = false)
     private LocalDateTime time;
 
-    @Column(name = "post_id", nullable = false)
-    private int postId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 
-    @Column(name = "parent_id")
-    private int parentId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "parent_id", nullable = true)
+    private Comment parent;
 
-    @Column(name = "author_id", nullable = false)
-    private int authorId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "author_id", nullable = false)
+    private Person author;
 
     @Column(name = "comment_text", nullable = false)
     private String commentText;
@@ -32,5 +35,6 @@ public class Comment {
     @Column(name = "is_blocked", nullable = false)
     private boolean isBlocked;
 
-
+    @OneToMany(mappedBy = "parent")
+    private Set<Comment> childComments;
 }

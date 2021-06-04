@@ -1,13 +1,18 @@
 package ru.skillbox.team13.entity;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.skillbox.team13.entity.enums.UserType;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Entity
-@Table(name = "user")
+@NoArgsConstructor
+@Table(name = "usr")
 public class User {
     @Id
     @Column(name = "id", nullable = false)
@@ -22,6 +27,13 @@ public class User {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @Column(name = "reg_date", nullable = false)
+    private LocalDateTime regDate;
+
+    @JoinColumn(name = "person")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Person person;
 
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)

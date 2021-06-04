@@ -1,12 +1,16 @@
 package ru.skillbox.team13.entity;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.skillbox.team13.entity.enums.NotificationCode;
 
 import javax.persistence.*;
 
-@Data
+@Getter
+@Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "notification_type")
 public class NotificationType {
     @Id
@@ -20,4 +24,9 @@ public class NotificationType {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    public NotificationType(NotificationCode code, String name) {
+        this.code = code;
+        this.name = name;
+    }
 }

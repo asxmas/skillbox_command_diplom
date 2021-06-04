@@ -1,12 +1,16 @@
 package ru.skillbox.team13.entity;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "post_like")
 public class Like {
     @Id
@@ -17,9 +21,11 @@ public class Like {
     @Column(name = "time", nullable = false)
     private LocalDateTime time;
 
-    @Column(name = "person_id", nullable = false)
-    private int personId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "person_id", nullable = false)
+    private Person person;
 
-    @Column(name = "post_id", nullable = false)
-    private int postId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 }

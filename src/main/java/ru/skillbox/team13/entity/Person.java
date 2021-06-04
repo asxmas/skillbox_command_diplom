@@ -1,40 +1,37 @@
 package ru.skillbox.team13.entity;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.skillbox.team13.entity.enums.PersonMessagePermission;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "person")
-public class Person {
-    @Id
-    @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private int id;
-
+public class Person extends Notified {
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Column(name = "reg_date", nullable = false)
-    private LocalDateTime regDate;
-
     @Column(name = "birth_date")
     private LocalDateTime birthDate;
 
-    @Column(name = "e_mail", nullable = false)
-    private String email;
+//    @Column(name = "e_mail", nullable = false)
+//    private String email;
 
     @Column(name = "phone")
     private String phone;
 
-    @Column(name = "password", nullable = false)
-    private String password;
+//    @Column(name = "password", nullable = false)
+//    private String password;
 
     @Column(name = "photo")
     private String photo;
@@ -42,14 +39,20 @@ public class Person {
     @Column(name = "about")
     private String about;
 
-    @Column(name = "town")
-    private String town;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "city")
+    private City city;
 
-    @Column(name = "confirmation_code")
-    private String confirmationCode;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "country")
+    private Country country;
 
-    @Column(name = "is_approved", nullable = false)
-    private boolean isApproved;
+//    WTF
+//    @Column(name = "confirmation_code")
+//    private String confirmationCode;
+//
+//    @Column(name = "is_approved", nullable = false)
+//    private boolean isApproved;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "messages_permission", nullable = false)
@@ -60,4 +63,28 @@ public class Person {
 
     @Column(name = "is_blocked", nullable = false)
     private boolean isBlocked;
+
+    @OneToMany(mappedBy = "fromPerson", fetch = FetchType.LAZY)
+    private Set<Friendship> friendshipsRequested;
+
+    @OneToMany(mappedBy = "toPerson", fetch = FetchType.LAZY)
+    private Set<Friendship> friendshipsReceived;
+
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    private Set<Message> messagesSent;
+
+    @OneToMany(mappedBy = "recipient", fetch = FetchType.LAZY)
+    private Set<Message> messagesReceived;
+
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    private Set<Post> posts;
+
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    private Set<Comment> comments;
+
+    @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+    private Set<Like> likes;
+
+    @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+    private Set<Block> blocks;
 }

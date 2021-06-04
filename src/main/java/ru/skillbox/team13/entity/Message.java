@@ -1,26 +1,29 @@
 package ru.skillbox.team13.entity;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.skillbox.team13.entity.enums.MessageReadStatus;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "message")
-public class Message {
-    @Id
-    @Column(name = "id", nullable = false)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private int id;
+public class Message extends Notified {
+    @Column(name = "time", nullable = false)
     private LocalDateTime time;
 
-    @Column(name = "author_id", nullable = false)
-    private int authorId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "author_id", nullable = false)
+    private Person author;
 
-    @Column(name = "recipient_id", nullable = false)
-    private int recipientId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "recipient_id", nullable = false)
+    private Person recipient;
 
     @Column(name = "message_text", nullable = false)
     private String messageText;

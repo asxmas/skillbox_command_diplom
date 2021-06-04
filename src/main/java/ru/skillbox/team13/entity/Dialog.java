@@ -5,22 +5,23 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.Set;
+
 
 @Getter
 @Setter
 @Entity
+@Table(name = "dialog")
 @NoArgsConstructor
-@Table(name = "tag")
-public class Tag {
+public class Dialog {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
 
-    @Column(name = "tag", nullable = false)
-    private String tag;
+    @Column(name = "unread_count")
+    private int unreadCount;
 
-    @ManyToMany(mappedBy = "tags")
-    private Set<Post> posts;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "last_message")
+    private Message lastMessage;
 }

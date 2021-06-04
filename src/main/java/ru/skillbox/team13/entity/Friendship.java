@@ -1,11 +1,15 @@
 package ru.skillbox.team13.entity;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
-@Data
+@Getter
+@Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "friendship")
 public class Friendship {
     @Id
@@ -13,13 +17,15 @@ public class Friendship {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
 
-    @Column(name = "status_id", nullable = false)
-    private int statusId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "status_id", nullable = false)
+    private FriendshipStatus status;
 
-    @Column(name = "src_person_id", nullable = false)
-    private int srcPersonId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "src_person_id", nullable = false)
+    private Person fromPerson;
 
-    @Column(name = "dst_person_id", nullable = false)
-    private int dstPersonId;
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dst_person_id", nullable = false)
+    private Person toPerson;
 }
