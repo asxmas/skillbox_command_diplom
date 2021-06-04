@@ -13,4 +13,13 @@ public abstract class Repo<T> {
   public void addToRepo(T t)  {
     repo.add(t);
   }
+
+  public void removeFromRepo(int id)  {
+    try {
+      repo.remove(id);
+    }
+    catch (ArrayIndexOutOfBoundsException ex) {
+      ex.printStackTrace();
+    }
+  }
 }
