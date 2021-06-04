@@ -3,7 +3,7 @@
 -- changeset lc:1-1-comment
 CREATE TABLE "public"."post_comment"
 (
-    "comment_text" VARCHAR(255)                NOT NULL,
+    "comment_text" TEXT                        NOT NULL,
     "is_blocked"   BOOLEAN                     NOT NULL,
     "time"         TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     "id"           INTEGER                     NOT NULL,

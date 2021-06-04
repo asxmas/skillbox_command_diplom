@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Table(name = "block_history")
 public class Block {
+
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -32,7 +33,7 @@ public class Block {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_id")
-    private Comment commentId;
+    private Comment comment;
 
     @Column(name = "action", nullable = false)
     @Enumerated(EnumType.STRING)

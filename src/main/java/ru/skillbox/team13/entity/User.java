@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Table(name = "usr")
 public class User {
+
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -31,11 +32,17 @@ public class User {
     @Column(name = "reg_date", nullable = false)
     private LocalDateTime regDate;
 
-    @JoinColumn(name = "person")
+    @JoinColumn(name = "person_id")
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Person person;
 
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)
     private UserType type;
+
+    @Column(name = "confirmation_code")
+    private String confirmationCode;
+
+    @Column(name = "is_approved", nullable = false)
+    private boolean isApproved;
 }

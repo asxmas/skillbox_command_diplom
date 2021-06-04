@@ -4,7 +4,7 @@
 CREATE TABLE "public"."notification_type"
 (
     "id"   INTEGER      NOT NULL,
-    "code" VARCHAR(255) NOT NULL,
+    "code" VARCHAR(30)  NOT NULL,
     "name" VARCHAR(255) NOT NULL,
     CONSTRAINT "notification_type_pkey" PRIMARY KEY ("id")
 );
