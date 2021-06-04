@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Repo<T> {
-  List<T> repo = new ArrayList<>();
+  private List<T> repo = new ArrayList<>();
 
   public List<T> getRepo()  {
     return repo;
