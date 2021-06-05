@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    username:
+    password:
+    url: jdbc:postgresql://localhost:5432/skillbox_team13
+  liquibase:
+    enabled: true
+    change-log: db/db.yml
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
