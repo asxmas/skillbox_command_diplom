@@ -4,7 +4,7 @@
 CREATE TABLE "public"."friendship_status"
 (
     "id"   INTEGER                     NOT NULL,
-    "code" VARCHAR(255)                NOT NULL,
+    "code" VARCHAR(50)                 NOT NULL,
     "name" VARCHAR(255)                NOT NULL,
     "time" TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     CONSTRAINT "friendship_status_pkey" PRIMARY KEY ("id")

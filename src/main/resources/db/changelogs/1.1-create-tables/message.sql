@@ -3,7 +3,7 @@
 -- changeset lc:1-1-message
 CREATE TABLE "public"."message"
 (
-    "message_text" VARCHAR(255)                NOT NULL,
+    "message_text" TEXT                        NOT NULL,
     "read_status"  INTEGER                     NOT NULL,
     "time"         TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     "id"           INTEGER                     NOT NULL,

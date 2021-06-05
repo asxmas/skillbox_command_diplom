@@ -4,7 +4,7 @@
 CREATE TABLE "public"."block_history"
 (
     "id"         INTEGER                     NOT NULL,
-    "action"     VARCHAR(255)                NOT NULL,
+    "action"     VARCHAR(20)                 NOT NULL,
     "time"       TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     "comment_id" INTEGER,
     "person_id"  INTEGER                     NOT NULL,

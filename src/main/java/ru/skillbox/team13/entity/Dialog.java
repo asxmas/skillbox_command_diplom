@@ -13,6 +13,7 @@ import javax.persistence.*;
 @Table(name = "dialog")
 @NoArgsConstructor
 public class Dialog {
+
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -22,6 +23,6 @@ public class Dialog {
     private int unreadCount;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "last_message")
+    @JoinColumn(name = "last_message_id")
     private Message lastMessage;
 }

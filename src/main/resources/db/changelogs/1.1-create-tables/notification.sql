@@ -3,7 +3,7 @@
 -- changeset lc:1-1-notification
 CREATE TABLE "public"."notification"
 (
-    "descriminator_type" VARCHAR(31)                 NOT NULL,
+    "descriminator_type" VARCHAR(20)                 NOT NULL,
     "id"                 INTEGER                     NOT NULL,
     "info"               VARCHAR(255)                NOT NULL,
     "sent_time"          TIMESTAMP WITHOUT TIME ZONE NOT NULL,

@@ -4,6 +4,6 @@
 CREATE TABLE "public"."city"
 (
     "id"    INTEGER      NOT NULL,
-    "title" VARCHAR(255) NOT NULL,
+    "title" VARCHAR(100) NOT NULL,
     CONSTRAINT "city_pkey" PRIMARY KEY ("id")
 );

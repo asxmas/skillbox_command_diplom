@@ -15,6 +15,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Table(name = "person")
 public class Person extends Notified {
+
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
@@ -24,14 +25,8 @@ public class Person extends Notified {
     @Column(name = "birth_date")
     private LocalDateTime birthDate;
 
-//    @Column(name = "e_mail", nullable = false)
-//    private String email;
-
     @Column(name = "phone")
     private String phone;
-
-//    @Column(name = "password", nullable = false)
-//    private String password;
 
     @Column(name = "photo")
     private String photo;
@@ -40,19 +35,12 @@ public class Person extends Notified {
     private String about;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "city")
+    @JoinColumn(name = "city_id")
     private City city;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "country")
+    @JoinColumn(name = "country_id")
     private Country country;
-
-//    WTF
-//    @Column(name = "confirmation_code")
-//    private String confirmationCode;
-//
-//    @Column(name = "is_approved", nullable = false)
-//    private boolean isApproved;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "messages_permission", nullable = false)

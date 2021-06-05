@@ -9,15 +9,15 @@ ALTER TABLE "public"."post_like"
 ALTER TABLE "public"."post"
     ADD CONSTRAINT "post_person_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."person" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "public"."usr"
-    ADD CONSTRAINT "usr_person_id_fk" FOREIGN KEY ("person") REFERENCES "public"."person" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+    ADD CONSTRAINT "usr_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."person" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "public"."post_comment"
     ADD CONSTRAINT "post_comment_post_comment_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."post_comment" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "public"."wall_post"
     ADD CONSTRAINT "wall_post_post_id_fk" FOREIGN KEY ("id") REFERENCES "public"."post" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "public"."person"
-    ADD CONSTRAINT "person_city_id_fk" FOREIGN KEY ("city") REFERENCES "public"."city" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+    ADD CONSTRAINT "person_city_id_fk" FOREIGN KEY ("city_id") REFERENCES "public"."city" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "public"."person"
-    ADD CONSTRAINT "person_country_id_fk" FOREIGN KEY ("country") REFERENCES "public"."country" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+    ADD CONSTRAINT "person_country_id_fk" FOREIGN KEY ("country_id") REFERENCES "public"."country" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "public"."message"
     ADD CONSTRAINT "message_author_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."person" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "public"."message"
@@ -51,7 +51,7 @@ ALTER TABLE "public"."block_history"
 ALTER TABLE "public"."post_comment"
     ADD CONSTRAINT "post_comment_post_id_fk" FOREIGN KEY ("post_id") REFERENCES "public"."post" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "public"."dialog"
-    ADD CONSTRAINT "dialog_message_id_fk" FOREIGN KEY ("last_message") REFERENCES "public"."message" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+    ADD CONSTRAINT "dialog_message_id_fk" FOREIGN KEY ("last_message_id") REFERENCES "public"."message" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "public"."message"
     ADD CONSTRAINT "message_notified_id_fk" FOREIGN KEY ("id") REFERENCES "public"."notified" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "public"."friendship"

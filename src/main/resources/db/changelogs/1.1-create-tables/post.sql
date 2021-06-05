@@ -4,7 +4,7 @@
 CREATE TABLE "public"."post"
 (
     "is_blocked" BOOLEAN                     NOT NULL,
-    "post_text"  VARCHAR(255)                NOT NULL,
+    "post_text"  TEXT                        NOT NULL,
     "time"       TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     "title"      VARCHAR(255)                NOT NULL,
     "id"         INTEGER                     NOT NULL,
