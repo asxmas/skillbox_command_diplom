@@ -42,11 +42,6 @@ public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
 
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder(12);
-    }
-
     @Override
     @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception {

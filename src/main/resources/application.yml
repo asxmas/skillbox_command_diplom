@@ -1,7 +1,7 @@
 spring:
   datasource:
-    username:
-    password:
+    username: ${USERNAME}
+    password: ${PASS}
     url: jdbc:postgresql://localhost:5432/skillbox_team13
   liquibase:
     enabled: true
@@ -13,3 +13,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+jwt:
+  token:
+    secret: secretkey
+    expired: 3600000
