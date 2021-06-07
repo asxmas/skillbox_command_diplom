@@ -24,8 +24,11 @@ public class Person extends Notified {
     @Column(name = "birth_date")
     private LocalDateTime birthDate;
 
-//    @Column(name = "e_mail", nullable = false)
-//    private String email;
+    @Column(name = "reg_date", nullable = false)
+    private LocalDateTime regDate;
+
+    @Column(name = "email", nullable = false)
+    private String email;
 
     @Column(name = "phone")
     private String phone;
