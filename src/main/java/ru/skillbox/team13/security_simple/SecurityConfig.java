@@ -1,4 +1,4 @@
-package ru.skillbox.team13.security;
+package ru.skillbox.team13.security_simple;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -8,7 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 
-@EnableWebSecurity(debug = true)
+//@EnableWebSecurity(debug = true)    -- uncomment to enable
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 

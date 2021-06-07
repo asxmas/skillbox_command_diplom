@@ -1,27 +1,24 @@
-package ru.skillbox.team13.service;
+package ru.skillbox.team13.mapper;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import ru.skillbox.team13.dto.CityDto;
 import ru.skillbox.team13.dto.CountryDto;
 import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.entity.City;
 import ru.skillbox.team13.entity.Country;
 import ru.skillbox.team13.entity.Person;
+import ru.skillbox.team13.util.TimeUtil;
 
-@Service
 @RequiredArgsConstructor
-public class DTOService {
-    //todo implement ModelMapper / MapStruct
-    private final TimeService timeService;
+public class PersonMapper {
 
-    public PersonDTO convertPersonToPersonDTO(Person p) {
+    public static PersonDTO convertPersonToPersonDTO(Person p) {
         return PersonDTO.builder()
                 .id(p.getId())
                 .firstName(p.getFirstName())
                 .lastName(p.getLastName())
-                .registrationDate(timeService.getTimestamp(p.getRegDate()))
-                .birthDate(timeService.getTimestamp(p.getBirthDate()))
+                .registrationDate(TimeUtil.getTimestamp(p.getRegDate()))
+                .birthDate(TimeUtil.getTimestamp(p.getBirthDate()))
                 .email(p.getEmail())
                 .phone(p.getPhone())
                 .photo(p.getPhoto())
@@ -29,16 +26,16 @@ public class DTOService {
                 .city(convertCityToCityDTO(p.getCity()))
                 .country(convertCountryToCountryDTO(p.getCountry()))
                 .messagesPermission(p.getMessagesPermission().name())
-                .lastOnlineTime(timeService.getTimestamp(p.getLastOnlineTime()))
+                .lastOnlineTime(TimeUtil.getTimestamp(p.getLastOnlineTime()))
                 .isBlocked(p.isBlocked()).build();
     }
 
-    private CountryDto convertCountryToCountryDTO(Country c) {
+    private static CountryDto convertCountryToCountryDTO(Country c) {
         if (c == null) return null;
         return CountryDto.builder().id(c.getId()).title(c.getTitle()).build();
     }
 
-    private CityDto convertCityToCityDTO(City c) {
+    private static CityDto convertCityToCityDTO(City c) {
         if (c == null) return null;
         return CityDto.builder().id(c.getId()).title(c.getTitle()).build();
     }

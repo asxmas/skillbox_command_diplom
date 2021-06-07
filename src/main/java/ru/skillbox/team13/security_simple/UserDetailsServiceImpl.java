@@ -1,4 +1,4 @@
-package ru.skillbox.team13.security;
+package ru.skillbox.team13.security_simple;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,7 +12,7 @@ import ru.skillbox.team13.repository.UserRepository;
 
 import java.util.List;
 
-@Service
+//@Service   -- uncomment to enable
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 

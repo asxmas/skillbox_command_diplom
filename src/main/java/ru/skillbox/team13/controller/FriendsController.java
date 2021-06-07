@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.PersonDTO;
-import ru.skillbox.team13.service.DTOWrapperService;
+import ru.skillbox.team13.mapper.WrapperMapper;
 import ru.skillbox.team13.service.FriendsService;
 
 import java.util.List;
@@ -17,7 +17,6 @@ import java.util.List;
 public class FriendsController {
 
     private final FriendsService friendService;
-    private final DTOWrapperService wrapperService;
 
     @GetMapping("friends")
     public ResponseEntity<DTOWrapper> getFriends(@RequestParam String name,
@@ -25,7 +24,7 @@ public class FriendsController {
                                                    @RequestParam(required = false, defaultValue = "10") int itemPerPage) {
         int count = friendService.countByName(name);
         List<PersonDTO> results = friendService.findByName(name, offset, itemPerPage);
-        return new ResponseEntity<>(wrapperService.wrap(results, count, offset, itemPerPage), HttpStatus.OK);
+        return new ResponseEntity<>(WrapperMapper.wrap(results, count, offset, itemPerPage), HttpStatus.OK);
     }
 //
 //    @DeleteMapping("friends/{id}")
