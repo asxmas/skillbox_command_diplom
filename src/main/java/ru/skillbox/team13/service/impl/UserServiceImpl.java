@@ -1,46 +1,42 @@
 package ru.skillbox.team13.service.impl;
 
+import io.jsonwebtoken.JwtException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.skillbox.team13.dto.CityDto;
-import ru.skillbox.team13.dto.CountryDto;
-import ru.skillbox.team13.dto.LoginDto;
-import ru.skillbox.team13.dto.UserDto;
-import ru.skillbox.team13.entity.City;
-import ru.skillbox.team13.entity.Country;
-import ru.skillbox.team13.entity.Person;
-import ru.skillbox.team13.entity.User;
+import ru.skillbox.team13.dto.*;
+import ru.skillbox.team13.entity.*;
 import ru.skillbox.team13.entity.enums.PersonMessagePermission;
 import ru.skillbox.team13.entity.enums.UserType;
 import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.repository.PersonRepo;
-import ru.skillbox.team13.repository.UserRepository;
+import ru.skillbox.team13.repository.RepoBlacklistedToken;
+import ru.skillbox.team13.repository.RepoUser;
 import ru.skillbox.team13.security.Jwt.JwtTokenProvider;
 import ru.skillbox.team13.service.UserService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.Date;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
+    private final RepoUser userRepository;
     private final PersonRepo personRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
-
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository, PersonRepo personRepository, BCryptPasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
-        this.userRepository = userRepository;
-        this.personRepository = personRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtTokenProvider = jwtTokenProvider;
-    }
+    private final RepoBlacklistedToken blacklistedTokenRepo;
 
     @Override
     public Boolean register(UserDto.Request.Register userDto) {
@@ -80,7 +76,7 @@ public class UserServiceImpl implements UserService {
 
         try {
             String username = loginDto.getEmail();
-            User user = userRepository.findByEmail(username);
+            User user = userRepository.findByEmail(username).get();
             Person person = personRepository.getById(user.getPerson().getId());
             City city = person.getCity();
             CityDto cityDto = null;
@@ -111,8 +107,40 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean logout() {
-        //метод включающий текущий токен в blacklist
-        return false;
+    public Boolean logout(HttpServletRequest request) {
+        String username = getCurrentUser().getEmail();
+        try {
+            String token = jwtTokenProvider.resolveToken(request);
+            Date tokenExpirationDate = jwtTokenProvider.resolveTokenDate(token);
+            BlacklistedToken expiredToken = new BlacklistedToken();
+            expiredToken.setToken(token);
+            expiredToken.setExpiredDate(tokenExpirationDate);
+            blacklistedTokenRepo.save(expiredToken);
+            SecurityContextHolder.clearContext();
+            SecurityContextHolder.createEmptyContext();
+        }
+        catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+        log.info("IN logout - user: {} successfully logout", username);
+        return true;
+    }
+
+    //метод получения текущего авторизованного пользователя
+    public User getCurrentUser() {
+        try {
+            String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+            User user = userRepository.findByEmail(email).get();
+            return user;
+        }
+        catch (Exception ex) {
+            throw new BadRequestException("Non authorized user");
+        }
+    }
+
+    //очистка blacklistedToken по расписанию
+    @Scheduled(fixedRate = 3600000)
+    private void blackListExpiredTokensClear(){
+        blacklistedTokenRepo.deleteAll(blacklistedTokenRepo.findExpiredTokens());
     }
 }

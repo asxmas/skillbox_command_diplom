@@ -15,6 +15,7 @@ import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.exception.SuccessResponse;
 import ru.skillbox.team13.service.UserService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @RestController
@@ -48,14 +49,8 @@ public class ApiAuthController {
     }
 
     @PostMapping("/auth/logout")
-    public ResponseEntity<SuccessResponse> logout(@RequestBody LoginDto loginDto) {
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
-            if (userService.logout()) {return ResponseEntity.ok(new SuccessResponse());}
-            else throw new BadRequestException("Logout fails");
-        }
-        catch (AuthenticationException e) {
-            return ResponseEntity.ok(new SuccessResponse());
-        }
+    public ResponseEntity<SuccessResponse> logout(HttpServletRequest request) {
+        if (userService.logout(request)) {return ResponseEntity.ok(new SuccessResponse());}
+        else throw new BadRequestException("Logout fails");
     }
 }

@@ -5,6 +5,7 @@ import ru.skillbox.team13.dto.LoginDto;
 import ru.skillbox.team13.dto.UserDto;
 import ru.skillbox.team13.entity.User;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface UserService {
@@ -13,7 +14,7 @@ public interface UserService {
 
     UserDto.Response.AuthPerson login(LoginDto loginDto);
 
-    Boolean logout();
+    Boolean logout(HttpServletRequest request);
 
 
 

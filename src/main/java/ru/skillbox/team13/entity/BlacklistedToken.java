@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -23,5 +23,5 @@ public class BlacklistedToken {
         private String token;
 
         @Column(name = "expired_date", nullable = false)
-        private LocalDateTime expiredDate;
+        private Date expiredDate;
 }
