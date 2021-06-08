@@ -17,7 +17,7 @@ import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.entity.enums.PersonMessagePermission;
 import ru.skillbox.team13.entity.enums.UserType;
 import ru.skillbox.team13.exception.BadRequestException;
-import ru.skillbox.team13.repository.PersonRepository;
+import ru.skillbox.team13.repository.PersonRepo;
 import ru.skillbox.team13.repository.UserRepository;
 import ru.skillbox.team13.security.Jwt.JwtTokenProvider;
 import ru.skillbox.team13.service.UserService;
@@ -30,12 +30,12 @@ import java.time.OffsetDateTime;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final PersonRepository personRepository;
+    private final PersonRepo personRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, PersonRepository personRepository, BCryptPasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
+    public UserServiceImpl(UserRepository userRepository, PersonRepo personRepository, BCryptPasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
         this.userRepository = userRepository;
         this.personRepository = personRepository;
         this.passwordEncoder = passwordEncoder;
@@ -53,6 +53,8 @@ public class UserServiceImpl implements UserService {
             Person person = new Person();
             person.setFirstName(userDto.getFirstName());
             person.setLastName(userDto.getLastName());
+            person.setEmail(userDto.getEmail());
+            person.setRegDate(LocalDateTime.now());
             person.setBlocked(false);//НЕТ ДАННЫХ, NOT NULL
             person.setLastOnlineTime(LocalDateTime.now());
             person.setMessagesPermission(PersonMessagePermission.ALL);//NOT NULL, ставим значение по-умолчанию
@@ -61,7 +63,6 @@ public class UserServiceImpl implements UserService {
             user.setEmail(userDto.getEmail());
             user.setName(userDto.getEmail());//НЕТ ДАННЫХ, NOT NULL
             user.setPassword(passwordEncoder.encode(userDto.getFirstPassword()));
-            user.setRegDate(LocalDateTime.now());
             user.setType(UserType.USER);//НЕТ ДАННЫХ, NOT NULL
             user.setPerson(personRepository.save(person));
             user.setConfirmationCode(userDto.getCode());
@@ -90,7 +91,6 @@ public class UserServiceImpl implements UserService {
             UserDto.Response.AuthPerson authPerson = UserDto.Response.AuthPerson.builder()
                     .firstName(person.getFirstName())
                     .lastName(person.getLastName())
-                    .regDate(user.getRegDate().toEpochSecond(OffsetDateTime.now().getOffset()))
                     .birthDate(person.getBirthDate() == null ? null : person.getBirthDate().toEpochSecond(OffsetDateTime.now().getOffset()))
                     .email(user.getEmail())
                     .phone(person.getPhone())
