@@ -1,28 +1,40 @@
 package ru.skillbox.team13.dto;
 
-import java.time.LocalDateTime;
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Getter;
 
 @Getter
-@Setter
+@Builder
 public class PersonDTO {
-  private int id;
-  private String firstName;
-  private String lastName;
-  private LocalDateTime regDate;
-  private LocalDateTime birthDate;
-  private String email;
-  private String phone;
-  private String password;
-  private String photo;
-  private String about;
-  private String town;
-  private String confirmationCode;
-  private boolean isApproved;
-  private MessagePermission messagesPermission;
-  private LocalDateTime lastOnlineTime;
-  private boolean isBlocked;
-  public enum MessagePermission {
-    ALL, FRIENDS
-  }
+
+    private final int id;
+
+    @JsonProperty("first_name")
+    private final String firstName;
+
+    @JsonProperty("last_name")
+    private final String lastName;
+
+    @JsonProperty("reg_date")
+    private final long registrationDate;
+
+    @JsonProperty("birth_date")
+    private final long birthDate;
+
+    private final String email;
+    private final String phone;
+    private final String photo;
+    private final String about;
+    private final CityDto city;
+    private final CountryDto country;
+
+    @JsonProperty("messages_permission")
+    private final String messagesPermission;
+
+    @JsonProperty("last_online_time")
+    private final long lastOnlineTime;
+
+    @JsonProperty("is_blocked")
+    private final boolean isBlocked;
 }

@@ -29,9 +29,6 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "reg_date", nullable = false)
-    private LocalDateTime regDate;
-
     @JoinColumn(name = "person_id")
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Person person;
