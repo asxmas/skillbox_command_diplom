@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.skillbox.team13.entity.User;
+import ru.skillbox.team13.repository.UserRepository;
 import ru.skillbox.team13.security.Jwt.JwtUserFactory;
 import ru.skillbox.team13.service.UserService;
 
@@ -14,16 +15,17 @@ import ru.skillbox.team13.service.UserService;
 @Slf4j
 public class JwtUserDetailsService implements UserDetailsService {
 
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     @Autowired
-    public JwtUserDetailsService(UserService userService) {
-        this.userService = userService;
+    public JwtUserDetailsService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userService.findByName(username);
+        User user = userRepository.findByEmail(username);
+        if (user == null) {userRepository.findByName(username);}
         if (user == null) {
             throw new UsernameNotFoundException("User with username: " + username + " not found");
         }

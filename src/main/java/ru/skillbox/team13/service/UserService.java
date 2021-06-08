@@ -1,19 +1,20 @@
 package ru.skillbox.team13.service;
 
 
+import ru.skillbox.team13.dto.LoginDto;
+import ru.skillbox.team13.dto.UserDto;
 import ru.skillbox.team13.entity.User;
 
 import java.util.List;
 
 public interface UserService {
-    //на входе должен быть userDto
-    User register(User user);
 
-    List<User> getAll();
+    Boolean register(UserDto.Request.Register userDto);
 
-    User findByName(String username);
+    UserDto.Response.AuthPerson login(LoginDto loginDto);
 
-    User findById(Long id);
+    Boolean logout();
 
-    void delete(Long id);
+
+
 }

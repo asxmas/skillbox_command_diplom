@@ -76,6 +76,8 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
+            //проверить токен на присутствие в blacklist
+
             Jws<Claims> claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
 
             if (claims.getBody().getExpiration().before(new Date())) {

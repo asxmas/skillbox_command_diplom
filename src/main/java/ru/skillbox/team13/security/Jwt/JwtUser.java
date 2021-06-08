@@ -7,13 +7,13 @@ import java.util.Collection;
 
 public class JwtUser implements UserDetails {
 
-    private final String username;
+    private final String email;
     private final String password;
     private final boolean enabled;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public JwtUser(String username, String password, boolean enabled, Collection<? extends GrantedAuthority> authorities) {
-        this.username = username;
+    public JwtUser(String email, String password, boolean enabled, Collection<? extends GrantedAuthority> authorities) {
+        this.email = email;
         this.password = password;
         this.enabled = enabled;
         this.authorities = authorities;
@@ -22,7 +22,7 @@ public class JwtUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return authorities;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class JwtUser implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
     @Override
