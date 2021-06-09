@@ -16,7 +16,7 @@ public class CommentDTO {
     private final Integer parentId;
 
     @JsonProperty("comment_text")
-    private final Integer commentText;
+    private final String commentText;
 
     @JsonProperty("time")
     private final Timestamp time;
