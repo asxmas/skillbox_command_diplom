@@ -16,9 +16,11 @@ import ru.skillbox.team13.security.JwtUserDetailsService;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.Base64;
 import java.util.Date;
+
+import static java.time.ZoneOffset.UTC;
 
 @Component
 public class JwtTokenProvider {
@@ -58,7 +60,7 @@ public class JwtTokenProvider {
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(validity)
-                .signWith(SignatureAlgorithm.HS256, secret)//
+                .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
 

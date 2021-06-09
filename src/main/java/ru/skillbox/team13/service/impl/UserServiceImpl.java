@@ -16,6 +16,7 @@ import ru.skillbox.team13.entity.*;
 import ru.skillbox.team13.entity.enums.PersonMessagePermission;
 import ru.skillbox.team13.entity.enums.UserType;
 import ru.skillbox.team13.exception.BadRequestException;
+import ru.skillbox.team13.mapper.PersonMapper;
 import ru.skillbox.team13.repository.PersonRepo;
 import ru.skillbox.team13.repository.RepoBlacklistedToken;
 import ru.skillbox.team13.repository.RepoUser;
@@ -25,7 +26,10 @@ import ru.skillbox.team13.service.UserService;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -63,44 +67,20 @@ public class UserServiceImpl implements UserService {
             user.setPerson(personRepository.save(person));
             user.setConfirmationCode(userDto.getCode());
             user.setApproved(true);////НЕТ ДАННЫХ, NOT NULL
-
             User registeredUser = userRepository.save(user);
-
             log.info("IN register - user: {} successfully registered", registeredUser.getEmail());
-
             return true;
     }
 
     @Override
-    public UserDto.Response.AuthPerson login(LoginDto loginDto) {
+    public PersonDTO login(LoginDto loginDto) {
 
         try {
             String username = loginDto.getEmail();
             User user = userRepository.findByEmail(username).get();
             Person person = personRepository.getById(user.getPerson().getId());
-            City city = person.getCity();
-            CityDto cityDto = null;
-            if (city != null) {cityDto = new CityDto(city.getId(), city.getTitle());}
-            Country country = person.getCountry();
-            CountryDto countryDto = null;
-            if (country != null) {countryDto = new CountryDto(country.getId(), country.getTitle());}
-            UserDto.Response.AuthPerson authPerson = UserDto.Response.AuthPerson.builder()
-                    .firstName(person.getFirstName())
-                    .lastName(person.getLastName())
-                    .birthDate(person.getBirthDate() == null ? null : person.getBirthDate().toEpochSecond(OffsetDateTime.now().getOffset()))
-                    .email(user.getEmail())
-                    .phone(person.getPhone())
-                    .photo(person.getPhoto())
-                    .about(person.getAbout())
-                    .city(cityDto)
-                    .country(countryDto)
-                    .messagesPermissions(person.getMessagesPermission())
-                    .lastOnlineTime(person.getLastOnlineTime().toEpochSecond(OffsetDateTime.now().getOffset()))
-                    .isBlocked(person.isBlocked())
-                    .token(jwtTokenProvider.createToken(username, user.getType()))
-                    .build();
             log.info("IN login - user: {} successfully login", loginDto.getEmail());
-            return authPerson;
+            return PersonMapper.convertPersonToPersonDTOWithToken(person, jwtTokenProvider.createToken(username, user.getType()));
         } catch (AuthenticationException e) {
             throw new BadRequestException("Invalid username or password");
         }
@@ -114,7 +94,7 @@ public class UserServiceImpl implements UserService {
             Date tokenExpirationDate = jwtTokenProvider.resolveTokenDate(token);
             BlacklistedToken expiredToken = new BlacklistedToken();
             expiredToken.setToken(token);
-            expiredToken.setExpiredDate(tokenExpirationDate);
+            expiredToken.setExpiredDate(LocalDateTime.ofInstant(tokenExpirationDate.toInstant(), ZoneId.systemDefault()));
             blacklistedTokenRepo.save(expiredToken);
             SecurityContextHolder.clearContext();
             SecurityContextHolder.createEmptyContext();
@@ -127,7 +107,7 @@ public class UserServiceImpl implements UserService {
     }
 
     //метод получения текущего авторизованного пользователя
-    public User getCurrentUser() {
+    public User getAuthorizedUser() {
         try {
             String email = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
             User user = userRepository.findByEmail(email).get();
@@ -141,6 +121,12 @@ public class UserServiceImpl implements UserService {
     //очистка blacklistedToken по расписанию
     @Scheduled(fixedRate = 3600000)
     private void blackListExpiredTokensClear(){
-        blacklistedTokenRepo.deleteAll(blacklistedTokenRepo.findExpiredTokens());
+        List<BlacklistedToken> expiredTokens = blacklistedTokenRepo.findExpiredTokens();
+        blacklistedTokenRepo.deleteAll(expiredTokens);
+    }
+
+    @Override
+    public PersonDTO getCurrentUser(){
+        return PersonMapper.convertPersonToPersonDTO(getAuthorizedUser().getPerson());
     }
 }

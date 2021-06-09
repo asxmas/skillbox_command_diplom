@@ -1,5 +1,6 @@
 package ru.skillbox.team13.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,45 +13,40 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.skillbox.team13.dto.LoginDto;
 import ru.skillbox.team13.dto.UserDto;
 import ru.skillbox.team13.exception.BadRequestException;
-import ru.skillbox.team13.exception.SuccessResponse;
+import ru.skillbox.team13.dto.SuccessDto;
 import ru.skillbox.team13.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/")
 public class ApiAuthController {
 
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    public ApiAuthController(UserService userService, AuthenticationManager authenticationManager) {
-        this.userService = userService;
-        this.authenticationManager = authenticationManager;
-    }
-
-    @PostMapping("/account/register")
-    public ResponseEntity<SuccessResponse> register(@RequestBody @Valid UserDto.Request.Register registerRequest){
-        if (userService.register(registerRequest)) {return ResponseEntity.ok(new SuccessResponse());}
+    @PostMapping("account/register")
+    public ResponseEntity<SuccessDto> register(@RequestBody @Valid UserDto.Request.Register registerRequest){
+        if (userService.register(registerRequest)) {return ResponseEntity.ok(new SuccessDto());}
         else throw new BadRequestException("registration fails");
     }
 
-    @PostMapping("/auth/login")
-    public ResponseEntity<SuccessResponse> login(@RequestBody LoginDto loginDto) {
+    @PostMapping("auth/login")
+    public ResponseEntity<SuccessDto> login(@RequestBody LoginDto loginDto) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
         }
         catch (AuthenticationException e) {
             throw new BadRequestException("Invalid username or password");
         }
-        return ResponseEntity.ok(new SuccessResponse(userService.login(loginDto)));
+        return ResponseEntity.ok(new SuccessDto(userService.login(loginDto)));
     }
 
-    @PostMapping("/auth/logout")
-    public ResponseEntity<SuccessResponse> logout(HttpServletRequest request) {
-        if (userService.logout(request)) {return ResponseEntity.ok(new SuccessResponse());}
+    @PostMapping("auth/logout")
+    public ResponseEntity<SuccessDto> logout(HttpServletRequest request) {
+        if (userService.logout(request)) {return ResponseEntity.ok(new SuccessDto());}
         else throw new BadRequestException("Logout fails");
     }
 }

@@ -42,17 +42,6 @@ public enum UserDto {;
 
     public enum Request{;
 
-        /**
-         * формат Request body для регистрации пользователя - POST api/v1/account/register
-         * {
-         *   "email": "arkady@example.com",
-         *   "passwd1": "123456",
-         *   "passwd2": "123456",
-         *   "firstName": "Аркадий",
-         *   "lastName": "Паровозов",
-         *   "code": "3675"
-         * }
-         */
         @Getter
         public static class Register implements Email, FirstPassword, SecondPassword, FirstName, LastName, Code {
             String email;
@@ -68,30 +57,6 @@ public enum UserDto {;
 
     public enum Response {;
 
-        /**
-         * формат для возврата данных пользователя, объединяющий User и Person
-         * "id": 1,
-         * "first_name": "Петр",
-         * "last_name": "Петрович",
-         * "reg_date": 1559751301818,
-         * "birth_date": 1559751301818,
-         * "email": "petr@mail.ru",
-         * "phone": "89100000000",
-         * "photo": "https://...../photos/image123.jpg",
-         * "about": "Родился в небольшой, но честной семье",
-         * "city": {
-         * "id": 1,
-         * "title": "Москва"
-         * },
-         * "country": {
-         * "id": 1,
-         * "title": "Россия"
-         * },
-         * "messages_permission": "ALL",
-         * "last_online_time": 1559751301818,
-         * "is_blocked": false
-         * "token" : "oiu25dfpo45ah"
-         */
         @Getter
         @Builder
         public static class AuthPerson implements PersonId, FirstName, LastName, RegDate, BirthDate,

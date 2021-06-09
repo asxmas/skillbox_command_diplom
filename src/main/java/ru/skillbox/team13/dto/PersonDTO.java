@@ -1,5 +1,6 @@
 package ru.skillbox.team13.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,4 +38,7 @@ public class PersonDTO {
 
     @JsonProperty("is_blocked")
     private final boolean isBlocked;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private final String token;
 }

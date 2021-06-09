@@ -16,5 +16,5 @@ spring:
 
 jwt:
   token:
-    secret: secretkey
-    expired: 3600000
+    secret: stream-team13
+    expired: 120000

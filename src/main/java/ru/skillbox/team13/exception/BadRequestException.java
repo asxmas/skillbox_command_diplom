@@ -1,14 +1,16 @@
 package ru.skillbox.team13.exception;
 
+import ru.skillbox.team13.dto.ErrorDto;
+
 public class BadRequestException extends RuntimeException {
 
-    private ErrorResponse response;
+    private ErrorDto response;
 
     public BadRequestException(String error){
-        response = new ErrorResponse(error);
+        response = new ErrorDto(error);
         }
 
-    public ErrorResponse getResponse() {
+    public ErrorDto getResponse() {
         return response;
     }
 }
