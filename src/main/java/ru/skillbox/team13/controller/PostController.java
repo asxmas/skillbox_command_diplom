@@ -28,6 +28,13 @@ public class PostController {
         return new ResponseEntity<>(postDTO, HttpStatus.OK);
     }
 
-
-
+    @DeleteMapping("post/{id}")
+    @ResponseBody
+    public ResponseEntity<PostDTO> deletePostById(@PathVariable("id") Integer id)  {
+        boolean result = postsService.deletePostById(id);
+        if (result) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 }
