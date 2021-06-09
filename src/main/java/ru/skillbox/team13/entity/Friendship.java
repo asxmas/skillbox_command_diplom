@@ -21,11 +21,19 @@ public class Friendship {
     @JoinColumn(name = "status_id", nullable = false)
     private FriendshipStatus status;
 
+    //person who 'friended' someone
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "src_person_id", nullable = false)
     private Person fromPerson;
 
+    //person who was 'friended' by someone
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dst_person_id", nullable = false)
     private Person toPerson;
+
+    public Friendship(FriendshipStatus status, Person fromPerson, Person toPerson) {
+        this.status = status;
+        this.fromPerson = fromPerson;
+        this.toPerson = toPerson;
+    }
 }
