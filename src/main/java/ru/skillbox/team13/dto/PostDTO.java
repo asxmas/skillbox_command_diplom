@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import ru.skillbox.team13.entity.Like;
 
 import java.sql.Timestamp;
 import java.util.Set;
@@ -28,5 +29,6 @@ public class PostDTO {
 
     private final Set<CommentDTO> comments;
     private final Set<TagDTO> tags;
+    private final Set<Like> likes;
 
 }

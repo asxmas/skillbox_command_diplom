@@ -7,7 +7,12 @@ import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.entity.City;
 import ru.skillbox.team13.entity.Country;
 import ru.skillbox.team13.entity.Person;
+import ru.skillbox.team13.entity.enums.PersonMessagePermission;
 import ru.skillbox.team13.util.TimeUtil;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.TimeZone;
 
 @RequiredArgsConstructor
 public class PersonMapper {
@@ -28,6 +33,24 @@ public class PersonMapper {
                 .messagesPermission(p.getMessagesPermission().name())
                 .lastOnlineTime(TimeUtil.getTimestamp(p.getLastOnlineTime()))
                 .isBlocked(p.isBlocked()).build();
+    }
+
+    public static Person convertPersonDTOToPerson (PersonDTO personDTO)  {
+        return Person.builder()
+                .firstName(personDTO.getFirstName())
+                .lastName(personDTO.getLastName())
+                .birthDate(TimeUtil.toLocalDateTime(personDTO.getBirthDate()))
+                .regDate(TimeUtil.toLocalDateTime(personDTO.getRegistrationDate()))
+                .email(personDTO.getEmail())
+                .phone(personDTO.getPhone())
+                .photo(personDTO.getPhoto())
+                .about(personDTO.getAbout())
+                .city(CityMapper.convertCityDTOtoCity(personDTO.getCity()))
+                .country(CountryMapper.convertCountryDTOToCountry(personDTO.getCountry()))
+                .messagesPermission(PersonMessagePermission.valueOf(personDTO.getMessagesPermission()))
+                .lastOnlineTime(TimeUtil.toLocalDateTime(personDTO.getLastOnlineTime()))
+                .isBlocked(personDTO.isBlocked())
+                .build();
     }
 
     private static CountryDto convertCountryToCountryDTO(Country c) {

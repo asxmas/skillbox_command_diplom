@@ -1,5 +1,6 @@
 package ru.skillbox.team13.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,6 +14,7 @@ import java.util.Set;
 @Setter
 @Entity
 @NoArgsConstructor
+@Builder
 @Table(name = "person")
 public class Person extends Notified {
 
@@ -56,7 +58,7 @@ public class Person extends Notified {
     private LocalDateTime lastOnlineTime;
 
     @Column(name = "is_blocked", nullable = false)
-    private boolean isBlocked;
+    private Boolean isBlocked;
 
     @OneToMany(mappedBy = "fromPerson", fetch = FetchType.LAZY)
     private Set<Friendship> friendshipsRequested;
