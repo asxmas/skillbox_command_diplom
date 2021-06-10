@@ -22,6 +22,7 @@ private final JwtTokenProvider jwtTokenProvider;
 
 private static final String LOGIN_ENDPOINT = "/api/v1/auth/login";
 private static final String REGISTER_ENDPOINT = "/api/v1/account/register";
+private static final String PASSWORD_RECOVERY_ENDPOINT = "/api/v1/account/password/recovery";
 
 
 @Autowired
@@ -39,10 +40,10 @@ public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
                 .authorizeRequests()
                 .antMatchers(LOGIN_ENDPOINT).permitAll()
                 .antMatchers(REGISTER_ENDPOINT).permitAll()
+                .antMatchers(PASSWORD_RECOVERY_ENDPOINT).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .apply(new JwtConfigurer(jwtTokenProvider));
-
     }
 
     @Override

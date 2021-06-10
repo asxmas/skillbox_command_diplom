@@ -22,16 +22,10 @@ import javax.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/")
-public class ApiAuthController {
+public class AuthController {
 
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
-
-    @PostMapping("account/register")
-    public ResponseEntity<SuccessDto> register(@RequestBody @Valid UserDto.Request.Register registerRequest){
-        if (userService.register(registerRequest)) {return ResponseEntity.ok(new SuccessDto());}
-        else throw new BadRequestException("registration fails");
-    }
 
     @PostMapping("auth/login")
     public ResponseEntity<SuccessDto> login(@RequestBody LoginDto loginDto) {
