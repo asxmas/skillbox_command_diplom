@@ -59,12 +59,12 @@ public class Person extends Notified {
     private boolean isBlocked;
 
     //'friends' list
-    @OneToMany(mappedBy = "fromPerson", fetch = FetchType.LAZY)
-    private Set<Friendship> friendshipsRequested;
+    @OneToMany(mappedBy = "sourcePerson", fetch = FetchType.LAZY)
+    private Set<Friendship> requestedFriendships;
 
     //'friends of' list
-    @OneToMany(mappedBy = "toPerson", fetch = FetchType.LAZY)
-    private Set<Friendship> friendshipsReceived;
+    @OneToMany(mappedBy = "destinationPerson", fetch = FetchType.LAZY)
+    private Set<Friendship> receivedFriendships;
 
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
     private Set<Message> messagesSent;

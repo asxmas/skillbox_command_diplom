@@ -22,18 +22,18 @@ public class Friendship {
     private FriendshipStatus status;
 
     //person who 'friended' someone
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "src_person_id", nullable = false)
-    private Person fromPerson;
+    private Person sourcePerson;
 
     //person who was 'friended' by someone
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)  //todo test
     @JoinColumn(name = "dst_person_id", nullable = false)
-    private Person toPerson;
+    private Person destinationPerson;
 
-    public Friendship(FriendshipStatus status, Person fromPerson, Person toPerson) {
+    public Friendship(FriendshipStatus status, Person sourcePerson, Person destinationPerson) {
         this.status = status;
-        this.fromPerson = fromPerson;
-        this.toPerson = toPerson;
+        this.sourcePerson = sourcePerson;
+        this.destinationPerson = destinationPerson;
     }
 }
