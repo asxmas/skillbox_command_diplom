@@ -4,6 +4,7 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.dto.SuccessDto;
@@ -17,6 +18,7 @@ public class ProfileController {
   private final UserService userService;
 
   @GetMapping("users/me")
+  @PreAuthorize("hasAuthority('user')")
   public ResponseEntity<SuccessDto> getCurrentUser(){
     return ResponseEntity.ok(new SuccessDto(userService.getCurrentUserDto()));
   }

@@ -1,7 +1,6 @@
 package ru.skillbox.team13.security.Jwt;
 
 import io.jsonwebtoken.*;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,11 +15,8 @@ import ru.skillbox.team13.security.JwtUserDetailsService;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.time.*;
 import java.util.Base64;
 import java.util.Date;
-
-import static java.time.ZoneOffset.UTC;
 
 @Component
 public class JwtTokenProvider {

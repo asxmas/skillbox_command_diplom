@@ -3,6 +3,7 @@ package ru.skillbox.team13.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -39,6 +40,7 @@ public class AuthController {
     }
 
     @PostMapping("auth/logout")
+    @PreAuthorize("hasAuthority('user')")
     public ResponseEntity<SuccessDto> logout(HttpServletRequest request) {
         if (userService.logout(request)) {return ResponseEntity.ok(new SuccessDto());}
         else throw new BadRequestException("Logout fails");
