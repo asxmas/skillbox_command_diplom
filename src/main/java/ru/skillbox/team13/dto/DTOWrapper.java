@@ -12,5 +12,5 @@ public class DTOWrapper {
     private int total;
     private int offset;
     private int perPage;
-    private final Object[] data;
+    private final Object data;
 }

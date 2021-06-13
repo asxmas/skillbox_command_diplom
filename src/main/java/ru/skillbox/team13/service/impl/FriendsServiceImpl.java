@@ -22,7 +22,6 @@ import ru.skillbox.team13.repository.RepoFriendship;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -73,7 +72,7 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
 
         friendshipRepo.delete(friendship); //todo set FSC to 'BLOCKED' or 'DECLINED' ???
 
-        return WrapperMapper.wrap(Collections.singletonList(new MessageDTO("ok")));
+        return WrapperMapper.wrapMessage(new MessageDTO("ok"));
     }
 
     @Override
@@ -92,7 +91,7 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
         //if friendship with any code exists, the exception will be thrown
         sendRequestIfNotExists(friendId, currentPersonId);
 
-        return WrapperMapper.wrap(Collections.singletonList(new MessageDTO("ok")));
+        return WrapperMapper.wrapMessage(new MessageDTO("ok"));
     }
 
     //if no 'name' present, returns all persons with 'REQUEST' status
@@ -139,6 +138,7 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
     }
 
     //returns statuses only for incoming friendships
+    //not actual USER IDs, but PERSON IDs
     @Override
     public DTOWrapper getStatusForIds(int[] friendsIds) {
         Integer currentPersonId = userService.getAuthorizedUser().getPerson().getId();
@@ -146,7 +146,7 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
         List<UserFriendshipStatusDTO> results = friendships.stream()
                 .map(f -> new UserFriendshipStatusDTO(f.getSourcePerson().getId(), f.getStatus().getCode().name()))
                 .collect(Collectors.toList());
-        return WrapperMapper.wrap(results);
+        return WrapperMapper.wrapDataOnly(results);
     }
 
     private void acceptRequestIfExists(Integer srcFriendId, Integer dstCurrentPersonId, FriendshipStatusCode code) {

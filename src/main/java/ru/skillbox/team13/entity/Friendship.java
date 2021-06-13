@@ -17,7 +17,7 @@ public class Friendship {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "status_id", nullable = false)
     private FriendshipStatus status;
 

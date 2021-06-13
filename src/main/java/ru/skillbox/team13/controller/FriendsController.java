@@ -18,7 +18,7 @@ public class FriendsController {
 
     @GetMapping("friends")
     //Получить список друзей
-    public ResponseEntity<DTOWrapper> getFriends(@RequestParam String name,
+    public ResponseEntity<DTOWrapper> getFriends(@RequestParam(required = false, defaultValue = "") String name,
                                                        @RequestParam(required = false, defaultValue = "0") int offset,
                                                        @RequestParam(required = false, defaultValue = "10") int itemPerPage) {
         return new ResponseEntity<>(friendService.getFriends(name, offset, itemPerPage), HttpStatus.OK);
@@ -38,7 +38,7 @@ public class FriendsController {
 
     @GetMapping("/friends/request")
     //Получить список входящик заявок на добавление в друзья
-    public ResponseEntity<DTOWrapper> getFriendshipRequests(@RequestParam String name,
+    public ResponseEntity<DTOWrapper> getFriendshipRequests(@RequestParam(required = false, defaultValue = "") String name,
                                                             @RequestParam(required = false, defaultValue = "0") int offset,
                                                             @RequestParam(required = false, defaultValue = "10") int itemPerPage) {
         return new ResponseEntity<>(friendService.getFriendshipRequests(name, offset, itemPerPage), HttpStatus.OK);
