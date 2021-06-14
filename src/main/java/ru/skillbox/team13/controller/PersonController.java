@@ -3,6 +3,7 @@ package ru.skillbox.team13.controller;
 import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,27 +11,28 @@ import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.dto.PostDTO;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
-import ru.skillbox.team13.mapper.PersonMapper;
-import ru.skillbox.team13.mapper.PostMapper;
-import ru.skillbox.team13.repository.PersonRepo;
-import ru.skillbox.team13.repository.RepoPost;
+import ru.skillbox.team13.exception.SuccessResponse;
 import ru.skillbox.team13.service.PersonService;
+import ru.skillbox.team13.service.PostsService;
 
-@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/")
 public class PersonController {
 
-  private final PersonRepo personRepo;
   private final PersonService personService;
-  private final RepoPost repoPost;
+  private final PostsService postsService;
+
+  @Autowired
+  public PersonController (PersonService personService, PostsService postsService)  {
+    this.personService = personService;
+    this.postsService = postsService;
+  }
 
   @PutMapping("/users/me")
-  public ResponseEntity<PersonDTO>  updateCurrentPerson(@RequestBody PersonDTO personDTO) {
+  public ResponseEntity<SuccessResponse>  updateCurrentPerson(@RequestBody PersonDTO personDTO) {
     try {
-      personService.setPerson(PersonMapper.convertPersonDTOToPerson(personDTO));
-      personService.updatePerson();
-      return new ResponseEntity<>(personDTO, HttpStatus.OK);
+      personService.updatePerson(personDTO);
+      return ResponseEntity.ok(new SuccessResponse());
     }
     catch (Exception ex)  {
       return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
@@ -39,11 +41,10 @@ public class PersonController {
 
   //todo Доделать
   @DeleteMapping("/users/me")
-  @ResponseBody
-  public ResponseEntity<PersonDTO> deleteCurrentPerson(PersonDTO personDTO)  {
+  public ResponseEntity<SuccessResponse> deleteCurrentPerson(@RequestBody PersonDTO personDTO)  {
     try {
-      personRepo.deleteById(personDTO.getId());
-      return new ResponseEntity<>(personDTO, HttpStatus.OK);
+      personService.getPersonById(personDTO.getId());
+      return ResponseEntity.ok(new SuccessResponse());
     }
     catch (Exception ex)  {
       return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
@@ -51,11 +52,10 @@ public class PersonController {
   }
   //todo Доделать
   @GetMapping("/users/{id}")
-  @ResponseBody
-  public ResponseEntity<Person> getPersonById(@PathVariable("id") Integer id) {
+  public ResponseEntity<SuccessResponse> getPersonById(@PathVariable("id") Integer id) {
     try {
-      Person person = personRepo.getById(id);
-      return new ResponseEntity<>(person, HttpStatus.OK);
+      Person person = personService.getPersonById(id);
+      return ResponseEntity.ok(new SuccessResponse());
     }
     catch (Exception ex)  {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -63,11 +63,10 @@ public class PersonController {
   }
   //todo Доделать
   @GetMapping("/users/{id}/wall")
-  @ResponseBody
-  public ResponseEntity<Set<Post>> getListPosts(@PathVariable("id") Integer id) {
+  public ResponseEntity<SuccessResponse> getListPosts(@PathVariable("id") Integer id) {
     try {
-      Person person = personRepo.getById(id);
-      return new ResponseEntity<>(person.getPosts(), HttpStatus.OK);
+      Person person = personService.getPersonById(id);
+      return ResponseEntity.ok(new SuccessResponse());
     }
     catch (Exception ex)  {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -76,15 +75,12 @@ public class PersonController {
 
   //todo Доделать убрать логику
   @PostMapping("/users/{id}/wall")
-  @ResponseBody
-  public ResponseEntity<Post> createPost(@PathVariable("id") Integer id,
-                                         PostDTO postDTO) {
+  public ResponseEntity<SuccessResponse> createPost(@PathVariable("id") Integer id,
+                                         @RequestBody PostDTO postDTO) {
     try {
-      Post post = PostMapper.convertPostDTOtoPost(postDTO);
-      Person person = personRepo.getById(id);
-      personService.setPerson(person);
-      personService.addPostToWall(post);
-      return new ResponseEntity<>(post, HttpStatus.OK);
+      Post post = postsService.addPost(postDTO);
+      personService.addPostToWall(id, post);
+      return ResponseEntity.ok(new SuccessResponse());
     }
     catch (Exception ex)  {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);

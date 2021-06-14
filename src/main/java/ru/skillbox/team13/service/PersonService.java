@@ -4,8 +4,10 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
+import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
+import ru.skillbox.team13.mapper.PersonMapper;
 import ru.skillbox.team13.repository.PersonRepo;
 
 import java.util.Set;
@@ -16,10 +18,10 @@ import java.util.Set;
 public class PersonService {
 
     private final PersonRepo personRepo;
-    private Person person;
 
-    public boolean updatePerson ()   {
+    public boolean updatePerson (PersonDTO personDTO)   {
         try {
+            Person person = PersonMapper.convertPersonDTOToPerson(personDTO);
             Person updatePerson = personRepo.getById(person.getId());
             updatePerson.setFirstName(person.getFirstName());
             updatePerson.setLastName(person.getLastName());
@@ -48,10 +50,15 @@ public class PersonService {
         }
     }
 
-    public void addPostToWall (Post post)   {
+    public void addPostToWall (int id, Post post)   {
+        Person person = personRepo.getById(id);
         post.setAuthor(person);
         Set<Post> personPosts = person.getPosts();
         personPosts.add(post);
         person.setPosts(personPosts);
+    }
+
+    public Person getPersonById(int id) {
+        return personRepo.getById(id);
     }
 }

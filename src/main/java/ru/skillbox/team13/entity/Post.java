@@ -46,6 +46,4 @@ public class Post extends Notified {
 
     @OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Attachment> attachments;
-
-    private Integer countLikes = likes.size();
 }
