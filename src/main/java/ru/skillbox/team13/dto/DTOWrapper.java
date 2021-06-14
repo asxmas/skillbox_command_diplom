@@ -7,10 +7,10 @@ import lombok.Getter;
 @Builder
 public class DTOWrapper {
 
-    private final String error;
-    private final long timestamp;
-    private final int total;
-    private final int offset;
-    private final int perPage;
-    private final Object[] data;
+    private String error;
+    private long timestamp;
+    private int total;
+    private int offset;
+    private int perPage;
+    private final Object data;
 }
