@@ -10,6 +10,7 @@ import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.enums.PersonMessagePermission;
 import ru.skillbox.team13.util.TimeUtil;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.TimeZone;
@@ -36,21 +37,51 @@ public class PersonMapper {
     }
 
     public static Person convertPersonDTOToPerson (PersonDTO personDTO)  {
-        return Person.builder()
-                .firstName(personDTO.getFirstName())
-                .lastName(personDTO.getLastName())
-                .birthDate(TimeUtil.toLocalDateTime(personDTO.getBirthDate()))
-                .regDate(TimeUtil.toLocalDateTime(personDTO.getRegistrationDate()))
-                .email(personDTO.getEmail())
-                .phone(personDTO.getPhone())
-                .photo(personDTO.getPhoto())
-                .about(personDTO.getAbout())
-                .city(CityMapper.convertCityDTOtoCity(personDTO.getCity()))
-                .country(CountryMapper.convertCountryDTOToCountry(personDTO.getCountry()))
-                .messagesPermission(PersonMessagePermission.valueOf(personDTO.getMessagesPermission()))
-                .lastOnlineTime(TimeUtil.toLocalDateTime(personDTO.getLastOnlineTime()))
-                .isBlocked(personDTO.isBlocked())
-                .build();
+        String firstName = personDTO.getFirstName();
+        String lastName = personDTO.getLastName();
+        LocalDateTime birthDate = TimeUtil.toLocalDateTime(personDTO.getBirthDate());
+        LocalDateTime regDate = TimeUtil.toLocalDateTime(personDTO.getRegistrationDate());
+        String email = personDTO.getEmail();
+        String phone = personDTO.getPhone();
+        String photo = personDTO.getPhoto();
+        String about = personDTO.getAbout();
+        City city = CityMapper.convertCityDTOtoCity(personDTO.getCity());
+        Country country = CountryMapper.convertCountryDTOToCountry(personDTO.getCountry());
+        PersonMessagePermission personMessagePermission = PersonMessagePermission.valueOf(personDTO.getMessagesPermission());
+        LocalDateTime lastOnlineTime = TimeUtil.toLocalDateTime(personDTO.getLastOnlineTime());
+        boolean isBlocked = personDTO.isBlocked();
+        Person person = new Person();
+        person.setFirstName(firstName);
+        person.setLastName(lastName);
+        person.setBirthDate(birthDate);
+        person.setRegDate(regDate);
+        person.setEmail(email);
+        person.setPhone(phone);
+        person.setPhoto(photo);
+        person.setAbout(about);
+        person.setCity(city);
+        person.setCountry(country);
+        person.setMessagesPermission(personMessagePermission);
+        person.setLastOnlineTime(lastOnlineTime);
+        person.setBlocked(isBlocked);
+        return person;
+
+
+//        return Person.builder()
+//                .firstName(personDTO.getFirstName())
+//                .lastName(personDTO.getLastName())
+//                .birthDate(TimeUtil.toLocalDateTime(personDTO.getBirthDate()))
+//                .regDate(TimeUtil.toLocalDateTime(personDTO.getRegistrationDate()))
+//                .email(personDTO.getEmail())
+//                .phone(personDTO.getPhone())
+//                .photo(personDTO.getPhoto())
+//                .about(personDTO.getAbout())
+//                .city(CityMapper.convertCityDTOtoCity(personDTO.getCity()))
+//                .country(CountryMapper.convertCountryDTOToCountry(personDTO.getCountry()))
+//                .messagesPermission(PersonMessagePermission.valueOf(personDTO.getMessagesPermission()))
+//                .lastOnlineTime(TimeUtil.toLocalDateTime(personDTO.getLastOnlineTime()))
+//                .isBlocked(personDTO.isBlocked())
+//                .build();
     }
 
     private static CountryDto convertCountryToCountryDTO(Country c) {

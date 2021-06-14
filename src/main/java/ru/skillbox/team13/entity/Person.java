@@ -14,7 +14,6 @@ import java.util.Set;
 @Setter
 @Entity
 @NoArgsConstructor
-@Builder
 @Table(name = "person")
 public class Person extends Notified {
 
@@ -58,7 +57,7 @@ public class Person extends Notified {
     private LocalDateTime lastOnlineTime;
 
     @Column(name = "is_blocked", nullable = false)
-    private Boolean isBlocked;
+    private boolean isBlocked;
 
     @OneToMany(mappedBy = "fromPerson", fetch = FetchType.LAZY)
     private Set<Friendship> friendshipsRequested;

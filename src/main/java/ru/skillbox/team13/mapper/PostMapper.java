@@ -2,11 +2,15 @@ package ru.skillbox.team13.mapper;
 
 import lombok.RequiredArgsConstructor;
 import ru.skillbox.team13.dto.PostDTO;
+import ru.skillbox.team13.entity.Comment;
+import ru.skillbox.team13.entity.Like;
+import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.util.TimeUtil;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @RequiredArgsConstructor
 public class PostMapper {
@@ -21,13 +25,19 @@ public class PostMapper {
                 .tags(TagMapper.convertSetTagToSetTagDTO(post.getTags())).build();
     }
     public static Post convertPostDTOtoPost (PostDTO postDTO)   {
-        return Post.builder()
-                .time(postDTO.getTime().toLocalDateTime())
-                .author(PersonMapper.convertPersonDTOToPerson(postDTO.getAuthor()))
-                .title(postDTO.getTitle())
-                .postText(postDTO.getPostText())
-                .likes(postDTO.getLikes())
-                .comments(CommentMapper.convertSetCommentDTOToSetComment(postDTO.getComments()))
-                .build();
+        Post post = new Post();
+        LocalDateTime time = postDTO.getTime().toLocalDateTime();
+        Person author = PersonMapper.convertPersonDTOToPerson(postDTO.getAuthor());
+        String title = postDTO.getTitle();
+        String postText = postDTO.getPostText();
+        Set<Like> likes = postDTO.getLikes();
+        Set<Comment> comments = CommentMapper.convertSetCommentDTOToSetComment(postDTO.getComments());
+        post.setTime(time);
+        post.setAuthor(author);
+        post.setTitle(title);
+        post.setPostText(postText);
+        post.setLikes(likes);
+        post.setComments(comments);
+        return post;
     }
 }

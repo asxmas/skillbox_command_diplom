@@ -1,43 +1,57 @@
 package ru.skillbox.team13.service;
 
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.stereotype.Service;
 import ru.skillbox.team13.entity.Person;
+import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.repository.PersonRepo;
 
+import java.util.Set;
+
 @Service
+@Setter
 @RequiredArgsConstructor
 public class PersonService {
 
     private final PersonRepo personRepo;
+    private Person person;
 
-    public boolean updatePerson (Person updatePerson)   {
+    public boolean updatePerson ()   {
         try {
-            Person person = personRepo.getById(updatePerson.getId());
-            person.setFirstName(updatePerson.getFirstName());
-            person.setLastName(updatePerson.getLastName());
-            person.setBirthDate(updatePerson.getBirthDate());
-            person.setRegDate(updatePerson.getRegDate());
-            person.setEmail(updatePerson.getEmail());
-            person.setPhone(updatePerson.getPhone());
-            person.setPhoto(updatePerson.getPhoto());
-            person.setAbout(updatePerson.getAbout());
-            person.setCity(updatePerson.getCity());
-            person.setMessagesPermission(updatePerson.getMessagesPermission());
-            person.setLastOnlineTime(updatePerson.getLastOnlineTime());
-            person.setIsBlocked(updatePerson.getIsBlocked());
-            person.setFriendshipsReceived(updatePerson.getFriendshipsReceived());
-            person.setFriendshipsRequested(updatePerson.getFriendshipsRequested());
-            person.setMessagesReceived(updatePerson.getMessagesReceived());
-            person.setMessagesSent(updatePerson.getMessagesSent());
-            person.setPosts(updatePerson.getPosts());
-            person.setComments(updatePerson.getComments());
-            person.setLikes(updatePerson.getLikes());
-            person.setBlocks(updatePerson.getBlocks());
+            Person updatePerson = personRepo.getById(person.getId());
+            updatePerson.setFirstName(person.getFirstName());
+            updatePerson.setLastName(person.getLastName());
+            updatePerson.setBirthDate(person.getBirthDate());
+            updatePerson.setRegDate(person.getRegDate());
+            updatePerson.setEmail(person.getEmail());
+            updatePerson.setPhone(person.getPhone());
+            updatePerson.setPhoto(person.getPhoto());
+            updatePerson.setAbout(person.getAbout());
+            updatePerson.setCity(person.getCity());
+            updatePerson.setMessagesPermission(person.getMessagesPermission());
+            updatePerson.setLastOnlineTime(person.getLastOnlineTime());
+            updatePerson.setBlocked(person.isBlocked());
+            updatePerson.setFriendshipsReceived(person.getFriendshipsReceived());
+            updatePerson.setFriendshipsRequested(person.getFriendshipsRequested());
+            updatePerson.setMessagesReceived(person.getMessagesReceived());
+            updatePerson.setMessagesSent(person.getMessagesSent());
+            updatePerson.setPosts(person.getPosts());
+            updatePerson.setComments(person.getComments());
+            updatePerson.setLikes(person.getLikes());
+            updatePerson.setBlocks(person.getBlocks());
             return true;
         } catch (Exception ex)  {
             ex.printStackTrace();
             return false;
         }
+    }
+
+    public void addPostToWall (Post post)   {
+        post.setAuthor(person);
+        Set<Post> personPosts = person.getPosts();
+        personPosts.add(post);
+        person.setPosts(personPosts);
     }
 }

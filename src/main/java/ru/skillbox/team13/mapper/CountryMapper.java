@@ -5,9 +5,11 @@ import ru.skillbox.team13.entity.Country;
 
 public class CountryMapper {
     public static Country convertCountryDTOToCountry (CountryDto countryDto) {
-        return Country.builder()
-                .id(countryDto.getId())
-                .title(countryDto.getTitle())
-                .build();
+        Country country = new Country();
+        int id = countryDto.getId();
+        String title = countryDto.getTitle();
+        country.setId(id);
+        country.setTitle(title);
+        return country;
     }
 }

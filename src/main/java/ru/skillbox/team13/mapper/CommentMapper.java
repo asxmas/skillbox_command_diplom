@@ -6,6 +6,7 @@ import ru.skillbox.team13.entity.Comment;
 import ru.skillbox.team13.service.CommentService;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,11 +22,13 @@ public class CommentMapper {
     }
 
     public static Comment convertCommentDTOToComment(CommentDTO commentDto)    {
-        return Comment.builder()
-                .parent(commentService.getCommentById(commentDto.getParentId()))
-                .commentText(commentDto.getCommentText())
-                .time(commentDto.getTime().toLocalDateTime())
-                .build();
+        Comment comment = new Comment();
+        Comment parent = commentService.getCommentById(commentDto.getParentId());
+        String commentText = commentDto.getCommentText();
+        LocalDateTime time = commentDto.getTime().toLocalDateTime();
+        comment.setParent(parent);
+        comment.setCommentText(commentText);
+        return comment;
     }
 
     public static Set<CommentDTO> convertSetCommentToSetCommentDTO(Set<Comment> comments)  {

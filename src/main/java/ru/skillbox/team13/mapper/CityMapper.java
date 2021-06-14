@@ -5,9 +5,11 @@ import ru.skillbox.team13.entity.City;
 
 public class CityMapper {
     public static City convertCityDTOtoCity(CityDto cityDto)    {
-        return City.builder()
-                .id(cityDto.getId())
-                .title(cityDto.getTitle())
-                .build();
+        City city = new City();
+        int id = cityDto.getId();
+        String title = cityDto.getTitle();
+        city.setId(id);
+        city.setTitle(title);
+        return city;
     }
 }
