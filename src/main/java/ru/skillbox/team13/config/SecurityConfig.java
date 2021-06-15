@@ -32,9 +32,7 @@ private static final String PASSWORD_RECOVERY_SET_ENDPOINT = "/api/v1/account/pa
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers(LOGIN_ENDPOINT).permitAll()
-                .antMatchers(REGISTER_ENDPOINT).permitAll()
-                .antMatchers(PASSWORD_RECOVERY_SET_ENDPOINT).permitAll()
+                .antMatchers("/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .apply(new JwtConfigurer(jwtTokenProvider));

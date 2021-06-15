@@ -1,6 +1,7 @@
 package ru.skillbox.team13.security.Jwt;
 
 import io.jsonwebtoken.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,7 @@ import java.util.Base64;
 import java.util.Date;
 
 @Component
+@Slf4j
 public class JwtTokenProvider {
 
     @Value("${jwt.token.secret}")
@@ -71,8 +73,10 @@ public class JwtTokenProvider {
 
     public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7, bearerToken.length());
+        //Postman добавляет к токену "Bearer ", фронт - нет. Убираем префикс если он есть
+        if (bearerToken != null) {
+            if (bearerToken.startsWith("Bearer")) bearerToken = bearerToken.substring(7, bearerToken.length());
+            return bearerToken;
         }
         return null;
     }
