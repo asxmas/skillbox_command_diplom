@@ -37,4 +37,7 @@ public class Comment extends Notified {
 
     @OneToMany(mappedBy = "parent")
     private Set<Comment> childComments;
+
+    @OneToMany(mappedBy = "postOrComment", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<Like> likes;
 }

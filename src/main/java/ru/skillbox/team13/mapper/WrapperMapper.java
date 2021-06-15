@@ -22,22 +22,31 @@ public class WrapperMapper {
                 .build();
     }
 
-    public static DTOWrapper wrap(List<?> payload) {
+    public static DTOWrapper wrapSingleData(Object payload) {
         return DTOWrapper.builder()
+                .data(payload)
+                .timestamp(TimeUtil.getTimestamp(LocalDateTime.now()))
                 .error("string")
-                .timestamp(TimeUtil.getTimestamp(LocalDateTime.now()))
-                .data(payload.toArray())
                 .build();
     }
 
-    public static DTOWrapper wrapDataOnly(List<?> payload) {
-        return DTOWrapper.builder().data(payload.toArray()).build();
-    }
 
-    public static DTOWrapper wrapMessage(MessageDTO message) {
-        return DTOWrapper.builder().error("string")
-                .timestamp(TimeUtil.getTimestamp(LocalDateTime.now()))
-                .data(message)
-                .build();
+    public static DTOWrapper wrap(List<?> payload) {
+            return DTOWrapper.builder()
+                    .error("string")
+                    .timestamp(TimeUtil.getTimestamp(LocalDateTime.now()))
+                    .data(payload.toArray())
+                    .build();
+        }
+
+        public static DTOWrapper wrapDataOnly(List<?> payload) {
+            return DTOWrapper.builder().data(payload.toArray()).build();
+        }
+
+        public static DTOWrapper wrapMessage(MessageDTO message) {
+            return DTOWrapper.builder().error("string")
+                    .timestamp(TimeUtil.getTimestamp(LocalDateTime.now()))
+                    .data(message)
+                    .build();
+        }
     }
-}
