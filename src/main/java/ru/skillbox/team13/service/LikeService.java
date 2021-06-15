@@ -6,4 +6,8 @@ public interface LikeService {
     DTOWrapper isLikedBy(Integer personId, int itemId, String type);
 
     DTOWrapper getLikedBy(int itemId, String type);
+
+    DTOWrapper doLike(int itemId, String type);
+
+    DTOWrapper doDislike(int itemId, String type);
 }

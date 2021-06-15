@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.DomainObjectFactory;
 import ru.skillbox.team13.entity.Comment;
@@ -88,7 +89,9 @@ public class LikeRepoTest {
         em.persist(like);
         em.getTransaction().commit();
         em.close();
-        assertTrue(likeRepo.getLikeForPostOrCommentById(postId, personId).isPresent());
+
+        Person p = personRepo.findById(personId).get();
+        assertEquals(1, likeRepo.countByLikerAndItemId(p, postId));
     }
 
     @Test
@@ -106,14 +109,8 @@ public class LikeRepoTest {
         em.getTransaction().commit();
         em.close();
 
-        assertTrue(likeRepo.getLikeForPostOrCommentById(commentId, personId).isPresent());
-    }
-
-    @Test
-    void testFindNoLike() {
-        int likerId = 999;
-        assertTrue(likeRepo.getLikeForPostOrCommentById(postId, likerId).isEmpty());
-        assertTrue(likeRepo.getLikeForPostOrCommentById(commentId, likerId).isEmpty());
+        Person p = personRepo.findById(personId).get();
+        assertEquals(1, likeRepo.countByLikerAndItemId(p, commentId));
     }
 
     @Test
@@ -143,5 +140,44 @@ public class LikeRepoTest {
         List<Integer> inputIds = persons.stream().map(Person::getId).collect(Collectors.toList());
         List<Integer> outputIds = likers.stream().map(Liker::getLikerId).collect(Collectors.toList());
         assertTrue(outputIds.containsAll(inputIds));
+    }
+
+    @Test
+    @Transactional
+    void testCountLikes() {
+
+        Person p = personRepo.findById(personId).get();
+        assertEquals(0, likeRepo.countByLikerAndItemId(p, postId));
+        assertEquals(0, likeRepo.countByLikerAndItemId(p, commentId));
+
+        Like l1 = new Like();
+        l1.setPostOrComment(postRepo.findById(postId).get());
+        l1.setPerson(p);
+        l1.setTime(LocalDateTime.now());
+
+        likeRepo.save(l1);
+
+        assertEquals(1, likeRepo.countByLikerAndItemId(p, postId));
+    }
+
+    @Test
+    @Transactional
+    void testLikeDislike() {
+
+        Person p = personRepo.findById(personId).get();
+        assertEquals(0, likeRepo.countByLikerAndItemId(p, postId));
+
+        Like l1 = new Like();
+        l1.setPostOrComment(postRepo.findById(postId).get());
+        l1.setPerson(p);
+        l1.setTime(LocalDateTime.now());
+
+        likeRepo.save(l1);
+
+        assertEquals(1, likeRepo.countByLikerAndItemId(p, postId));
+
+        likeRepo.deleteByLikerAndId(p, postId);
+
+        assertEquals(0, likeRepo.countByLikerAndItemId(p, postId));
     }
 }

@@ -3,11 +3,9 @@ package ru.skillbox.team13.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.skillbox.team13.dto.DTOWrapper;
+import ru.skillbox.team13.dto.LikeDto;
 import ru.skillbox.team13.service.LikeService;
 
 @RestController
@@ -30,5 +28,18 @@ public class LikesController {
     public ResponseEntity<DTOWrapper> getLikers(@RequestParam(name = "item_id") int itemId,
                                                 @RequestParam String type) {
         return new ResponseEntity<>(likeService.getLikedBy(itemId, type), HttpStatus.OK);
+    }
+
+    @PutMapping("likes")
+    //Поставить лайк
+    public ResponseEntity<DTOWrapper> doLike(@RequestBody LikeDto like) {
+        return new ResponseEntity<>(likeService.doLike(like.getItemId(), like.getType()), HttpStatus.OK);
+    }
+
+    @DeleteMapping("likes")
+    //Поставить лайк
+    public ResponseEntity<DTOWrapper> doDislike(@RequestParam(name = "item_id") int itemId,
+                                                @RequestParam String type) {
+        return new ResponseEntity<>(likeService.doDislike(itemId, type), HttpStatus.OK);
     }
 }
