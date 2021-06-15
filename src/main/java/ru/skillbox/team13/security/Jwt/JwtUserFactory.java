@@ -16,13 +16,7 @@ public final class JwtUserFactory {
             user.getEmail(),
             user.getPassword(),
             true,
-            mapToGrantedAuthorities(user.getType())
+            user.getType().getAuthorities()
         );
-    }
-
-    private static ArrayList<SimpleGrantedAuthority> mapToGrantedAuthorities(UserType userRole) {
-        ArrayList<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(userRole.name()));
-        return authorities;
     }
 }

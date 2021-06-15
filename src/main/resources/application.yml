@@ -17,4 +17,12 @@ spring:
 jwt:
   token:
     secret: stream-team13
-    expired: 120000
+    expired: 3600000
+
+spring.mail:
+  host: smtp.gmail.com
+  port: 587
+  username: ${EMAIL}
+  password: ${EMAILPASS}
+  properties.mail.smtp.auth: true
+  properties.mail.smtp.starttls.enable: true
