@@ -17,15 +17,23 @@ public class Friendship {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "status_id", nullable = false)
     private FriendshipStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    //person who 'friended' someone
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "src_person_id", nullable = false)
-    private Person fromPerson;
+    private Person sourcePerson;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    //person who was 'friended' by someone
+    @ManyToOne(fetch = FetchType.EAGER)  //todo test
     @JoinColumn(name = "dst_person_id", nullable = false)
-    private Person toPerson;
+    private Person destinationPerson;
+
+    public Friendship(FriendshipStatus status, Person sourcePerson, Person destinationPerson) {
+        this.status = status;
+        this.sourcePerson = sourcePerson;
+        this.destinationPerson = destinationPerson;
+    }
 }
