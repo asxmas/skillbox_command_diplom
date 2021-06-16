@@ -28,4 +28,10 @@ public class FriendshipStatus {
     @Column(name = "code", nullable = false)
     @Enumerated(EnumType.STRING)
     private FriendshipStatusCode code;
+
+    public FriendshipStatus(LocalDateTime time, String name, FriendshipStatusCode code) {
+        this.time = time;
+        this.name = name;
+        this.code = code;
+    }
 }

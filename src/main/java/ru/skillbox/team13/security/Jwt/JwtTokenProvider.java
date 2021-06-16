@@ -1,6 +1,7 @@
 package ru.skillbox.team13.security.Jwt;
 
 import io.jsonwebtoken.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import ru.skillbox.team13.entity.enums.UserType;
+import ru.skillbox.team13.repository.RepoBlacklistedToken;
 import ru.skillbox.team13.security.JwtUserDetailsService;
 
 import javax.annotation.PostConstruct;
@@ -18,6 +20,7 @@ import java.util.Base64;
 import java.util.Date;
 
 @Component
+@Slf4j
 public class JwtTokenProvider {
 
     @Value("${jwt.token.secret}")
@@ -26,9 +29,11 @@ public class JwtTokenProvider {
     @Value("${jwt.token.expired}")
     private long validityInMilliseconds;
 
-
     @Autowired
     private JwtUserDetailsService userDetailsService;
+
+    @Autowired
+    private RepoBlacklistedToken blacklistedTokenRepo;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -53,7 +58,7 @@ public class JwtTokenProvider {
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(validity)
-                .signWith(SignatureAlgorithm.HS256, secret)//
+                .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
 
@@ -68,25 +73,31 @@ public class JwtTokenProvider {
 
     public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer_")) {
-            return bearerToken.substring(7, bearerToken.length());
+        //Postman добавляет к токену "Bearer ", фронт - нет. Убираем префикс если он есть
+        if (bearerToken != null) {
+            if (bearerToken.startsWith("Bearer")) bearerToken = bearerToken.substring(7, bearerToken.length());
+            return bearerToken;
         }
         return null;
     }
 
+    public Date resolveTokenDate(String token) {
+        Jws<Claims> claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
+        return claims.getBody().getExpiration();
+    }
+
     public boolean validateToken(String token) {
         try {
-            //проверить токен на присутствие в blacklist
-
+            if (blacklistedTokenRepo.findByToken(token).isPresent()) {
+                throw new JwtException("JWT token in blacklist");
+            }
             Jws<Claims> claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
-
             if (claims.getBody().getExpiration().before(new Date())) {
                 return false;
             }
-
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            throw new JwtAuthenticationException("JWT token is expired or invalid");
+            return false;
         }
     }
 }

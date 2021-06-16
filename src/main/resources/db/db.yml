@@ -11,3 +11,5 @@ databaseChangeLog:
       path: db/changelogs/2.1-patch
   - include:
       file: db/changelogs/3.1-patch/token.sql
+  - include:
+      file: db/changelogs/4-patch/modify-like.sql

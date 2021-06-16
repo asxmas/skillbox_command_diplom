@@ -59,11 +59,13 @@ public class Person extends Notified {
     @Column(name = "is_blocked", nullable = false)
     private boolean isBlocked;
 
-    @OneToMany(mappedBy = "fromPerson", fetch = FetchType.LAZY)
-    private Set<Friendship> friendshipsRequested;
+    //'friends' list
+    @OneToMany(mappedBy = "sourcePerson", fetch = FetchType.LAZY)
+    private Set<Friendship> requestedFriendships;
 
-    @OneToMany(mappedBy = "toPerson", fetch = FetchType.LAZY)
-    private Set<Friendship> friendshipsReceived;
+    //'friends of' list
+    @OneToMany(mappedBy = "destinationPerson", fetch = FetchType.LAZY)
+    private Set<Friendship> receivedFriendships;
 
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
     private Set<Message> messagesSent;

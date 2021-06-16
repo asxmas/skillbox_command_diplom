@@ -32,7 +32,7 @@ public class Post extends Notified {
     @Column(name = "is_blocked", nullable = false)
     private boolean isBlocked;
 
-    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "postOrComment", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Like> likes;
 
     @OneToMany(mappedBy = "post")
