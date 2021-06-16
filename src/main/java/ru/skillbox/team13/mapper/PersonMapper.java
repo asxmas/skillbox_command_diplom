@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import ru.skillbox.team13.dto.CityDto;
 import ru.skillbox.team13.dto.CountryDto;
 import ru.skillbox.team13.dto.PersonDTO;
+import ru.skillbox.team13.dto.PostDTO;
 import ru.skillbox.team13.entity.City;
 import ru.skillbox.team13.entity.Country;
 import ru.skillbox.team13.entity.Person;
@@ -13,6 +14,7 @@ import ru.skillbox.team13.util.TimeUtil;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.TimeZone;
 
 @RequiredArgsConstructor
@@ -33,6 +35,7 @@ public class PersonMapper {
                 .country(convertCountryToCountryDTO(p.getCountry()))
                 .messagesPermission(p.getMessagesPermission().name())
                 .lastOnlineTime(TimeUtil.getTimestamp(p.getLastOnlineTime()))
+                .posts(PostMapper.convertSetPostToSetPostDTO(p.getPosts()))
                 .isBlocked(p.isBlocked()).build();
     }
 
@@ -45,6 +48,7 @@ public class PersonMapper {
         String phone = personDTO.getPhone();
         String photo = personDTO.getPhoto();
         String about = personDTO.getAbout();
+        Set<PostDTO> posts = personDTO.getPosts();
         City city = CityMapper.convertCityDTOtoCity(personDTO.getCity());
         Country country = CountryMapper.convertCountryDTOToCountry(personDTO.getCountry());
         PersonMessagePermission personMessagePermission = PersonMessagePermission.valueOf(personDTO.getMessagesPermission());
@@ -64,24 +68,8 @@ public class PersonMapper {
         person.setMessagesPermission(personMessagePermission);
         person.setLastOnlineTime(lastOnlineTime);
         person.setBlocked(isBlocked);
+        person.setPosts(PostMapper.convertSetPostDTOToSetPost(posts));
         return person;
-
-
-//        return Person.builder()
-//                .firstName(personDTO.getFirstName())
-//                .lastName(personDTO.getLastName())
-//                .birthDate(TimeUtil.toLocalDateTime(personDTO.getBirthDate()))
-//                .regDate(TimeUtil.toLocalDateTime(personDTO.getRegistrationDate()))
-//                .email(personDTO.getEmail())
-//                .phone(personDTO.getPhone())
-//                .photo(personDTO.getPhoto())
-//                .about(personDTO.getAbout())
-//                .city(CityMapper.convertCityDTOtoCity(personDTO.getCity()))
-//                .country(CountryMapper.convertCountryDTOToCountry(personDTO.getCountry()))
-//                .messagesPermission(PersonMessagePermission.valueOf(personDTO.getMessagesPermission()))
-//                .lastOnlineTime(TimeUtil.toLocalDateTime(personDTO.getLastOnlineTime()))
-//                .isBlocked(personDTO.isBlocked())
-//                .build();
     }
 
     private static CountryDto convertCountryToCountryDTO(Country c) {

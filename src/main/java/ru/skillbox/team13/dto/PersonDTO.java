@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.Set;
+
 @Getter
 @Builder
 public class PersonDTO {
@@ -37,4 +39,5 @@ public class PersonDTO {
 
     @JsonProperty("is_blocked")
     private final boolean isBlocked;
+    private final Set<PostDTO> posts;
 }

@@ -11,6 +11,7 @@ import ru.skillbox.team13.util.TimeUtil;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class PostMapper {
@@ -39,5 +40,17 @@ public class PostMapper {
         post.setLikes(likes);
         post.setComments(comments);
         return post;
+    }
+
+    public static Set<PostDTO> convertSetPostToSetPostDTO(Set<Post> posts) {
+        return posts.stream()
+                .map(PostMapper::convertPostToPostDTO)
+                .collect(Collectors.toSet());
+    }
+
+    public static Set<Post> convertSetPostDTOToSetPost(Set<PostDTO> posts) {
+        return posts.stream()
+                .map(PostMapper::convertPostDTOtoPost)
+                .collect(Collectors.toSet());
     }
 }

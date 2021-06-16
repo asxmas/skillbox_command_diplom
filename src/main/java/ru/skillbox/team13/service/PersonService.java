@@ -57,8 +57,7 @@ public class PersonService {
         personPosts.add(post);
         person.setPosts(personPosts);
     }
-
-    public Person getPersonById(int id) {
-        return personRepo.getById(id);
+    public PersonDTO getPersonById(int id) {
+        return PersonMapper.convertPersonToPersonDTO(personRepo.getOne(id));
     }
 }

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.dto.PostDTO;
@@ -39,7 +40,6 @@ public class PersonController {
     }
   }
 
-  //todo Доделать
   @DeleteMapping("/users/me")
   public ResponseEntity<SuccessResponse> deleteCurrentPerson(@RequestBody PersonDTO personDTO)  {
     try {
@@ -50,12 +50,13 @@ public class PersonController {
       return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
     }
   }
-  //todo Доделать
+  //todo Не работает при id > 1000
+  //todo не возврашает not found
   @GetMapping("/users/{id}")
   public ResponseEntity<SuccessResponse> getPersonById(@PathVariable("id") Integer id) {
     try {
-      Person person = personService.getPersonById(id);
-      return ResponseEntity.ok(new SuccessResponse());
+      PersonDTO person = personService.getPersonById(id);
+      return ResponseEntity.ok(new SuccessResponse(person));
     }
     catch (Exception ex)  {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -65,15 +66,14 @@ public class PersonController {
   @GetMapping("/users/{id}/wall")
   public ResponseEntity<SuccessResponse> getListPosts(@PathVariable("id") Integer id) {
     try {
-      Person person = personService.getPersonById(id);
-      return ResponseEntity.ok(new SuccessResponse());
+      personService.getPersonById(id);
+      return new ResponseEntity<>(HttpStatus.OK);
     }
     catch (Exception ex)  {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
 
-  //todo Доделать убрать логику
   @PostMapping("/users/{id}/wall")
   public ResponseEntity<SuccessResponse> createPost(@PathVariable("id") Integer id,
                                          @RequestBody PostDTO postDTO) {
