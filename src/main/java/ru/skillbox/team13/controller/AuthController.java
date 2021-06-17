@@ -40,7 +40,6 @@ public class AuthController {
     }
 
     @PostMapping("auth/logout")
-    @PreAuthorize("hasAuthority('user')")
     public ResponseEntity<SuccessDto> logout(HttpServletRequest request) {
         if (userService.logout(request)) {return ResponseEntity.ok(new SuccessDto());}
         else throw new BadRequestException("Logout fails");
