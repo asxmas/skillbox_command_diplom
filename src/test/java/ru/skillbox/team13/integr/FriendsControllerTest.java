@@ -16,17 +16,19 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skillbox.team13.dto.*;
+import ru.skillbox.team13.DomainObjectFactory;
+import ru.skillbox.team13.dto.DTOWrapper;
+import ru.skillbox.team13.dto.MessageDTO;
+import ru.skillbox.team13.dto.PersonDTO;
+import ru.skillbox.team13.dto.UserFriendshipStatusDTO;
 import ru.skillbox.team13.entity.Friendship;
 import ru.skillbox.team13.entity.FriendshipStatus;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
-import ru.skillbox.team13.entity.enums.PersonMessagePermission;
-import ru.skillbox.team13.entity.enums.UserType;
-import ru.skillbox.team13.repository.PersonRepo;
-import ru.skillbox.team13.repository.RepoFriendship;
-import ru.skillbox.team13.repository.RepoUser;
+import ru.skillbox.team13.repository.FriendshipRepository;
+import ru.skillbox.team13.repository.PersonRepository;
+import ru.skillbox.team13.repository.UserRepository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -49,13 +51,13 @@ public class FriendsControllerTest {
     MockMvc mockMvc;
 
     @Autowired
-    PersonRepo personRepo;
+    PersonRepository personRepository;
 
     @Autowired
-    RepoFriendship frRepo;
+    FriendshipRepository frRepo;
 
     @Autowired
-    RepoUser userRepo;
+    UserRepository userRepo;
 
     @Autowired
     ObjectMapper om;
@@ -69,7 +71,7 @@ public class FriendsControllerTest {
 
     @Test
     void sanityCheck() {
-        assertNotNull(personRepo);
+        assertNotNull(personRepository);
         assertNotNull(userRepo);
         assertNotNull(mockMvc);
         assertNotNull(om);
@@ -83,21 +85,10 @@ public class FriendsControllerTest {
     void prepareTheUser() {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
-        Person bobPerson = new Person();
-        bobPerson.setFirstName("Bob");
-        bobPerson.setLastName("Bobson");
-        bobPerson.setRegDate(LocalDateTime.now());
-        bobPerson.setEmail("bob@mail");
-        bobPerson.setMessagesPermission(PersonMessagePermission.ALL);
-        bobPerson.setBlocked(false);
+        Person bobPerson = DomainObjectFactory.makePerson("Bob", "Bobson", "bob@mail");
         em.persist(bobPerson);
 
-        User bobUser = new User();
-        bobUser.setName("bobTheUser");
-        bobUser.setPassword("pass");
-        bobUser.setType(UserType.USER);
-        bobUser.setEmail("bob@mail");
-        bobUser.setApproved(true);
+        User bobUser = DomainObjectFactory.makeUser("bob@mail");
         bobUser.setPerson(bobPerson);
         em.persist(bobUser);
 
@@ -109,24 +100,14 @@ public class FriendsControllerTest {
 
     @BeforeAll
     void preparePersons() {
-        Person person2 = new Person();
-        person2.setFirstName("Jim");
-        person2.setLastName("Jimson");
-        person2.setRegDate(LocalDateTime.now());
-        person2.setEmail("@2");
-        person2.setMessagesPermission(PersonMessagePermission.ALL);
+        Person person2 = DomainObjectFactory.makePerson("Jim", "Jimson", "@2");
         person2.setBlocked(false);
 
-        Person person3 = new Person();
-        person3.setFirstName("Tim");
-        person3.setLastName("Timson");
-        person3.setRegDate(LocalDateTime.now());
-        person3.setEmail("@3");
-        person3.setMessagesPermission(PersonMessagePermission.ALL);
+        Person person3 = DomainObjectFactory.makePerson("Tim", "Timson", "@3");
         person3.setBlocked(false);
 
-        jimId = personRepo.save(person2).getId();
-        timId = personRepo.save(person3).getId();
+        jimId = personRepository.save(person2).getId();
+        timId = personRepository.save(person3).getId();
     }
 
     @Test
@@ -239,7 +220,7 @@ public class FriendsControllerTest {
         makeFriendship(jimId, bobId, REQUEST, "from jim to bob");
         makeFriendship(timId, bobId, FRIEND, "from tim to bob");
 
-        UserIdsDto ids = new UserIdsDto(new int[]{jimId, timId});
+        int[] ids = new int[]{jimId, timId};
 
         DTOWrapper dto = performRequest(post("http://localhost:8080/api/v1/is/friends")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -254,8 +235,8 @@ public class FriendsControllerTest {
 
 
     private void makeFriendship(int from, int to, FriendshipStatusCode code, String statusName) {
-        Person fromP = personRepo.findById(from).get();
-        Person toP = personRepo.findById(to).get();
+        Person fromP = personRepository.findById(from).get();
+        Person toP = personRepository.findById(to).get();
         FriendshipStatus friendshipStatus = new FriendshipStatus(LocalDateTime.now(), statusName, code);
         Friendship friendship = new Friendship(friendshipStatus, fromP, toP);
         frRepo.save(friendship);

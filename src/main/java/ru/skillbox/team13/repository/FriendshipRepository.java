@@ -1,15 +1,15 @@
 package ru.skillbox.team13.repository;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import ru.skillbox.team13.entity.Friendship;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface RepoFriendship extends CrudRepository<Friendship, Integer> {
+public interface FriendshipRepository extends JpaRepository<Friendship, Integer> {
 
     @Query("select count(f) from Friendship f where f.sourcePerson.id = :srcId and f.status.code = :code")
     int countRequestedFriendships(Integer srcId, FriendshipStatusCode code);

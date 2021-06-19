@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.team13.dto.DTOWrapper;
-import ru.skillbox.team13.dto.UserIdsDto;
 import ru.skillbox.team13.service.impl.FriendsServiceImpl;
 
 @RestController
@@ -54,7 +53,7 @@ public class FriendsController {
     @SneakyThrows
     @PostMapping("/is/friends")
     //Получить информацию является ли пользователь другом указанных пользователей
-    public ResponseEntity<DTOWrapper> isFriends(@RequestBody UserIdsDto userIds) {
-        return new ResponseEntity<>(friendService.getStatusForIds(userIds.getUserIds()), HttpStatus.OK);
+    public ResponseEntity<DTOWrapper> isFriends(@RequestBody int[] userIds) {
+        return new ResponseEntity<>(friendService.getStatusForIds(userIds), HttpStatus.OK);
     }
 }

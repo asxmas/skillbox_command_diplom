@@ -17,8 +17,8 @@ import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
 import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.mapper.PersonMapper;
 import ru.skillbox.team13.mapper.WrapperMapper;
-import ru.skillbox.team13.repository.PersonRepo;
-import ru.skillbox.team13.repository.RepoFriendship;
+import ru.skillbox.team13.repository.PersonRepository;
+import ru.skillbox.team13.repository.FriendshipRepository;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -29,8 +29,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsService {
 
-    private final PersonRepo personRepo;
-    private final RepoFriendship friendshipRepo;
+    private final PersonRepository personRepository;
+    private final FriendshipRepository friendshipRepo;
     private final UserServiceImpl userService;  //todo UserService interface's not working
 
     //if no 'name' is present returns all persons with code 'FRIEND' for this person
@@ -57,7 +57,7 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
         List<PersonDTO> results = friendships.stream().map(Friendship::getDestinationPerson)
                 .map(PersonMapper::convertPersonToPersonDTO).collect(Collectors.toList());
 
-        return WrapperMapper.wrap(results, count, offset, itemPerPage);
+        return WrapperMapper.wrap(results, count, offset, itemPerPage, true);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
         List<PersonDTO> results = friendships.stream().map(Friendship::getSourcePerson)
                 .map(PersonMapper::convertPersonToPersonDTO).collect(Collectors.toList());
 
-        return WrapperMapper.wrap(results, count, offset, itemPerPage);
+        return WrapperMapper.wrap(results, count, offset, itemPerPage, true);
     }
 
     //returns all users from same city (already friended and not)
@@ -128,13 +128,13 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
         City city = thisPerson.getCity();
         Pageable p = getPageable(offset, itemPerPage);
 
-        Integer count = personRepo.countByCity(city);
-        List<Person> personList = personRepo.findByCity(p, city);
+        Integer count = personRepository.countByCity(city);
+        List<Person> personList = personRepository.findByCity(p, city);
 
         List<PersonDTO> results = personList.stream()
                 .map(PersonMapper::convertPersonToPersonDTO).collect(Collectors.toList());
 
-        return WrapperMapper.wrap(results, count, offset, itemPerPage);
+        return WrapperMapper.wrap(results, count, offset, itemPerPage, true);
     }
 
     //returns statuses only for incoming friendships
@@ -146,7 +146,7 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
         List<UserFriendshipStatusDTO> results = friendships.stream()
                 .map(f -> new UserFriendshipStatusDTO(f.getSourcePerson().getId(), f.getStatus().getCode().name()))
                 .collect(Collectors.toList());
-        return WrapperMapper.wrapDataOnly(results);
+        return WrapperMapper.wrap(results, false);
     }
 
     private void acceptRequestIfExists(Integer srcFriendId, Integer dstCurrentPersonId, FriendshipStatusCode code) {
@@ -179,8 +179,8 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
     }
 
     private Friendship createNewFriendship(Integer src, Integer dst, FriendshipStatusCode code) {
-        Person srcPerson = personRepo.findById(src).get(); //todo exception handling
-        Person dstPerson = personRepo.findById(dst).get();
+        Person srcPerson = personRepository.findById(src).get(); //todo exception handling
+        Person dstPerson = personRepository.findById(dst).get();
         FriendshipStatus status = new FriendshipStatus(LocalDateTime.now(), "", FriendshipStatusCode.REQUEST);
         return new Friendship(status, srcPerson, dstPerson);
     }

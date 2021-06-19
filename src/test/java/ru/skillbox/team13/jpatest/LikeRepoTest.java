@@ -1,21 +1,19 @@
 package ru.skillbox.team13.jpatest;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.DomainObjectFactory;
 import ru.skillbox.team13.entity.Comment;
 import ru.skillbox.team13.entity.Like;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
-import ru.skillbox.team13.repository.RepoLike;
-import ru.skillbox.team13.repository.RepoPerson;
-import ru.skillbox.team13.repository.RepoPost;
-import ru.skillbox.team13.repository.projection.Liker;
+import ru.skillbox.team13.repository.*;
+import ru.skillbox.team13.entity.projection.Liker;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -32,13 +30,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class LikeRepoTest {
 
     @Autowired
-    RepoLike likeRepo;
+    LikeRepository likeRepo;
 
     @Autowired
-    RepoPerson personRepo;
+    PersonRepository personRepo;
 
     @Autowired
-    RepoPost postRepo;
+    PostRepository postRepo;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    CommentRepository commentRepo;
 
     @Autowired
     EntityManagerFactory emf;
@@ -72,6 +76,14 @@ public class LikeRepoTest {
         commentId = comment.getId();
 
         em.close();
+    }
+
+    @AfterAll
+    void destroy() {
+        commentRepo.deleteAll();
+        postRepo.deleteAll();
+        userRepository.deleteAll();
+        personRepo.deleteAll();
     }
 
     @Test

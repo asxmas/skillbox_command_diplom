@@ -1,20 +1,20 @@
 package ru.skillbox.team13.jpatest;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.skillbox.team13.DomainObjectFactory;
 import ru.skillbox.team13.entity.Friendship;
 import ru.skillbox.team13.entity.FriendshipStatus;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
-import ru.skillbox.team13.entity.enums.PersonMessagePermission;
-import ru.skillbox.team13.repository.PersonRepo;
-import ru.skillbox.team13.repository.RepoFriendship;
+import ru.skillbox.team13.repository.FriendshipRepository;
+import ru.skillbox.team13.repository.PersonRepository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -33,10 +33,10 @@ import static ru.skillbox.team13.entity.enums.FriendshipStatusCode.REQUEST;
 public class FriendsRepositoryTest {
 
     @Autowired
-    RepoFriendship friendshipRepo;
+    FriendshipRepository friendshipRepo;
 
     @Autowired
-    PersonRepo personRepo;
+    PersonRepository personRepository;
 
     @Autowired
     EntityManagerFactory emf;
@@ -48,7 +48,7 @@ public class FriendsRepositoryTest {
     @Test
     void sanityCheck() {
         assertNotNull(friendshipRepo);
-        assertNotNull(personRepo);
+        assertNotNull(personRepository);
         assertNotNull(emf);
         EntityManager em = emf.createEntityManager();
         assertNotNull(em);
@@ -57,33 +57,20 @@ public class FriendsRepositoryTest {
 
     @BeforeAll
     void setupPersons() {
-        Person person1 = new Person();
-        person1.setFirstName("Bob");
-        person1.setLastName("Bobson");
-        person1.setRegDate(LocalDateTime.now());
-        person1.setEmail("@1");
-        person1.setMessagesPermission(PersonMessagePermission.ALL);
-        person1.setBlocked(false);
+        Person person1 = DomainObjectFactory.makePerson("Bob", "Bobson", "@1");
 
-        Person person2 = new Person();
-        person2.setFirstName("Jim");
-        person2.setLastName("Jimson");
-        person2.setRegDate(LocalDateTime.now());
-        person2.setEmail("@2");
-        person2.setMessagesPermission(PersonMessagePermission.ALL);
-        person2.setBlocked(false);
+        Person person2 = DomainObjectFactory.makePerson("Jim", "Jimson", "@2");
 
-        Person person3 = new Person();
-        person3.setFirstName("Tim");
-        person3.setLastName("Timson");
-        person3.setRegDate(LocalDateTime.now());
-        person3.setEmail("@3");
-        person3.setMessagesPermission(PersonMessagePermission.ALL);
-        person3.setBlocked(false);
+        Person person3 = DomainObjectFactory.makePerson("Tim", "Timson", "@3");
 
-        bobId = personRepo.save(person1).getId();
-        jimId = personRepo.save(person2).getId();
-        timId = personRepo.save(person3).getId();
+        bobId = personRepository.save(person1).getId();
+        jimId = personRepository.save(person2).getId();
+        timId = personRepository.save(person3).getId();
+    }
+
+    @AfterAll
+    void destroy() {
+        personRepository.deleteAll();
     }
 
     @Test
@@ -93,7 +80,7 @@ public class FriendsRepositoryTest {
         makeFriendship(bobId, jimId, FRIEND, "from bob to jim");
         makeFriendship(bobId, timId, FRIEND, "from bob to tim");
 
-        Person fromDB = personRepo.findById(bobId).get();
+        Person fromDB = personRepository.findById(bobId).get();
         int count = friendshipRepo.countRequestedFriendships(fromDB.getId(), FRIEND);
         assertEquals(2, count);
     }
@@ -105,7 +92,7 @@ public class FriendsRepositoryTest {
         makeFriendship(bobId, jimId, FRIEND, "from bob to jim");
         makeFriendship(bobId, timId, FRIEND, "from bob to tim");
 
-        Person fromDB = personRepo.findById(bobId).get();
+        Person fromDB = personRepository.findById(bobId).get();
         int count = friendshipRepo.countRequestedFriendships(fromDB.getId(), FRIEND, "tim%");
 
         assertEquals(1, count);
@@ -117,7 +104,7 @@ public class FriendsRepositoryTest {
         makeFriendship(jimId, bobId, FRIEND, "from jim to bob");
         makeFriendship(timId, bobId, FRIEND, "from tim to bob");
 
-        Person fromDB = personRepo.findById(bobId).get();
+        Person fromDB = personRepository.findById(bobId).get();
         int count = friendshipRepo.countReceivedFriendships(fromDB.getId(), FRIEND);
 
         assertEquals(2, count);
@@ -129,7 +116,7 @@ public class FriendsRepositoryTest {
         makeFriendship(jimId, bobId, FRIEND, "from jim to bob");
         makeFriendship(timId, bobId, FRIEND, "from tim to bob");
 
-        Person fromDB = personRepo.findById(bobId).get();
+        Person fromDB = personRepository.findById(bobId).get();
         int count = friendshipRepo.countReceivedFriendships(fromDB.getId(), FRIEND, "jimson");
         assertEquals(1, count);
     }
@@ -140,7 +127,7 @@ public class FriendsRepositoryTest {
         makeFriendship(bobId, jimId, REQUEST, "from bob to jim");
         makeFriendship(bobId, timId, REQUEST, "from bob to tim");
 
-        Person fromDB = personRepo.findById(bobId).get();
+        Person fromDB = personRepository.findById(bobId).get();
         List<Friendship> f = friendshipRepo.findRequestedFriendships(PageRequest.of(0, 10), fromDB.getId(), REQUEST);
         assertEquals(2, f.size());
         assertTrue(f.stream().map(fr -> fr.getStatus()).anyMatch(s -> s.getName().equals("from bob to tim")));
@@ -152,7 +139,7 @@ public class FriendsRepositoryTest {
         makeFriendship(bobId, jimId, REQUEST, "from bob to jim");
         makeFriendship(bobId, timId, REQUEST, "from bob to tim");
 
-        Person fromDB = personRepo.findById(bobId).get();
+        Person fromDB = personRepository.findById(bobId).get();
         List<Friendship> f = friendshipRepo.findRequestedFriendships(PageRequest.of(0, 10), fromDB.getId(), REQUEST, "%tim%");
         assertEquals(1, f.size());
     }

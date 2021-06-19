@@ -21,9 +21,9 @@ import ru.skillbox.team13.entity.enums.UserType;
 import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.exception.UnauthorizedException;
 import ru.skillbox.team13.mapper.PersonMapper;
-import ru.skillbox.team13.repository.PersonRepo;
-import ru.skillbox.team13.repository.RepoBlacklistedToken;
-import ru.skillbox.team13.repository.RepoUser;
+import ru.skillbox.team13.repository.PersonRepository;
+import ru.skillbox.team13.repository.BlacklistedTokenRepository;
+import ru.skillbox.team13.repository.UserRepository;
 import ru.skillbox.team13.security.Jwt.JwtTokenProvider;
 import ru.skillbox.team13.service.UserService;
 
@@ -40,11 +40,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final RepoUser userRepository;
-    private final PersonRepo personRepository;
+    private final UserRepository userRepository;
+    private final PersonRepository personRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RepoBlacklistedToken blacklistedTokenRepo;
+    private final BlacklistedTokenRepository blacklistedTokenRepo;
     private final MailServiceImpl mailServiceImpl;
 
     @Override

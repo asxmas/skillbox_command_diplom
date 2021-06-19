@@ -8,13 +8,13 @@ import ru.skillbox.team13.dto.LikesDto;
 import ru.skillbox.team13.entity.Like;
 import ru.skillbox.team13.entity.Notified;
 import ru.skillbox.team13.entity.Person;
+import ru.skillbox.team13.entity.projection.Liker;
 import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.mapper.WrapperMapper;
-import ru.skillbox.team13.repository.RepoComment;
-import ru.skillbox.team13.repository.RepoLike;
-import ru.skillbox.team13.repository.RepoPerson;
-import ru.skillbox.team13.repository.RepoPost;
-import ru.skillbox.team13.repository.projection.Liker;
+import ru.skillbox.team13.repository.PersonRepository;
+import ru.skillbox.team13.repository.CommentRepository;
+import ru.skillbox.team13.repository.LikeRepository;
+import ru.skillbox.team13.repository.PostRepository;
 import ru.skillbox.team13.service.LikeService;
 
 import java.time.LocalDateTime;
@@ -25,10 +25,10 @@ import java.util.List;
 public class LikeServiceImpl implements LikeService {
 
     private final UserServiceImpl userService; //todo fix implementation
-    private final RepoLike likeRepo;
-    private final RepoPost postRepo;
-    private final RepoComment commentRepo;
-    private final RepoPerson personRepo;
+    private final LikeRepository likeRepo;
+    private final PostRepository postRepo;
+    private final CommentRepository commentRepo;
+    private final PersonRepository personRepo;
 
     @Override
     public DTOWrapper isLikedBy(Integer personId, int itemId, String type) {
@@ -36,15 +36,18 @@ public class LikeServiceImpl implements LikeService {
                 userService.getAuthorizedUser().getPerson() :
                 personRepo.findById(personId).orElseThrow(() -> new BadRequestException("No person found for id=" + personId));
 
-        return WrapperMapper.wrapSingleData(new LikesDto(checkLikedBy(liker, itemId)));
+        LikesDto dto = new LikesDto(checkLikedBy(liker, itemId));
+        return WrapperMapper.wrap(dto, true);
     }
 
     @Override
     public DTOWrapper getLikedBy(int itemId, String type) {
         List<Liker> likers = likeRepo.findLikersProjectionsForItemId(itemId);
+
         LikesDto dto = new LikesDto(likers.size());
         dto.setUsers(likers.stream().mapToInt(Liker::getLikerId).toArray());
-        return WrapperMapper.wrapSingleData(dto);
+
+        return WrapperMapper.wrap(dto, true);
     }
 
     @Override

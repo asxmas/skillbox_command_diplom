@@ -11,7 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import ru.skillbox.team13.entity.enums.UserType;
-import ru.skillbox.team13.repository.RepoBlacklistedToken;
+import ru.skillbox.team13.repository.BlacklistedTokenRepository;
 import ru.skillbox.team13.security.JwtUserDetailsService;
 
 import javax.annotation.PostConstruct;
@@ -33,7 +33,7 @@ public class JwtTokenProvider {
     private JwtUserDetailsService userDetailsService;
 
     @Autowired
-    private RepoBlacklistedToken blacklistedTokenRepo;
+    private BlacklistedTokenRepository blacklistedTokenRepo;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {

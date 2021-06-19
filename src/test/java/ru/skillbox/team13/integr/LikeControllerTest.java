@@ -19,10 +19,7 @@ import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.LikeDto;
 import ru.skillbox.team13.dto.LikesDto;
 import ru.skillbox.team13.entity.*;
-import ru.skillbox.team13.repository.RepoComment;
-import ru.skillbox.team13.repository.RepoLike;
-import ru.skillbox.team13.repository.RepoPerson;
-import ru.skillbox.team13.repository.RepoPost;
+import ru.skillbox.team13.repository.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -48,16 +45,19 @@ public class LikeControllerTest {
     MockMvc mockMvc;
 
     @Autowired
-    RepoPerson personRepo;
+    PersonRepository personRepo;
 
     @Autowired
-    RepoPost postRepo;
+    UserRepository userRepository;
 
     @Autowired
-    RepoComment commentRepo;
+    PostRepository postRepo;
 
     @Autowired
-    RepoLike likeRepo;
+    CommentRepository commentRepo;
+
+    @Autowired
+    LikeRepository likeRepo;
 
     int userId;
     int personId;

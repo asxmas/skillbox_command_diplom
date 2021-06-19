@@ -6,47 +6,53 @@ import ru.skillbox.team13.util.TimeUtil;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 public class WrapperMapper {
 
-    public static DTOWrapper wrap(List<?> payload, int count, int offset, int limit) {
+    public static DTOWrapper wrap(Object payload, int count, int offset, int limit, boolean errorAndTimestamp) {
+        if (errorAndTimestamp) {
+            return DTOWrapper.builder()
+                    .error("string")
+                    .timestamp(Instant.now().getEpochSecond())
+                    .total(count)
+                    .data(getDataByClass(payload))
+                    .offset(offset)
+                    .perPage(limit)
+                    .build();
 
-        return DTOWrapper.builder()
-                .error("string")
-                .timestamp(Instant.now().getEpochSecond())
+        } else return DTOWrapper.builder()
                 .total(count)
-                .data(payload.toArray())
+                .data(getDataByClass(payload))
                 .offset(offset)
                 .perPage(limit)
                 .build();
     }
 
-    public static DTOWrapper wrapSingleData(Object payload) {
-        return DTOWrapper.builder()
-                .data(payload)
-                .timestamp(TimeUtil.getTimestamp(LocalDateTime.now()))
-                .error("string")
-                .build();
-    }
-
-
-    public static DTOWrapper wrap(List<?> payload) {
+    public static DTOWrapper wrap(Object payload, boolean errorAndTimestamp) {
+        if (errorAndTimestamp) {
             return DTOWrapper.builder()
                     .error("string")
                     .timestamp(TimeUtil.getTimestamp(LocalDateTime.now()))
-                    .data(payload.toArray())
+                    .data(getDataByClass(payload))
                     .build();
-        }
 
-        public static DTOWrapper wrapDataOnly(List<?> payload) {
-            return DTOWrapper.builder().data(payload.toArray()).build();
-        }
-
-        public static DTOWrapper wrapMessage(MessageDTO message) {
-            return DTOWrapper.builder().error("string")
-                    .timestamp(TimeUtil.getTimestamp(LocalDateTime.now()))
-                    .data(message)
-                    .build();
-        }
+        } else return DTOWrapper.builder()
+                .data(getDataByClass(payload))
+                .build();
     }
+
+    public static DTOWrapper wrapMessage(MessageDTO message) {
+        return DTOWrapper.builder().error("string")
+                .timestamp(TimeUtil.getTimestamp(LocalDateTime.now()))
+                .data(message)
+                .build();
+    }
+
+    private static Object getDataByClass(Object payload) {
+        if (payload instanceof Collection<?>) {
+            return ((Collection<?>) payload).toArray();
+        } else return payload;
+    }
+}
