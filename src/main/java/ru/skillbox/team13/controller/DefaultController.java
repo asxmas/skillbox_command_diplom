@@ -8,7 +8,7 @@ public class DefaultController {
 
     @GetMapping("/")
     public String index(){
-        return "static/index.html";
+        return "index.html";
     }
 
 }
