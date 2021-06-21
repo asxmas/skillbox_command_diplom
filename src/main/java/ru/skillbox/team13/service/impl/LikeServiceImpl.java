@@ -16,6 +16,7 @@ import ru.skillbox.team13.repository.CommentRepository;
 import ru.skillbox.team13.repository.LikeRepository;
 import ru.skillbox.team13.repository.PostRepository;
 import ru.skillbox.team13.service.LikeService;
+import ru.skillbox.team13.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LikeServiceImpl implements LikeService {
 
-    private final UserServiceImpl userService; //todo fix implementation
+    private final UserService userService;
     private final LikeRepository likeRepo;
     private final PostRepository postRepo;
     private final CommentRepository commentRepo;
