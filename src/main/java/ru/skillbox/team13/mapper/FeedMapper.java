@@ -40,7 +40,7 @@ public class FeedMapper {
                         .postId(String.valueOf(f.getPostId())) //todo !! api wants string
                         .time(TimeUtil.getTimestamp(f.getTime()))
                         .authorId(f.getAuthorId())
-                        .isBlocked(f.isBlocked())
+                        .isBlocked(f.getBlocked())
                         .build())
                 .collect(Collectors.toList());
     }

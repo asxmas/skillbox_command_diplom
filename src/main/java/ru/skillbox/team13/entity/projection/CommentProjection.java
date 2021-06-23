@@ -15,5 +15,5 @@ public interface CommentProjection {
 
     Integer getAuthorId();
 
-    Boolean isBlocked();
+    Boolean getBlocked();
 }

@@ -1,5 +1,6 @@
 package ru.skillbox.team13.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +17,8 @@ public class CommentDto {
     String postId; //todo wtf?? "post_id": "string",
 
     @JsonProperty("parent_id")
-    int parentId;
+//    @JsonInclude(JsonInclude.Include.NON_NULL)
+    Integer parentId;
     long time;
 
     @JsonProperty("author_id")

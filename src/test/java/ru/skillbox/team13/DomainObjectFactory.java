@@ -10,7 +10,7 @@ import java.util.Random;
 public class DomainObjectFactory {
     private static final char A = 'A';
     private static final char a = 'a';
-    private static final int CHARACTER_COUNT = 25;
+    private static final int CHARACTER_COUNT = 26;
     private static final Random RANDOM = new Random();
 
     public static User makeUser(String email) {
