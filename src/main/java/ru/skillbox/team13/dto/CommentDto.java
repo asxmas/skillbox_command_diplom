@@ -1,12 +1,12 @@
-package ru.skillbox.team13.dto.feeddto;
+package ru.skillbox.team13.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
-public class FeedComment {
+@Builder
+public class CommentDto {
     int id;
 
     @JsonProperty("comment_text")

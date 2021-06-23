@@ -12,7 +12,7 @@ import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.entity.projection.CommentProjection;
-import ru.skillbox.team13.service.impl.FeedsServiceImpl;
+import ru.skillbox.team13.service.impl.DumbFeedsService;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -32,7 +32,7 @@ public class FeedsServiceTest {
     EntityManagerFactory emf;
 
     @Autowired
-    FeedsServiceImpl feedsService;
+    DumbFeedsService feedsService;
 
     List<Post> postList;
     Person p;
@@ -82,7 +82,7 @@ public class FeedsServiceTest {
         List<Post> postsWithAuthors = feedsService.getPosts(List.of(p), PageRequest.of(0, 10));
         assertNotNull(postsWithAuthors.get(0).getAuthor());
 
-        List<CommentProjection> comments = feedsService.fetchComments(postsWithAuthors.get(5));
+        List<CommentProjection> comments = feedsService.getCommentProjections(postsWithAuthors);
         assertTrue(comments.size() > 0);
     }
 }

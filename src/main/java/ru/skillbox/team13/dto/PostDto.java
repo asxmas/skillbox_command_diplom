@@ -1,18 +1,20 @@
-package ru.skillbox.team13.dto.feeddto;
+package ru.skillbox.team13.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.util.List;
 
 @Getter
+@Builder
 @AllArgsConstructor
-public class FeedPost {  //todo merge with regular dtos
+public class PostDto {
 
     int id;
     long timestamp;
-    FeedAuthor author;
+    PersonDTO author;
     String title;
 
     @JsonProperty("post_text")
@@ -23,7 +25,7 @@ public class FeedPost {  //todo merge with regular dtos
 
     int likes;
 
-    List<FeedComment> comments;
+    List<CommentDto> comments;
 
 
 
