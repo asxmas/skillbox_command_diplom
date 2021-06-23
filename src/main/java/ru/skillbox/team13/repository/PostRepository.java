@@ -16,6 +16,6 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     @Query("select p from Post p join fetch p.author where p.author in :authors order by p.time desc ")
     List<Post> findPostsAndAuthorsFromAuthors(Pageable p, List<Person> authors);
 
-    @Query("select p.likes.size as likeCount, p.id as id from Post p where p in :posts")
+    @Query("select size(p.likes) as likeCount, p.id as id from Post p where p in :posts")
     List<LikeCount> countLikesByPosts(List<Post> posts);
 }
