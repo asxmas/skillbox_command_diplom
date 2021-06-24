@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
+import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.mapper.PersonMapper;
+import ru.skillbox.team13.repository.CityRepo;
 import ru.skillbox.team13.repository.PersonRepo;
 
 import java.util.Set;
@@ -18,36 +20,19 @@ import java.util.Set;
 public class PersonService {
 
     private final PersonRepo personRepo;
+    private final CityRepo cityRepo;
+    private final UserService userService;
 
-    public boolean updatePerson (PersonDTO personDTO)   {
-        try {
-            Person person = PersonMapper.convertPersonDTOToPerson(personDTO);
-            Person updatePerson = personRepo.getById(person.getId());
-            updatePerson.setFirstName(person.getFirstName());
-            updatePerson.setLastName(person.getLastName());
-            updatePerson.setBirthDate(person.getBirthDate());
-            updatePerson.setRegDate(person.getRegDate());
-            updatePerson.setEmail(person.getEmail());
-            updatePerson.setPhone(person.getPhone());
-            updatePerson.setPhoto(person.getPhoto());
-            updatePerson.setAbout(person.getAbout());
-            updatePerson.setCity(person.getCity());
-            updatePerson.setMessagesPermission(person.getMessagesPermission());
-            updatePerson.setLastOnlineTime(person.getLastOnlineTime());
-            updatePerson.setBlocked(person.isBlocked());
-            updatePerson.setFriendshipsReceived(person.getFriendshipsReceived());
-            updatePerson.setFriendshipsRequested(person.getFriendshipsRequested());
-            updatePerson.setMessagesReceived(person.getMessagesReceived());
-            updatePerson.setMessagesSent(person.getMessagesSent());
-            updatePerson.setPosts(person.getPosts());
-            updatePerson.setComments(person.getComments());
-            updatePerson.setLikes(person.getLikes());
-            updatePerson.setBlocks(person.getBlocks());
-            return true;
-        } catch (Exception ex)  {
-            ex.printStackTrace();
-            return false;
+    public PersonDTO updateCurrentPerson(PersonDTO personDTO)   {
+        PersonDTO currentPersonDTO = userService.getCurrentUserDto();
+        Person person = new Person();
+        Integer personId = currentPersonDTO.getId();
+        if (personId != null)  {
+            person = personRepo.getById(personId);
         }
+        fillPersonFields(person, personDTO);
+        personRepo.saveAndFlush(person);
+        return PersonMapper.convertPersonToPersonDTO(person);
     }
 
     public void addPostToWall (int id, Post post)   {
@@ -56,8 +41,29 @@ public class PersonService {
         Set<Post> personPosts = person.getPosts();
         personPosts.add(post);
         person.setPosts(personPosts);
+        personRepo.save(person);
     }
-    public PersonDTO getPersonById(int id) {
-        return PersonMapper.convertPersonToPersonDTO(personRepo.getOne(id));
+    public PersonDTO getPersonDTOById(int id) {
+        Person person = personRepo.getById(id);
+        PersonDTO personDTO = PersonMapper.convertPersonToPersonDTO(person);
+        return personDTO;
+    }
+
+    private void fillPersonFields (Person person, PersonDTO dto)    {
+        person.setFirstName(dto.getFirstName());
+        person.setLastName(dto.getLastName());
+        person.setEmail(dto.getEmail());
+        person.setPhoto(dto.getPhoto());
+        person.setCity(dto.getCity() != null ? cityRepo.getById(dto.getCity().getId()) : null);
+    }
+
+    public Person getPersonBiId(int id) {
+        return personRepo.getById(id);
+    }
+
+    public PersonDTO deleteCurrentUser (PersonDTO personDTO) {
+        Person currentPerson = personRepo.getById(personDTO.getId());
+        personRepo.delete(currentPerson);
+        return personDTO;
     }
 }

@@ -14,9 +14,10 @@ import java.util.Set;
 @Builder
 public class PostDTO {
 
-    @JsonProperty("time")
+    private final Integer id;
+
     private final Timestamp time;
-    private final PersonDTO author;
+    private final Integer authorId;
 
     @JsonProperty("title")
     private final String title;
@@ -24,11 +25,11 @@ public class PostDTO {
     @JsonProperty("post_text")
     private final String postText;
 
-    @JsonProperty("likes")
+    @JsonProperty("count_likes")
     private final Integer countLikes;
 
     private final Set<CommentDTO> comments;
     private final Set<TagDTO> tags;
-    private final Set<Like> likes;
+    private final Set<LikeDto> likes;
 
 }

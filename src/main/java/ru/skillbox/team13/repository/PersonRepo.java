@@ -10,6 +10,7 @@ import ru.skillbox.team13.entity.Person;
 
 import java.util.List;
 
+//todo запилить поиск по email как в userrepo и добавить в authcontroller
 public interface PersonRepo extends JpaRepository<Person, Integer> {
 
     @Query("select count(p) from Person p where lower(p.firstName)  like :q or lower(p.lastName) like :q")

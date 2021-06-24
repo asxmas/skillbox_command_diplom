@@ -37,10 +37,4 @@ public class CommentMapper {
                 .collect(Collectors.toSet());
     }
 
-    public static Set<Comment> convertSetCommentDTOToSetComment(Set<CommentDTO> comments)  {
-        return comments.stream()
-                .map(CommentMapper::convertCommentDTOToComment)
-                .collect(Collectors.toSet());
-    }
-
 }

@@ -17,26 +17,26 @@ public class ProfileController {
 
   private final UserService userService;
 
-  @GetMapping("users/me")
-  @PreAuthorize("hasAuthority('user')")
-  public ResponseEntity<SuccessDto> getCurrentUser(){
-    return ResponseEntity.ok(new SuccessDto(userService.getCurrentUserDto()));
-  }
-
-  @PutMapping("/users/me")
-  public List<PersonDTO> updateCurrentPerson(PersonDTO personDTO) {
-    return null;
-  }
-
-  @DeleteMapping("/users/me")
-  public void deleteCurrentPerson(PersonDTO personDTO)  {
-  }
-
-  @GetMapping("/users/{id}")
-  @ResponseBody
-  public ResponseEntity<Integer> getUserById(@PathVariable("id") Integer id) {
-    return null;
-  }
-
+//  @GetMapping("users/me")
+//  @PreAuthorize("hasAuthority('user')")
+//  public ResponseEntity<SuccessDto> getCurrentUser(){
+//    return ResponseEntity.ok(new SuccessDto(userService.getCurrentUserDto()));
+//  }
+//
+//  @PutMapping("/users/me")
+//  public List<PersonDTO> updateCurrentPerson(PersonDTO personDTO) {
+//    return null;
+//  }
+//
+//  @DeleteMapping("/users/me")
+//  public void deleteCurrentPerson(PersonDTO personDTO)  {
+//  }
+//
+//  @GetMapping("/users/{id}")
+//  @ResponseBody
+//  public ResponseEntity<Integer> getUserById(@PathVariable("id") Integer id) {
+//    return null;
+//  }
+//
 
 }

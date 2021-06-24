@@ -12,6 +12,8 @@ import java.sql.Timestamp;
 @Builder
 public class CommentDTO {
 
+    private final Integer id;
+
     @JsonProperty("parent_id")
     private final Integer parentId;
 

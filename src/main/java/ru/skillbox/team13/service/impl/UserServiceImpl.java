@@ -88,6 +88,7 @@ public class UserServiceImpl implements UserService {
         try {
             String username = loginDto.getEmail();
             User user = userRepository.findByEmail(username).get();
+            //todo почему-то возвращается пустое значение
             Person person = personRepository.getById(user.getPerson().getId());
             log.info("IN login - user: {} successfully login", loginDto.getEmail());
             return PersonMapper.convertPersonToPersonDTOWithToken(person, jwtTokenProvider.createToken(username, user.getType()));

@@ -11,7 +11,7 @@ import java.util.Set;
 @Builder
 public class PersonDTO {
 
-    private final int id;
+    private final Integer id;
 
     @JsonProperty("first_name")
     private final String firstName;

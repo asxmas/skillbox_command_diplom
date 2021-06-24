@@ -4,23 +4,16 @@ import lombok.RequiredArgsConstructor;
 import ru.skillbox.team13.dto.CityDto;
 import ru.skillbox.team13.dto.CountryDto;
 import ru.skillbox.team13.dto.PersonDTO;
-import ru.skillbox.team13.dto.PostDTO;
 import ru.skillbox.team13.entity.City;
 import ru.skillbox.team13.entity.Country;
 import ru.skillbox.team13.entity.Person;
-import ru.skillbox.team13.entity.enums.PersonMessagePermission;
 import ru.skillbox.team13.util.TimeUtil;
-
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Set;
-import java.util.TimeZone;
 
 @RequiredArgsConstructor
 public class PersonMapper {
 
     public static PersonDTO convertPersonToPersonDTO(Person p) {
+
         return PersonDTO.builder()
                 .id(p.getId())
                 .firstName(p.getFirstName())
@@ -55,7 +48,7 @@ public class PersonMapper {
                 .messagesPermission(p.getMessagesPermission().name())
                 .lastOnlineTime(TimeUtil.getTimestamp(p.getLastOnlineTime()))
                 .isBlocked(p.isBlocked())
-                .setPosts(PostMapper.convertSetPostDTOToSetPost(posts));
+                .posts(PostMapper.convertSetPostToSetPostDTO(p.getPosts()))
                 .token(token).build();
     }
 

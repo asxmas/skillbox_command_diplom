@@ -15,6 +15,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Table(name = "post_comment")
 public class Comment extends Notified {
+
     @Column(name = "time", nullable = false)
     private LocalDateTime time;
 

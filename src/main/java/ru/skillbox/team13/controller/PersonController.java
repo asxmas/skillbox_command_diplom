@@ -1,20 +1,17 @@
 package ru.skillbox.team13.controller;
 
-import java.util.Set;
-
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.dto.PostDTO;
-import ru.skillbox.team13.entity.Person;
+import ru.skillbox.team13.dto.SuccessDto;
 import ru.skillbox.team13.entity.Post;
-import ru.skillbox.team13.exception.SuccessResponse;
 import ru.skillbox.team13.service.PersonService;
 import ru.skillbox.team13.service.PostsService;
+import ru.skillbox.team13.service.UserService;
 
 @RestController
 @RequestMapping("/api/v1/")
@@ -22,65 +19,68 @@ public class PersonController {
 
   private final PersonService personService;
   private final PostsService postsService;
+  private final UserService userService;
 
   @Autowired
-  public PersonController (PersonService personService, PostsService postsService)  {
+  public PersonController (PersonService personService, PostsService postsService, UserService userService)  {
     this.personService = personService;
     this.postsService = postsService;
+    this.userService = userService;
   }
 
+  @GetMapping("users/me")
+  @PreAuthorize("hasAuthority('user')")
+  public ResponseEntity<SuccessDto> getCurrentUser(){
+    return ResponseEntity.ok(new SuccessDto(userService.getCurrentUserDto()));
+  }
+
+  //todo Протестить
   @PutMapping("/users/me")
-  public ResponseEntity<SuccessResponse>  updateCurrentPerson(@RequestBody PersonDTO personDTO) {
+  public ResponseEntity updateCurrentPerson(@RequestBody PersonDTO personDTO) {
     try {
-      personService.updatePerson(personDTO);
-      return ResponseEntity.ok(new SuccessResponse());
+      personService.updateCurrentPerson(personDTO);
+      return ResponseEntity.ok(personDTO);
     }
     catch (Exception ex)  {
       return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
     }
   }
-
+  //todo Протестить
   @DeleteMapping("/users/me")
-  public ResponseEntity<SuccessResponse> deleteCurrentPerson(@RequestBody PersonDTO personDTO)  {
+  public ResponseEntity deleteCurrentPerson()  {
     try {
-      personService.getPersonById(personDTO.getId());
-      return ResponseEntity.ok(new SuccessResponse());
+      return ResponseEntity.ok(personService.deleteCurrentUser(userService.getCurrentUserDto()));
     }
     catch (Exception ex)  {
       return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
     }
   }
-  //todo Не работает при id > 1000
-  //todo не возврашает not found
   @GetMapping("/users/{id}")
-  public ResponseEntity<SuccessResponse> getPersonById(@PathVariable("id") Integer id) {
+  public ResponseEntity getPersonById(@PathVariable("id") Integer id) {
     try {
-      PersonDTO person = personService.getPersonById(id);
-      return ResponseEntity.ok(new SuccessResponse(person));
-    }
-    catch (Exception ex)  {
+      return ResponseEntity.ok(personService.getPersonDTOById(id));
+    } catch (Exception ex) {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
-  //todo Доделать
+  //todo Протестить
   @GetMapping("/users/{id}/wall")
-  public ResponseEntity<SuccessResponse> getListPosts(@PathVariable("id") Integer id) {
+  public ResponseEntity getListPosts(@PathVariable("id") Integer id) {
     try {
-      personService.getPersonById(id);
-      return new ResponseEntity<>(HttpStatus.OK);
+      return ResponseEntity.ok(personService.getPersonDTOById(id).getPosts());
     }
     catch (Exception ex)  {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
-
+//todo протестить
   @PostMapping("/users/{id}/wall")
-  public ResponseEntity<SuccessResponse> createPost(@PathVariable("id") Integer id,
+  public ResponseEntity createPost(@PathVariable("id") Integer id,
                                          @RequestBody PostDTO postDTO) {
     try {
       Post post = postsService.addPost(postDTO);
       personService.addPostToWall(id, post);
-      return ResponseEntity.ok(new SuccessResponse());
+      return ResponseEntity.ok(post);
     }
     catch (Exception ex)  {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
