@@ -1,4 +1,4 @@
-package ru.skillbox.team13.mapping;
+package ru.skillbox.team13.mapper;
 
 import ru.skillbox.team13.dto.LanguageDto;
 import ru.skillbox.team13.entity.Languages;

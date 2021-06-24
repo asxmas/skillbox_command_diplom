@@ -25,23 +25,20 @@ public class PlatformController {
     private final LanguageService languageService;
 
     @GetMapping("languages")
-    public ResponseEntity<DTOWrapper> ResponseLanguages(@RequestParam String name,
-                                                        @RequestParam(required = false, defaultValue = "0") int offset,
+    public ResponseEntity<DTOWrapper> ResponseLanguages(@RequestParam(required = false, defaultValue = "0") int offset,
                                                         @RequestParam(required = false, defaultValue = "10") int itemPerPage) {
-        return new ResponseEntity<DTOWrapper>(languageService.findAllLanguages(name, offset, itemPerPage), HttpStatus.OK);
+        return new ResponseEntity<>(languageService.findAllLanguages(offset, itemPerPage), HttpStatus.OK);
     }
 
     @GetMapping("countries")
-    public ResponseEntity<DTOWrapper> ResponseCountries(@RequestParam String name,
-                                                        @RequestParam(required = false, defaultValue = "0") int offset,
+    public ResponseEntity<DTOWrapper> ResponseCountries(@RequestParam(required = false, defaultValue = "0") int offset,
                                                         @RequestParam(required = false, defaultValue = "10") int itemPerPage) {
-        return new ResponseEntity<DTOWrapper>(countryService.findAllCountries(name, offset, itemPerPage), HttpStatus.OK);
+        return new ResponseEntity<>(countryService.findAllCountries(offset, itemPerPage), HttpStatus.OK);
     }
 
     @GetMapping("cities")
-    public ResponseEntity<DTOWrapper> ResponseCities(@RequestParam String name,
-                                                     @RequestParam(required = false, defaultValue = "0") int offset,
+    public ResponseEntity<DTOWrapper> ResponseCities(@RequestParam(required = false, defaultValue = "0") int offset,
                                                      @RequestParam(required = false, defaultValue = "10") int itemPerPage) {
-        return new ResponseEntity<DTOWrapper>(cityService.findAllCities(name, offset, itemPerPage), HttpStatus.OK);
+        return new ResponseEntity<>(cityService.findAllCities(offset, itemPerPage), HttpStatus.OK);
     }
 }
