@@ -1,0 +1,15 @@
+package ru.skillbox.team13.service;
+
+import ru.skillbox.team13.dto.DTOWrapper;
+
+public interface PostService {
+    DTOWrapper find(String text, Long timestampFrom, Long timestampTo, int offset, int itemPerPage);
+
+    DTOWrapper getById(int id);
+
+    DTOWrapper edit(int id, Long pubDate, String title, String text);
+
+    DTOWrapper deleteById(int id);
+
+    DTOWrapper recoverById(int id);
+}
