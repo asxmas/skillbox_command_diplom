@@ -71,6 +71,19 @@ public class FeedsControllerTest {
 
             while (r.nextBoolean()) {
                 Post post = DomainObjectFactory.makePost(genString(40, 0.1f, false), genString(200, 0.2f, true));
+
+                if (r.nextInt(10) == 0) {
+                    StringBuilder sb = new StringBuilder(post.getTitle());
+                    sb.insert(20, "substring");
+                    post.setTitle(sb.toString());
+                }
+
+                if (r.nextInt(10) == 0) {
+                    StringBuilder sb = new StringBuilder(post.getPostText());
+                    sb.insert(100, "SUBSTRING");
+                    post.setPostText(sb.toString());
+                }
+
                 post.setTime(LocalDateTime.now().minus(r.nextInt(1440), ChronoUnit.MINUTES));
                 post.setAuthor(person);
                 em.persist(post);
@@ -137,6 +150,21 @@ public class FeedsControllerTest {
     void testContainsLikes() {
         List<PostDto> feed = requestService.getAsFeed(get(url), false);
         assertTrue(feed.stream().anyMatch(pdto -> pdto.getLikes() > 0));
+    }
+
+
+    @Test
+    @WithMockUser(username = "main@mail")
+    void testSearchSubstring() {
+        DTOWrapper feed = requestService.getAsWrapper(get(url).param("name", "Substring"), false);
+        assertTrue(feed.getTotal() > 0);
+    }
+
+    @Test
+    @WithMockUser(username = "main@mail")
+    void testSearchSubstringEmpty() {
+        DTOWrapper feed = requestService.getAsWrapper(get(url).param("name", "string that does not exist in db"), false);
+        assertEquals(0, feed.getTotal());
     }
 
 }

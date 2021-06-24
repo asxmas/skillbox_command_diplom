@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -20,19 +21,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static ru.skillbox.team13.DomainObjectFactory.*;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-
 public class FeedsServiceTest {
     @Autowired
     EntityManagerFactory emf;
 
     @Autowired
     DumbFeedsService feedsService;
+
+
 
     List<Post> postList;
     Person p;
@@ -56,6 +58,12 @@ public class FeedsServiceTest {
             em.persist(post);
             postList.add(post);
         }
+
+        em.persist(makePost("SuBsTrInG", "----", p));
+        em.persist(makePost("00", "00substring", p));
+        em.persist(makePost("test", "substringZZ", p));
+        em.persist(makePost("____", "   subString   ", p));
+
 
         for (Post px : postList) {
             int commentCount = new Random().nextInt(10) + 1;
@@ -84,5 +92,12 @@ public class FeedsServiceTest {
 
         List<CommentProjection> comments = feedsService.getCommentProjections(postsWithAuthors);
         assertTrue(comments.size() > 0);
+    }
+
+    @Test
+    @WithMockUser(username = "email")
+    void testSearchSubstring() {
+        List<Post> posts = feedsService.getPosts(List.of(p), PageRequest.of(0, 10), "subsTrinG");
+        assertEquals(4, posts.size());
     }
 }

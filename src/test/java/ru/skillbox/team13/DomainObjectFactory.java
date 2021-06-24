@@ -43,7 +43,14 @@ public class DomainObjectFactory {
         return post;
     }
 
-    public static Comment makeComment(String text) {
+    public static Post makePost(String title, String text, Person author) {
+        Post p = makePost(title, text);
+        p.setAuthor(author);
+        return p;
+    }
+
+
+        public static Comment makeComment(String text) {
         Comment comment = new Comment();
         comment.setTime(LocalDateTime.now());
         comment.setCommentText(text);
