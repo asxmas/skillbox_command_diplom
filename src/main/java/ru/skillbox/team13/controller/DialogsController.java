@@ -6,8 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.service.DialogsService;
 
-import java.util.ArrayList;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/")
@@ -20,12 +18,12 @@ public class DialogsController {
     public ResponseEntity<DTOWrapper> getDialogs(@RequestParam(required = false, defaultValue = "") String query,
                                                  @RequestParam(required = false, defaultValue = "0") int offset,
                                                  @RequestParam(required = false, defaultValue = "10") int itemPerPage) {
-        return ResponseEntity.ok(dialogsService.getDialogs(query, offset, itemPerPage));
+        return ResponseEntity.ok(dialogsService.getUserDialogs(query, offset, itemPerPage));
     }
 
     @PostMapping("dialogs")
-    //создание диалога между переданными в параметре Ids участников
-    public ResponseEntity<DTOWrapper> createDialog(@PathVariable ArrayList<Integer> userIds) {
+    //создание диалога
+    public ResponseEntity<DTOWrapper> createDialog(@PathVariable int[] userIds) {
         return ResponseEntity.ok(dialogsService.createDialog(userIds));
     }
 

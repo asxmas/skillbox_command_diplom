@@ -6,9 +6,9 @@ import java.util.ArrayList;
 
 public interface DialogsService {
 
-    DTOWrapper getDialogs(String query, int offset, int itemPerPage);
+    DTOWrapper getUserDialogs(String query, int offset, int itemPerPage);
 
-    DTOWrapper createDialog(ArrayList<Integer> userIds);
+    DTOWrapper createDialog(int[] userIds);
 
     DTOWrapper getUnreadCount();
 
