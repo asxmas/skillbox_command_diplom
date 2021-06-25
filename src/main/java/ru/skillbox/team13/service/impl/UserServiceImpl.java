@@ -100,23 +100,29 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public Boolean logout(HttpServletRequest request) {
-
-        String username = getCurrentUserDto().getEmail();
+        String username = "anonymous";
         try {
+            username = getAuthorizedUser().getEmail();
             String token = jwtTokenProvider.resolveToken(request);
-            Date tokenExpirationDate = jwtTokenProvider.resolveTokenDate(token);
-            BlacklistedToken expiredToken = new BlacklistedToken();
-            expiredToken.setToken(token);
-            expiredToken.setExpiredDate(LocalDateTime.ofInstant(tokenExpirationDate.toInstant().plusSeconds(10), ZoneId.systemDefault()));
-            blacklistedTokenRepo.save(expiredToken);
+            if (token != null) {
+                Date tokenExpirationDate = jwtTokenProvider.resolveTokenDate(token);
+                if (new Date().before(tokenExpirationDate)) {
+                    BlacklistedToken expiredToken = new BlacklistedToken();
+                    expiredToken.setToken(token);
+                    expiredToken.setExpiredDate(LocalDateTime.ofInstant(tokenExpirationDate.toInstant().plusSeconds(10), ZoneId.systemDefault()));
+                    blacklistedTokenRepo.save(expiredToken);
+                    log.info("IN logout - user: {} successfully logout", username);
+                }
+            }
+        }
+        catch (JwtException | UnauthorizedException e) {
+            log.info("IN logout - user: {} successfully logout", username);
+        }
+        finally {
             SecurityContextHolder.clearContext();
             SecurityContextHolder.createEmptyContext();
+            return true;
         }
-        catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
-        log.info("IN logout - user: {} successfully logout", username);
-        return true;
     }
 
     //метод получения текущего авторизованного пользователя
