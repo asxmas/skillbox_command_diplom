@@ -13,3 +13,5 @@ databaseChangeLog:
       file: db/changelogs/3.1-patch/token.sql
   - include:
       file: db/changelogs/4-patch/modify-like.sql
+  - include:
+      file: db/changelogs/6-patch-posts/deleted-column.sql
