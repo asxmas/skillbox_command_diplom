@@ -19,7 +19,7 @@ public class PersonMapper {
                 .firstName(p.getFirstName())
                 .lastName(p.getLastName())
                 .registrationDate(TimeUtil.getTimestamp(p.getRegDate()))
-                .birthDate(TimeUtil.getTimestamp(p.getBirthDate()))
+                .birthDate(String.valueOf(TimeUtil.getTimestamp(p.getBirthDate())))
                 .email(p.getEmail())
                 .phone(p.getPhone())
                 .photo(p.getPhoto())
@@ -28,7 +28,6 @@ public class PersonMapper {
                 .country(convertCountryToCountryDTO(p.getCountry()))
                 .messagesPermission(p.getMessagesPermission().name())
                 .lastOnlineTime(TimeUtil.getTimestamp(p.getLastOnlineTime()))
-                .posts(PostMapper.convertSetPostToSetPostDTO(p.getPosts()))
                 .isBlocked(p.isBlocked()).build();
     }
 
@@ -38,7 +37,7 @@ public class PersonMapper {
                 .firstName(p.getFirstName())
                 .lastName(p.getLastName())
                 .registrationDate(TimeUtil.getTimestamp(p.getRegDate()))
-                .birthDate(TimeUtil.getTimestamp(p.getBirthDate()))
+                .birthDate(String.valueOf(TimeUtil.getTimestamp(p.getBirthDate())))
                 .email(p.getEmail())
                 .phone(p.getPhone())
                 .photo(p.getPhoto())
@@ -48,7 +47,6 @@ public class PersonMapper {
                 .messagesPermission(p.getMessagesPermission().name())
                 .lastOnlineTime(TimeUtil.getTimestamp(p.getLastOnlineTime()))
                 .isBlocked(p.isBlocked())
-                .posts(PostMapper.convertSetPostToSetPostDTO(p.getPosts()))
                 .token(token).build();
     }
 

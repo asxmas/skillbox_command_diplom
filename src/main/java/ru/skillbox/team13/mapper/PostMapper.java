@@ -18,7 +18,8 @@ import java.util.stream.Collectors;
 public class PostMapper {
     public static PostDTO convertPostToPostDTO(Post post)   {
         return PostDTO.builder().postText(post.getPostText())
-                .authorId(post.getAuthor().getId())
+                .id(post.getId())
+                .author(PersonMapper.convertPersonToPersonDTO(post.getAuthor()))
                 .title(post.getTitle())
                 .postText(post.getPostText())
                 .countLikes(post.getLikes().size())

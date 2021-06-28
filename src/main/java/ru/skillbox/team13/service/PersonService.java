@@ -1,17 +1,19 @@
 package ru.skillbox.team13.service;
 
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.PersonDTO;
+import ru.skillbox.team13.dto.PostDTO;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
-import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.mapper.PersonMapper;
 import ru.skillbox.team13.repository.CityRepo;
 import ru.skillbox.team13.repository.PersonRepo;
+import ru.skillbox.team13.repository.RepoUser;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Service
@@ -22,6 +24,7 @@ public class PersonService {
     private final PersonRepo personRepo;
     private final CityRepo cityRepo;
     private final UserService userService;
+    private final RepoUser repoUser;
 
     public PersonDTO updateCurrentPerson(PersonDTO personDTO)   {
         PersonDTO currentPersonDTO = userService.getCurrentUserDto();
@@ -53,6 +56,7 @@ public class PersonService {
         person.setFirstName(dto.getFirstName());
         person.setLastName(dto.getLastName());
         person.setEmail(dto.getEmail());
+        person.setPhone(dto.getPhone());
         person.setPhoto(dto.getPhoto());
         person.setCity(dto.getCity() != null ? cityRepo.getById(dto.getCity().getId()) : null);
     }
@@ -61,9 +65,10 @@ public class PersonService {
         return personRepo.getById(id);
     }
 
+    @Transactional
     public PersonDTO deleteCurrentUser (PersonDTO personDTO) {
-        Person currentPerson = personRepo.getById(personDTO.getId());
-        personRepo.delete(currentPerson);
+        repoUser.deleteUserByPersonId(personDTO.getId());
+        personRepo.deletePersonById(personDTO.getId());
         return personDTO;
     }
 }

@@ -1,18 +1,17 @@
 package ru.skillbox.team13.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.dto.PostDTO;
-import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
-import ru.skillbox.team13.mapper.PersonMapper;
 import ru.skillbox.team13.mapper.PostMapper;
 import ru.skillbox.team13.repository.RepoPost;
-import ru.skillbox.team13.util.TimeUtil;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Service
@@ -55,7 +54,12 @@ public class PostsService {
         }
         post.setTitle(postDTO.getTitle());
         if (post.getTime() == null) {
-            post.setTime(postDTO.getTime().toLocalDateTime());
+            post.setTime(postDTO.getTime());
         }
+    }
+
+    public Set<PostDTO> getSetPostsByAuthorId(Integer id)   {
+        List<Post> postsByAuthor = repoPost.getPostsByAuthorId(PageRequest.of(0,10),id);
+        return PostMapper.convertSetPostToSetPostDTO(Set.copyOf(postsByAuthor));
     }
 }

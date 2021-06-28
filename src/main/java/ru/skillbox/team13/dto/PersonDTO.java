@@ -19,15 +19,21 @@ public class PersonDTO {
     @JsonProperty("last_name")
     private final String lastName;
 
-    @JsonProperty("reg_date")
     private final long registrationDate;
 
     @JsonProperty("birth_date")
-    private final long birthDate;
+    private final String birthDate;
 
+    @JsonProperty("email")
     private final String email;
+
+    @JsonProperty("phone")
     private final String phone;
+
+    @JsonProperty("photo")
     private final String photo;
+
+    @JsonProperty("about")
     private final String about;
     private final CityDto city;
     private final CountryDto country;
@@ -40,7 +46,6 @@ public class PersonDTO {
 
     @JsonProperty("is_blocked")
     private final boolean isBlocked;
-    private final Set<PostDTO> posts;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private final String token;

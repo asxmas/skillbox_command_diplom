@@ -1,5 +1,6 @@
 package ru.skillbox.team13.repository;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import ru.skillbox.team13.entity.User;
@@ -14,4 +15,8 @@ public interface RepoUser extends CrudRepository<User, Integer> {
     Optional<User> findByName(String name);
 
     Optional<User> findByConfirmationCode(String token);
+
+    @Modifying
+    @Query("DELETE FROM User WHERE person.id = :id")
+    void deleteUserByPersonId(Integer id);
 }

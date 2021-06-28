@@ -4,9 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import ru.skillbox.team13.entity.Like;
+import ru.skillbox.team13.entity.Person;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Getter
@@ -16,8 +17,7 @@ public class PostDTO {
 
     private final Integer id;
 
-    private final Timestamp time;
-    private final Integer authorId;
+    private final PersonDTO author;
 
     @JsonProperty("title")
     private final String title;
@@ -31,5 +31,6 @@ public class PostDTO {
     private final Set<CommentDTO> comments;
     private final Set<TagDTO> tags;
     private final Set<LikeDto> likes;
+    private final LocalDateTime time;
 
 }
