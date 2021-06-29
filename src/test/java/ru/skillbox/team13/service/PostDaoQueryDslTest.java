@@ -7,6 +7,8 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.repository.LikeRepository;
@@ -17,7 +19,6 @@ import ru.skillbox.team13.repository.QueryDSL.PostDAO;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -91,19 +92,19 @@ public class PostDaoQueryDslTest {
 
     @Test
     void testTextSearchOnly() {
-        List<Post> posts = postDAO.findByTextAndTime("substring", null, null);
-        assertEquals(30, posts.size());
+        Page<Post> posts = postDAO.findByTextAndTime("substring", null, null, PageRequest.of(0, 100));
+        assertEquals(30, posts.getTotalElements());
     }
 
     @Test
     void testWithOneTime() {
-        List<Post> posts = postDAO.findByTextAndTime("substring", LocalDateTime.now().minusMinutes(1), null);
-        assertEquals(20, posts.size());
+        Page<Post> posts = postDAO.findByTextAndTime("substring", LocalDateTime.now().minusMinutes(1), null, PageRequest.of(0, 100));
+        assertEquals(20, posts.getTotalElements());
     }
 
     @Test
     void testWithTwoTimes() {
-        List<Post> posts = postDAO.findByTextAndTime("substring", LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1));
-        assertEquals(10, posts.size());
+        Page<Post> posts = postDAO.findByTextAndTime("substring", LocalDateTime.now().minusMinutes(1), LocalDateTime.now().plusMinutes(1), PageRequest.of(0, 100));
+        assertEquals(10, posts.getTotalElements());
     }
 }

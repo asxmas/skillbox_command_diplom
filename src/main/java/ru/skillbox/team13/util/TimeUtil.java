@@ -16,7 +16,8 @@ public class TimeUtil {
         return ldt.toInstant(ZONE_OFFSET).toEpochMilli();
     }
 
-    public static LocalDateTime getTime(long timestamp) {
+    public static LocalDateTime getTime(Long timestamp) {
+        if (timestamp == null) return null;
         if (timestamp == 0L) return LocalDateTime.now();
         return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZONE_OFFSET);
     }

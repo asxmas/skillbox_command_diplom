@@ -82,6 +82,11 @@ public class DomainObjectFactory {
         return sb.toString();
     }
 
+
+    public static String genString(int length) {
+        return genString(length, 0f, false);
+    }
+
     private static char getRandomChar(boolean isCapital) {
         return (char) (RANDOM.nextInt(CHARACTER_COUNT) + (isCapital ? A : a));
     }
