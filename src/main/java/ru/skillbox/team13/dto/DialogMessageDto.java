@@ -8,13 +8,13 @@ import lombok.Getter;
 @Builder
 public class DialogMessageDto {
 
-    private final int id;
+    private int id;
     private long time;
 
     @JsonProperty("author_id")
     private int authorId;
 
-    @JsonProperty("author_id")
+    @JsonProperty("recipient_id")
     private int recipientId;
 
     @JsonProperty("message_text")

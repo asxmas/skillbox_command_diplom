@@ -21,9 +21,6 @@ public class Dialog {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
 
-    @Column(name = "unread_count")
-    private int unreadCount;
-
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "last_message_id")
     private Message lastMessage;

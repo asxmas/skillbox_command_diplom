@@ -1,8 +1,10 @@
 package ru.skillbox.team13.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import ru.skillbox.team13.entity.enums.MessageReadStatus;
 
 import javax.persistence.*;
@@ -12,6 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @NoArgsConstructor
+@Accessors(chain = true)
 @Table(name = "message")
 public class Message extends Notified {
     @Column(name = "time", nullable = false)

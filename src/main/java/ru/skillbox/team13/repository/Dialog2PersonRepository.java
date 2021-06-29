@@ -5,12 +5,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.skillbox.team13.entity.Dialog;
-import ru.skillbox.team13.entity.Dialog2person;
-import ru.skillbox.team13.entity.Person;
+import ru.skillbox.team13.entity.Dialog2Person;
 
-public interface Dialog2PersonRepository extends JpaRepository<Dialog2person, Integer> {
+import java.util.List;
 
-    @Query("select d2p.dialog from Dialog2person d2p left join d2p.dialog.messages m " +
-           "where lower(m.messageText) like %:query% and d2p.person = :currentUser")
-    Page<Dialog> findUserDialogs(Pageable pageable, String query, Person currentUser);
+public interface Dialog2PersonRepository extends JpaRepository<Dialog2Person, Integer> {
+
+    @Query("select d2p from Dialog2Person d2p left join d2p.dialog.messages m " +
+           "where lower(m.messageText) like %:query% and d2p.person.id = :currentPersonId")
+    Page<Dialog2Person> findPersonDialogs(Pageable pageable, String query, int currentPersonId);
+
+    List<Dialog2Person> findDialog2PersonByDialog(Dialog dialog);
+
+    @Query("select sum(d2p.unreadCount) from Dialog2Person d2p where d2p.person = :personId")
+    int countAllUnread(int personId);
 }

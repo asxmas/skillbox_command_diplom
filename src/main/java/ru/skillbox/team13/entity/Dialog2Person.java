@@ -1,8 +1,10 @@
 package ru.skillbox.team13.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 
@@ -11,7 +13,8 @@ import javax.persistence.*;
 @Entity
 @Table(name = "dialog2person")
 @NoArgsConstructor
-public class Dialog2person {
+@Accessors(chain = true)
+public class Dialog2Person {
 
     @Id
     @Column(name = "id", nullable = false)
@@ -25,4 +28,7 @@ public class Dialog2person {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dialog_id", nullable = false)
     private Dialog dialog;
+
+    @Column(name = "unread_count")
+    private int unreadCount;
 }

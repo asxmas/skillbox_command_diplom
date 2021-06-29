@@ -7,6 +7,7 @@ CREATE TABLE "public"."dialog2person"
     "id"         INTEGER NOT NULL,
     "dialog_id"  INTEGER NOT NULL,
     "person_id"  INTEGER NOT NULL,
+    "unread_count"  INTEGER NOT NULL,
     CONSTRAINT "dialog2person_pkey" PRIMARY KEY ("dialog_id", "person_id")
 );
 COMMENT ON TABLE "public"."dialog2person" IS 'связи ползователей с диалогами';
