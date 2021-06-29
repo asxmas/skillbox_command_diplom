@@ -13,7 +13,7 @@ import java.util.Set;
 @Entity
 @NoArgsConstructor
 @Table(name = "post_comment")
-public class Comment extends Notified {
+public class  Comment extends Notified {
     @Column(name = "time", nullable = false)
     private LocalDateTime time;
 
@@ -38,6 +38,6 @@ public class Comment extends Notified {
     @OneToMany(mappedBy = "parent")
     private Set<Comment> childComments;
 
-    @OneToMany(mappedBy = "postOrComment", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "postOrComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Like> likes;
 }
