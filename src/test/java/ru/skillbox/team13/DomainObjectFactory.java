@@ -1,15 +1,17 @@
 package ru.skillbox.team13;
 
-import ru.skillbox.team13.entity.Comment;
-import ru.skillbox.team13.entity.Person;
-import ru.skillbox.team13.entity.Post;
-import ru.skillbox.team13.entity.User;
+import ru.skillbox.team13.entity.*;
 import ru.skillbox.team13.entity.enums.PersonMessagePermission;
 import ru.skillbox.team13.entity.enums.UserType;
 
 import java.time.LocalDateTime;
+import java.util.Random;
 
 public class DomainObjectFactory {
+    private static final char A = 'A';
+    private static final char a = 'a';
+    private static final int CHARACTER_COUNT = 26;
+    private static final Random RANDOM = new Random();
 
     public static User makeUser(String email) {
         User user = new User();
@@ -41,11 +43,51 @@ public class DomainObjectFactory {
         return post;
     }
 
-    public static Comment makeComment(String text) {
+    public static Post makePost(String title, String text, Person author) {
+        Post p = makePost(title, text);
+        p.setAuthor(author);
+        return p;
+    }
+
+
+        public static Comment makeComment(String text) {
         Comment comment = new Comment();
         comment.setTime(LocalDateTime.now());
         comment.setCommentText(text);
         comment.setBlocked(false);
         return comment;
+    }
+
+    public static Like makeLike(Person liker, Notified postOrComment) {
+        Like like = new Like();
+        like.setTime(LocalDateTime.now());
+        like.setPerson(liker);
+        like.setPostOrComment(postOrComment);
+        return like;
+    }
+
+    public static String genString(int length, float whiteSpaceFreq, boolean addComma) {
+        if (length < 1) throw new RuntimeException("Text should be 1+ character long");
+        StringBuilder sb = new StringBuilder(length);
+        sb.append(getRandomChar(true));
+        for (int i = 0; i < length - 1; i++) {
+            if (RANDOM.nextFloat() < whiteSpaceFreq) {
+                sb.append(" ");
+            } else sb.append(getRandomChar(false));
+        }
+        if (addComma) {
+            sb.deleteCharAt(length - 1);
+            sb.append(".");
+        }
+        return sb.toString();
+    }
+
+
+    public static String genString(int length) {
+        return genString(length, 0f, false);
+    }
+
+    private static char getRandomChar(boolean isCapital) {
+        return (char) (RANDOM.nextInt(CHARACTER_COUNT) + (isCapital ? A : a));
     }
 }
