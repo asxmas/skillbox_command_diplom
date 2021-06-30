@@ -15,17 +15,15 @@ public class NotificationsController {
     private final NotificationService noteService;
 
     @GetMapping()
-    public ResponseEntity<DTOWrapper> getAllNotificatioons(@RequestParam(required = false, defaultValue = "0") int offset,
+    public ResponseEntity<DTOWrapper> getAllNotifications(@RequestParam(required = false, defaultValue = "0") int offset,
                                                            @RequestParam(required = false, defaultValue = "10") int limit) {
-        return new ResponseEntity<DTOWrapper>(noteService.getAllNotification(offset, limit), HttpStatus.OK);
+        return new ResponseEntity<DTOWrapper>(noteService.getAllNotification(), HttpStatus.OK);
     }
 
     @PutMapping()
-    public ResponseEntity<DTOWrapper> readNotifications(@RequestParam(required = false, defaultValue = "0") int offset,
-                                                        @RequestParam(required = false, defaultValue = "10") int limit,
-                                                        @RequestParam(required = false, defaultValue = "- 1") int noteId,
+    public ResponseEntity<DTOWrapper> readNotifications(@RequestParam(required = false, defaultValue = "- 1") int id,
                                                         @RequestParam(required = false, defaultValue = "false") boolean isReadAll) {
-        return new ResponseEntity<DTOWrapper>(noteService.getNotificationById(offset, limit, noteId, isReadAll), HttpStatus.OK);
+        return new ResponseEntity<DTOWrapper>(noteService.getNotificationById(id, isReadAll), HttpStatus.OK);
 
     }
 }

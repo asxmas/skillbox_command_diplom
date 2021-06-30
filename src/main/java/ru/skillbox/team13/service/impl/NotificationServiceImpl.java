@@ -2,6 +2,7 @@ package ru.skillbox.team13.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.NotificationDto;
 import ru.skillbox.team13.entity.Notification;
@@ -23,23 +24,26 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository noteRepository;
 
     @Override
-    public DTOWrapper getAllNotification(int offset, int limit) {
+    @Transactional
+    public DTOWrapper getAllNotification() {
         Integer currentPersonId = userService.getAuthorizedUser().getPerson().getId();
         List<Notification> noteList = noteRepository.findAllByPersonId(currentPersonId);
-        return NotificationMapper.mapNotifications(noteList, offset, limit);
+        return NotificationMapper.mapNotifications(noteList, 0,10);
     }
 
     @Override
-    public DTOWrapper getNotificationById(int offset, int limit, int id, boolean isAllRead) {
+    @Transactional
+    public DTOWrapper getNotificationById(int id, boolean isAllRead) {
         Integer currentPersonId = userService.getAuthorizedUser().getPerson().getId();
         if(id < 0 || isAllRead) {
-            DTOWrapper request = getAllNotification(offset, limit);
+            DTOWrapper request = getAllNotification();
             noteRepository.deleteAllByPersonId(currentPersonId);
             return request;
         }
         NotificationDto noteDto = NotificationMapper.mapNotification(noteRepository.findNotificationByPersonIdAndAndId(currentPersonId, id));
         NotificationDto[] noteArray = {noteDto};
         noteRepository.deleteByPersonIdAndId(currentPersonId, id);
-        return WrapperMapper.wrap(noteArray, 1, offset, limit, true);
+        return WrapperMapper.wrap(noteArray, 1, 0, 10, true);
     }
+
 }

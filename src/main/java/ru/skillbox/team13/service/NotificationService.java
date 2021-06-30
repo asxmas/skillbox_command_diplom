@@ -4,7 +4,7 @@ import ru.skillbox.team13.dto.DTOWrapper;
 
 public interface NotificationService {
 
-    DTOWrapper getAllNotification(int offset, int limit);
+    DTOWrapper getAllNotification();
 
-    DTOWrapper getNotificationById(int offset, int limit, int id, boolean isAllRead);
+    DTOWrapper getNotificationById(int id, boolean isAllRead);
 }

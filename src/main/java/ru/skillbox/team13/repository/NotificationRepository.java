@@ -14,4 +14,5 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
     Notification findNotificationByPersonIdAndAndId(int personId, int id);
 
     void deleteByPersonIdAndId(int personId, int id);
+
 }
