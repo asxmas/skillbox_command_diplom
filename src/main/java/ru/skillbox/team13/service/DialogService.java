@@ -15,4 +15,6 @@ public interface DialogService {
     DTOWrapper deleteDialog(int dialogId);
 
     DTOWrapper sendMessage(int dialogId, String messageText);
+
+    DTOWrapper getDialogMessages(int dialogId, String query, int offset, int itemPerPage);
 }

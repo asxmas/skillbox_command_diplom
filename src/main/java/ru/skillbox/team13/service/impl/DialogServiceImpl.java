@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.DialogDto;
+import ru.skillbox.team13.dto.DialogMessageDto;
 import ru.skillbox.team13.entity.Dialog;
 import ru.skillbox.team13.entity.Dialog2Person;
 import ru.skillbox.team13.entity.Message;
@@ -46,7 +47,7 @@ public class DialogServiceImpl implements DialogService {
     public DTOWrapper getPersonDialogs(String query, int offset, int itemPerPage) {
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         Person person = userService.getAuthorizedUser().getPerson();
-        Page<Dialog2Person> dialogPage= dialog2PersonRepository.findPersonDialogs(pageable, query, person.getId());
+        Page<Dialog2Person> dialogPage = dialog2PersonRepository.findPersonDialogs(pageable, query, person.getId());
         if (dialogPage == null) { throw new BadRequestException("User " + person.getEmail() + " have no dialogs");}
         else {
             List<DialogDto> results = dialogPage.stream().map(DialogMapper::convertDialog2PersonToDialogDTO).collect(Collectors.toList());
@@ -65,18 +66,18 @@ public class DialogServiceImpl implements DialogService {
         if (!userIds.contains(currentUserId)) userIds.add(currentUserId);
         List<Dialog2Person> dialog2PersonList = userIds.stream().map(id -> {
             Person person = personRepository.getById(id);
-            Dialog2Person dialog2person = new Dialog2Person()
+            return new Dialog2Person()
                     .setPerson(person)
-                    .setDialog(dialog);
-        return dialog2person;}).collect(Collectors.toList());
+                    .setDialog(dialog);}).collect(Collectors.toList());
         dialog2PersonRepository.saveAllAndFlush(dialog2PersonList);
         return WrapperMapper.wrap(Map.of("id", dialogId), true);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public DTOWrapper getUnreadCount() {
-        int currentUserId = userService.getAuthorizedUser().getPerson().getId();
-        int countUnread = dialog2PersonRepository.countAllUnread(currentUserId);
+        int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
+        int countUnread = dialog2PersonRepository.countAllUnread(currentPersonId);
         return WrapperMapper.wrap(Map.of("count", countUnread), true);
     }
 
@@ -111,6 +112,15 @@ public class DialogServiceImpl implements DialogService {
         incrementUnread(dialog, currentPerson);
         //todo сообщение должно попасть в нотификешен
         return WrapperMapper.wrap(DialogMapper.convertMessageToDialogMessageDTO(message), true);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DTOWrapper getDialogMessages(int dialogId, String query, int offset, int itemPerPage) {
+        Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
+        Page<Message> messagePage = messageRepository.findByDialog(pageable, query, dialogId);
+        List<DialogMessageDto> results = messagePage.stream().map(DialogMapper::convertMessageToDialogMessageDTO).collect(Collectors.toList());
+        return WrapperMapper.wrap(results, (int) messagePage.getTotalElements(), offset, itemPerPage, true);
     }
 
     private void incrementUnread(Dialog dialog, Person currentPerson){
