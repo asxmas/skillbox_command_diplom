@@ -10,7 +10,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.DomainObjectFactory;
 import ru.skillbox.team13.RequestService;
@@ -28,10 +27,9 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.skillbox.team13.DomainObjectFactory.genString;
 
 @SpringBootTest
@@ -70,7 +68,7 @@ public class PostControllerTest {
     }
 
     @Test
-    @Transactional
+//    @Transactional
     @WithMockUser(username = "main@mail")
     void testSimpleFind() {
         createAndPersistPost("substring", "substring");
@@ -90,9 +88,21 @@ public class PostControllerTest {
     }
 
     @Test
+    @Transactional
+    @WithMockUser(username = "main@mail")
+    void findDeletedByID() {
+        int id = createAndPersistPost("", "");
+        Post p = postRepository.getById(id);
+        p.setDeleted(true);
+        postRepository.save(p);
+
+        requestService.doRequest(get(url + "/" + id), status().isBadRequest(), true);
+    }
+
+    @Test
     @WithMockUser(username = "main@mail")
     void testWrongId() {
-        Object o = requestService.doRequest(get(url + "/100500"), MockMvcResultMatchers.status().isBadRequest(), true);
+        requestService.doRequest(get(url + "/100500"), status().isBadRequest(), true);
     }
 
     @Test
@@ -126,6 +136,33 @@ public class PostControllerTest {
         assertEquals("cowboy", dto.getTitle());
         assertEquals("shootin", dto.getText());
         assertEquals(2000, TimeUtil.getTime(dto.getTimestamp()).getYear());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "main@mail")
+    void testDelete() {
+        int id = createAndPersistPost("", "");
+
+        requestService.doRequest(delete(url + "/" + id), status().isOk(), true);
+
+        requestService.doRequest(get(url + "/" + id), status().isBadRequest(), true);
+    }
+
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "main@mail")
+    void testDeleteAndRecover() {
+        int id = createAndPersistPost("", "");
+
+        requestService.doRequest(get(url + "/" + id), status().isOk(), true); //exists
+        requestService.doRequest(delete(url + "/" + id), status().isOk(), true); //deletes
+        requestService.doRequest(get(url + "/" + id), status().isBadRequest(), true); //no data
+
+        requestService.doRequest(put(url + "/" + id + "/recover"), status().isOk(), true); //recover
+
+        requestService.doRequest(get(url + "/" + id), status().isOk(), true); //exists
     }
 
     int createAndPersistPost(String title, String text) {

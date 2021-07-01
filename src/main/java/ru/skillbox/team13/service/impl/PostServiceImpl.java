@@ -19,6 +19,7 @@ import ru.skillbox.team13.repository.QueryDSL.PostDAO;
 import ru.skillbox.team13.util.TimeUtil;
 
 import java.util.List;
+import java.util.Map;
 
 import static ru.skillbox.team13.util.PageUtil.getPageable;
 import static ru.skillbox.team13.util.TimeUtil.getTime;
@@ -74,12 +75,20 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     }
 
     @Override
+    @Modifying
+    @Transactional
     public DTOWrapper deleteById(int id) {
-        return null;
+        Post p = postRepository.findById(id).orElseThrow(() -> new BadRequestException("no post for id=" + id));
+        p.setDeleted(true);
+        postRepository.save(p);
+        return WrapperMapper.wrap(Map.of("id", id), true);
     }
 
     @Override
     public DTOWrapper recoverById(int id) {
-        return null;
+        Post p = postRepository.findByIdAndDeleted(id, true).orElseThrow(() -> new BadRequestException("no post for id=" + id));
+        p.setDeleted(false);
+        postRepository.save(p);
+        return getById(id);
     }
 }
