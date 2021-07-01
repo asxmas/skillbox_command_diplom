@@ -14,7 +14,11 @@ import java.util.stream.Collectors;
 public class FeedMapper {
 
     public static List<PostDto> buildFeed(List<Post> posts, List<LikeCount> likes, List<CommentProjection> comments) {
-        return posts.stream().map(p -> PostDto.builder()
+        return posts.stream().map(p -> buildPostDto(p, likes, comments)).collect(Collectors.toList());
+    }
+
+    public static PostDto buildPostDto(Post p, List<LikeCount> likes, List<CommentProjection> comments) {
+        return PostDto.builder()
                 .id(p.getId())
                 .timestamp(TimeUtil.getTimestamp(p.getTime()))
                 .author(PersonMapper.convertPersonToPersonDTO(p.getAuthor()))
@@ -23,7 +27,7 @@ public class FeedMapper {
                 .isBlocked(p.isBlocked())
                 .likes(getLikeCountForPostId(p.getId(), likes))
                 .comments(getCommentsForPostId(p.getId(), comments))
-                .build()).collect(Collectors.toList());
+                .build();
     }
 
     private static Integer getLikeCountForPostId(int pId, List<LikeCount> likes) {

@@ -52,8 +52,13 @@ public class RequestService {
     }
 
     @SneakyThrows
-    public List<PostDto> getAsFeed(RequestBuilder req, boolean doPrint) {
+    public List<PostDto> getAsPostsDtoList(RequestBuilder req, boolean doPrint) {
         String data = getDataAsString(req, doPrint);
         return Arrays.asList(om.readValue(data, PostDto[].class));
+    }
+    @SneakyThrows
+    public PostDto getAsPostDto(RequestBuilder req, boolean doPrint) {
+        String data = getDataAsString(req, doPrint);
+        return om.readValue(data, PostDto.class);
     }
 }

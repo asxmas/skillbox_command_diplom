@@ -31,6 +31,8 @@ public class DumbFeedsService implements ru.skillbox.team13.service.FeedsService
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
 
+    //todo merge with post service and/or controller
+
     @Override
     public DTOWrapper serve(String searchSubstr, int offset, int itemPerPage) {
         Integer currentPersonId = userService.getAuthorizedUser().getPerson().getId();
