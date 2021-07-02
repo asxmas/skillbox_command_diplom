@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class FeedMapper {
+public class PostMapper {
 
-    public static List<PostDto> buildFeed(List<Post> posts, List<LikeCount> likes, List<CommentProjection> comments) {
+    public static List<PostDto> combinePostsLikesComments(List<Post> posts, List<LikeCount> likes, List<CommentProjection> comments) {
         return posts.stream().map(p -> buildPostDto(p, likes, comments)).collect(Collectors.toList());
     }
 

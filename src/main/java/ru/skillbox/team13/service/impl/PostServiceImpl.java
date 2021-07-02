@@ -2,20 +2,25 @@ package ru.skillbox.team13.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.PostDto;
+import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
+import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
 import ru.skillbox.team13.entity.projection.CommentProjection;
 import ru.skillbox.team13.entity.projection.LikeCount;
 import ru.skillbox.team13.exception.BadRequestException;
-import ru.skillbox.team13.mapper.FeedMapper;
+import ru.skillbox.team13.mapper.PostMapper;
 import ru.skillbox.team13.mapper.WrapperMapper;
-import ru.skillbox.team13.repository.CommentRepository;
 import ru.skillbox.team13.repository.PostRepository;
 import ru.skillbox.team13.repository.QueryDSL.PostDAO;
+import ru.skillbox.team13.service.CommentService;
+import ru.skillbox.team13.service.FriendsService;
+import ru.skillbox.team13.service.UserService;
 import ru.skillbox.team13.util.TimeUtil;
 
 import java.util.List;
@@ -30,25 +35,44 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
     private final PostDAO postDAO;
     private final PostRepository postRepository;
-    private final DumbFeedsService feedsService;
-    private final CommentRepository commentRepository;
+    private final CommentService commentService;
+    private final UserService userService;
+    private final FriendsService friendsService;
+
+    @Override
+    public DTOWrapper getFeed(String searchSubstr, int offset, int itemPerPage) {
+        Integer currentPersonId = userService.getAuthorizedUser().getPerson().getId();
+
+        //get friends (type 'FRIEND')
+        List<Person> friends = friendsService.getFriends(currentPersonId, FriendshipStatusCode.FRIEND);
+
+        //count posts
+        Integer count = searchSubstr.isBlank() ?
+                postRepository.countAllByAuthorIn(friends) :
+                postRepository.countAllByAuthorInAndTitleLikeOrPostTextLike(friends,
+                        getQuery(searchSubstr), getQuery(searchSubstr));
+
+        //load posts with persons
+        List<Post> posts = searchSubstr.isBlank() ?
+                getPosts(friends, getPageable(offset, itemPerPage)) :
+                getPosts(friends, getPageable(offset, itemPerPage), searchSubstr);
+
+        List<LikeCount> likes = postRepository.countLikesByPosts(posts);
+        List<CommentProjection> comments = commentService.getCommentProjections(posts);
+        List<PostDto> feed = PostMapper.combinePostsLikesComments(posts, likes, comments);
+
+        return WrapperMapper.wrap(feed, count, offset, itemPerPage, true);
+    }
 
     @Override
     public DTOWrapper find(String text, Long timestampFrom, Long timestampTo, int offset, int itemPerPage) {
-        //posts with authors
         Page<Post> page = postDAO.findByTextAndTime(text, getTime(timestampFrom), getTime(timestampTo), getPageable(offset, itemPerPage));
 
-        //todo trashy, refactor
-        //likes for posts
         List<LikeCount> likes = postRepository.countLikesByPosts(page.getContent());
+        List<CommentProjection> comments = commentService.getCommentProjections(page.getContent());
+        List<PostDto> posts = PostMapper.combinePostsLikesComments(page.getContent(), likes, comments);
 
-        //for post get comments
-        List<CommentProjection> comments = feedsService.getCommentProjections(page.getContent());
-
-        //build feed
-        List<PostDto> feed = FeedMapper.buildFeed(page.getContent(), likes, comments);
-
-        return WrapperMapper.wrap(feed, (int) page.getTotalElements(), offset, itemPerPage, true);
+        return WrapperMapper.wrap(posts, (int) page.getTotalElements(), offset, itemPerPage, true);
     }
 
     @Override
@@ -57,8 +81,8 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         //todo refactor
         Post p = postRepository.findById(id).orElseThrow(() -> new BadRequestException("no post for id=" + id));
         LikeCount likes = postRepository.countLikesByPosts(p);
-        List<CommentProjection> comments = commentRepository.getCommProjections(p);
-        PostDto dto = FeedMapper.buildPostDto(p, List.of(likes), comments);
+        List<CommentProjection> comments = commentService.getCommentProjections(p);
+        PostDto dto = PostMapper.buildPostDto(p, List.of(likes), comments);
         return WrapperMapper.wrap(dto, true);
     }
 
@@ -85,10 +109,24 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     }
 
     @Override
+    @Modifying
+    @Transactional
     public DTOWrapper recoverById(int id) {
         Post p = postRepository.findByIdAndDeleted(id, true).orElseThrow(() -> new BadRequestException("no post for id=" + id));
         p.setDeleted(false);
         postRepository.save(p);
         return getById(id);
+    }
+
+    public List<Post> getPosts(List<Person> persons, Pageable p) {
+        return postRepository.findPostsAndAuthorsFromAuthors(p, persons);
+    }
+
+    public List<Post> getPosts(List<Person> persons, Pageable p, String query) {
+        return postRepository.findPostsAndAuthorsFromAuthors(p, persons, getQuery(query));
+    }
+
+    private String getQuery(String query) {
+        return "%" + query.toLowerCase() + "%";
     }
 }

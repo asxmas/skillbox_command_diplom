@@ -13,7 +13,7 @@ import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.entity.projection.CommentProjection;
-import ru.skillbox.team13.service.impl.DumbFeedsService;
+import ru.skillbox.team13.service.impl.PostServiceImpl;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -32,9 +32,10 @@ public class FeedsServiceTest {
     EntityManagerFactory emf;
 
     @Autowired
-    DumbFeedsService feedsService;
+    PostServiceImpl postService;
 
-
+    @Autowired
+    CommentService commentService;
 
     List<Post> postList;
     Person p;
@@ -80,24 +81,24 @@ public class FeedsServiceTest {
 
     @Test
     void testGetFeed() {
-        assertNotNull(feedsService);
+        assertNotNull(postService);
     }
 
 
     @Test
     @WithMockUser(username = "email")
     void testComments() {
-        List<Post> postsWithAuthors = feedsService.getPosts(List.of(p), PageRequest.of(0, 10));
+        List<Post> postsWithAuthors = postService.getPosts(List.of(p), PageRequest.of(0, 10));
         assertNotNull(postsWithAuthors.get(0).getAuthor());
 
-        List<CommentProjection> comments = feedsService.getCommentProjections(postsWithAuthors);
+        List<CommentProjection> comments = commentService.getCommentProjections(postsWithAuthors);
         assertTrue(comments.size() > 0);
     }
 
     @Test
     @WithMockUser(username = "email")
     void testSearchSubstring() {
-        List<Post> posts = feedsService.getPosts(List.of(p), PageRequest.of(0, 10), "subsTrinG");
+        List<Post> posts = postService.getPosts(List.of(p), PageRequest.of(0, 10), "subsTrinG");
         assertEquals(4, posts.size());
     }
 }
