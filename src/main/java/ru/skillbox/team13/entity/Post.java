@@ -19,8 +19,8 @@ public class Post extends Notified {
     @Column(name = "time", nullable = false)
     private LocalDateTime time;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "author_id", nullable = true)
     private Person author;
 
     @Column(name = "title", nullable = false)

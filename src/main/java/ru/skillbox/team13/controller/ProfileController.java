@@ -74,7 +74,8 @@ public class ProfileController {
   @PostMapping("/users/{id}/wall")
   public ResponseEntity createPost(@PathVariable("id") Integer id, @RequestBody PostDTO postDTO) {
     try {
-      Post post = postsService.addPost(postDTO);
+      PersonDTO author = userService.getCurrentUserDto();
+      Post post = postsService.addPost(postDTO, personService.getPersonBiId(author.getId()));
       personService.addPostToWall(id, post);
       return ResponseEntity.ok(post);
     }

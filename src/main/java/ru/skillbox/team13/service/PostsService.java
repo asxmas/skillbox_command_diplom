@@ -2,9 +2,11 @@ package ru.skillbox.team13.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.dto.PostDTO;
+import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.mapper.PostMapper;
 import ru.skillbox.team13.repository.RepoPost;
@@ -17,9 +19,7 @@ import java.util.Set;
 @Service
 public class PostsService {
     private final RepoPost repoPost;
-    private final PersonService personService;
     private final CommentService commentService;
-    private final UserService userService;
 
     public Post getPostById(int id)  {
         return repoPost.findById(id).stream().findFirst().orElse(null);
@@ -34,10 +34,9 @@ public class PostsService {
             return false;
         }
     }
-    public Post addPost(PostDTO postDTO) {
+    public Post addPost(PostDTO postDTO, Person currentPerson) {
         Post post = new Post();
-        PersonDTO author = userService.getCurrentUserDto();
-        post.setAuthor(personService.getPersonBiId(author.getId()));
+        post.setAuthor(currentPerson);
         post.setTime(LocalDateTime.now());
         fillPostFields(post, postDTO);
         repoPost.save(post);
@@ -61,5 +60,14 @@ public class PostsService {
     public Set<PostDTO> getSetPostsByAuthorId(Integer id)   {
         List<Post> postsByAuthor = repoPost.getPostsByAuthorId(PageRequest.of(0,10),id);
         return PostMapper.convertSetPostToSetPostDTO(Set.copyOf(postsByAuthor));
+    }
+
+    @Modifying
+    public void setNullAuthor(Integer personId) {
+        List<Post> posts = repoPost.getPostsByAuthorId(PageRequest.of(0,10), personId);
+        for (Post post : posts) {
+            post.setAuthor(null);
+        }
+        repoPost.saveAllAndFlush(posts);
     }
 }

@@ -16,6 +16,7 @@ CREATE TABLE "public"."person"
     "id"                  INTEGER      NOT NULL,
     "city_id"                INTEGER,
     "country_id"             INTEGER,
+    "is_active"           BOOLEAN       NOT NULL DEFAULT true,
     CONSTRAINT "person_pkey" PRIMARY KEY ("id")
 );
 

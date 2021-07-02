@@ -5,15 +5,14 @@ import lombok.Setter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.PersonDTO;
-import ru.skillbox.team13.dto.PostDTO;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.mapper.PersonMapper;
 import ru.skillbox.team13.repository.CityRepo;
 import ru.skillbox.team13.repository.PersonRepo;
 import ru.skillbox.team13.repository.RepoUser;
+import ru.skillbox.team13.service.impl.UserServiceImpl;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Service
@@ -21,33 +20,33 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class PersonService {
 
-    private final PersonRepo personRepo;
+    private final PersonRepo repoPerson;
     private final CityRepo cityRepo;
-    private final UserService userService;
-    private final RepoUser repoUser;
+    private final UserServiceImpl userService;
+    private final PostsService postsService;
 
     public PersonDTO updateCurrentPerson(PersonDTO personDTO)   {
         PersonDTO currentPersonDTO = userService.getCurrentUserDto();
         Person person = new Person();
         Integer personId = currentPersonDTO.getId();
         if (personId != null)  {
-            person = personRepo.getById(personId);
+            person = repoPerson.getById(personId);
         }
         fillPersonFields(person, personDTO);
-        personRepo.saveAndFlush(person);
+        repoPerson.saveAndFlush(person);
         return PersonMapper.convertPersonToPersonDTO(person);
     }
 
     public void addPostToWall (int id, Post post)   {
-        Person person = personRepo.getById(id);
+        Person person = repoPerson.getById(id);
         post.setAuthor(person);
         Set<Post> personPosts = person.getPosts();
         personPosts.add(post);
         person.setPosts(personPosts);
-        personRepo.save(person);
+        repoPerson.save(person);
     }
     public PersonDTO getPersonDTOById(int id) {
-        Person person = personRepo.getById(id);
+        Person person = repoPerson.getById(id);
         PersonDTO personDTO = PersonMapper.convertPersonToPersonDTO(person);
         return personDTO;
     }
@@ -62,13 +61,18 @@ public class PersonService {
     }
 
     public Person getPersonBiId(int id) {
-        return personRepo.getById(id);
+        return repoPerson.getById(id);
     }
+
+    //todo добавить разлогирование
+    //todo проставление флага isArchive
 
     @Transactional
     public PersonDTO deleteCurrentUser (PersonDTO personDTO) {
-        repoUser.deleteUserByPersonId(personDTO.getId());
-        personRepo.deletePersonById(personDTO.getId());
+        Person person = repoPerson.getById(personDTO.getId());
+        postsService.setNullAuthor(personDTO.getId());
+        person.setActive(false);
+        repoPerson.save(person);
         return personDTO;
     }
 }

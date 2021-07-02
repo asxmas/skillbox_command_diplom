@@ -219,4 +219,9 @@ public class UserServiceImpl implements UserService {
         //TODO сохраняем настройки по конкретному типу оповещений для этого пользователя
         return true;
     }
+
+    @Transactional
+    public void deleteUserById(Integer personId) {
+        userRepository.deleteUserByPersonId(personId);
+    }
 }
