@@ -13,3 +13,7 @@ databaseChangeLog:
       file: db/changelogs/3.1-patch/token.sql
   - include:
       file: db/changelogs/4-patch/modify-like.sql
+  - include:
+      file: db/changelogs/5-patch/storage.sql
+  - include:
+      file: db/changelogs/7-patch-tag/unique-tag.sql

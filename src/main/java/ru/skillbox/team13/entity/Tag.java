@@ -13,12 +13,13 @@ import java.util.Set;
 @NoArgsConstructor
 @Table(name = "tag")
 public class Tag {
+
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
 
-    @Column(name = "tag", nullable = false)
+    @Column(name = "tag", nullable = false, unique = true)
     private String tag;
 
     @ManyToMany(mappedBy = "tags")
