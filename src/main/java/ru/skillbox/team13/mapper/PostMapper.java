@@ -37,15 +37,8 @@ public class PostMapper {
 
     private static List<CommentDto> getCommentsForPostId(int pId, List<CommentProjection> comments) {
         return comments.stream().filter(c -> c.getPostId() == pId)
-                .map(f -> CommentDto.builder()
-                        .parentId(f.getParentId())
-                        .text(f.getText())
-                        .id(f.getId())
-                        .postId(String.valueOf(f.getPostId())) //todo !! api wants string
-                        .time(TimeUtil.getTimestamp(f.getTime()))
-                        .authorId(f.getAuthorId())
-                        .isBlocked(f.getBlocked())
-                        .build())
+                .map(f -> new CommentDto(f.getId(), f.getPostId(), f.getParentId(),
+                        f.getText(), f.getTime(), f.getAuthorId(), f.getBlocked()))
                 .collect(Collectors.toList());
     }
 }

@@ -1,4 +1,4 @@
-package ru.skillbox.team13.service;
+package ru.skillbox.team13.database_test;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,12 +22,12 @@ import java.time.LocalDateTime;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static ru.skillbox.team13.DomainObjectFactory.*;
+import static ru.skillbox.team13.test_util.DomainObjectFactory.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class PostDaoQueryDslTest {
+public class PostFindByTextAndTimeTest {
 
     @Autowired
     PostRepository postRepository;

@@ -1,4 +1,4 @@
-package ru.skillbox.team13.integr;
+package ru.skillbox.team13.controller_integration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,8 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skillbox.team13.DomainObjectFactory;
-import ru.skillbox.team13.RequestService;
+import ru.skillbox.team13.test_util.DomainObjectFactory;
+import ru.skillbox.team13.test_util.RequestService;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.entity.Person;
@@ -30,7 +30,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.skillbox.team13.DomainObjectFactory.genString;
+import static ru.skillbox.team13.test_util.DomainObjectFactory.genString;
 
 @SpringBootTest
 @AutoConfigureMockMvc

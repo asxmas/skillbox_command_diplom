@@ -1,4 +1,4 @@
-package ru.skillbox.team13;
+package ru.skillbox.team13.test_util;
 
 import ru.skillbox.team13.entity.*;
 import ru.skillbox.team13.entity.enums.PersonMessagePermission;
@@ -50,13 +50,21 @@ public class DomainObjectFactory {
     }
 
 
-        public static Comment makeComment(String text) {
+    public static Comment makeComment(String text) {
         Comment comment = new Comment();
         comment.setTime(LocalDateTime.now());
         comment.setCommentText(text);
         comment.setBlocked(false);
         return comment;
     }
+
+    public static Comment makeComment(String text, Person author, Post post) {
+        Comment comment = makeComment(text);
+        comment.setAuthor(author);
+        comment.setPost(post);
+        return comment;
+    }
+
 
     public static Like makeLike(Person liker, Notified postOrComment) {
         Like like = new Like();

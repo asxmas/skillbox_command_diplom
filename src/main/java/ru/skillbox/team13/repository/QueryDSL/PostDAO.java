@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 
 @Repository
 @RequiredArgsConstructor
-public class PostDAO {  //todo merge with PostRepository
+public class PostDAO {
 
     private final EntityManagerFactory emf;
 
@@ -41,7 +41,7 @@ public class PostDAO {  //todo merge with PostRepository
                 .offset(p.getOffset())
                 .limit(p.getPageSize())
                 .fetchResults();
-
+        em.close();
         return new PageImpl<>(results.getResults(), p, results.getTotal());
     }
 }

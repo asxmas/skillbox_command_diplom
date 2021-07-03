@@ -1,4 +1,4 @@
-package ru.skillbox.team13.service;
+package ru.skillbox.team13.service_test;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -13,6 +13,7 @@ import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.entity.projection.CommentProjection;
+import ru.skillbox.team13.service.CommentService;
 import ru.skillbox.team13.service.impl.PostServiceImpl;
 
 import javax.persistence.EntityManager;
@@ -22,7 +23,7 @@ import java.util.List;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static ru.skillbox.team13.DomainObjectFactory.*;
+import static ru.skillbox.team13.test_util.DomainObjectFactory.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc

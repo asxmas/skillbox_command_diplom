@@ -1,4 +1,4 @@
-package ru.skillbox.team13;
+package ru.skillbox.team13.test_util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package ru.skillbox.team13.integr;
+package ru.skillbox.team13.controller_integration;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
-import ru.skillbox.team13.DomainObjectFactory;
-import ru.skillbox.team13.RequestService;
+import ru.skillbox.team13.test_util.DomainObjectFactory;
+import ru.skillbox.team13.test_util.RequestService;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.entity.*;
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.skillbox.team13.DomainObjectFactory.genString;
+import static ru.skillbox.team13.test_util.DomainObjectFactory.genString;
 
 @SpringBootTest
 @AutoConfigureMockMvc
