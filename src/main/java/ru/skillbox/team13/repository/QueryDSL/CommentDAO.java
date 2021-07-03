@@ -20,14 +20,22 @@ import java.util.List;
 public class CommentDAO {
 
     private final EntityManagerFactory emf;
+    private QComment comment = QComment.comment;
+    private QPerson author = comment.author;
+    private QPost post = comment.post;
+    private QComment parentComment = comment.parent;
 
-    public List<CommentDto> getComments(Integer... postIds) {
-        QComment comment = QComment.comment;
-        QPerson author = comment.author;
-        QPost post = comment.post;
-        QComment parentComment = comment.parent;
+    public List<CommentDto> getComments(Integer postId) {
+        Predicate where = post.id.eq(postId);
+        return find(where);
+    }
 
+    public List<CommentDto> getComments(List<Integer> postIds) {
         Predicate where = post.id.in(postIds);
+        return find(where);
+    }
+
+    private List<CommentDto> find(Predicate where) {
         EntityManager em = emf.createEntityManager();
         JPAQuery<Comment> query = new JPAQuery<>(em);
 

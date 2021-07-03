@@ -6,12 +6,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.skillbox.team13.dto.CommentDto;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
-import ru.skillbox.team13.entity.projection.CommentProjection;
 import ru.skillbox.team13.entity.projection.LikeCount;
 import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.mapper.PostMapper;
@@ -58,7 +58,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
                 getPosts(friends, getPageable(offset, itemPerPage), searchSubstr);
 
         List<LikeCount> likes = postRepository.countLikesByPosts(posts);
-        List<CommentProjection> comments = commentService.getCommentProjections(posts);
+        List<CommentDto> comments = commentService.getCommentDtos(posts);
         List<PostDto> feed = PostMapper.combinePostsLikesComments(posts, likes, comments);
 
         return WrapperMapper.wrap(feed, count, offset, itemPerPage, true);
@@ -69,7 +69,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         Page<Post> page = postDAO.findByTextAndTime(text, getTime(timestampFrom), getTime(timestampTo), getPageable(offset, itemPerPage));
 
         List<LikeCount> likes = postRepository.countLikesByPosts(page.getContent());
-        List<CommentProjection> comments = commentService.getCommentProjections(page.getContent());
+        List<CommentDto> comments = commentService.getCommentDtos(page.getContent());
         List<PostDto> posts = PostMapper.combinePostsLikesComments(page.getContent(), likes, comments);
 
         return WrapperMapper.wrap(posts, (int) page.getTotalElements(), offset, itemPerPage, true);
@@ -81,7 +81,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         //todo refactor
         Post p = postRepository.findById(id).orElseThrow(() -> new BadRequestException("no post for id=" + id));
         LikeCount likes = postRepository.countLikesByPosts(p);
-        List<CommentProjection> comments = commentService.getCommentProjections(p);
+        List<CommentDto> comments = commentService.getCommentDtos(List.of(p));
         PostDto dto = PostMapper.buildPostDto(p, List.of(likes), comments);
         return WrapperMapper.wrap(dto, true);
     }

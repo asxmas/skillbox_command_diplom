@@ -111,7 +111,7 @@ public class CommentTest {
     void getCommentsForMultiplePosts() {
         int postId1 = postIds.get(0);
         int postId2 = postIds.get(1);
-        List<CommentDto> commentDTOS = commentDAO.getComments(postId1, postId2);
+        List<CommentDto> commentDTOS = commentDAO.getComments(List.of(postId1, postId2));
 
         assertEquals(3, commentDTOS.size());
     }

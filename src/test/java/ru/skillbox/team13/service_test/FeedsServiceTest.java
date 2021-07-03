@@ -8,11 +8,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.test.context.support.WithMockUser;
+import ru.skillbox.team13.dto.CommentDto;
 import ru.skillbox.team13.entity.Comment;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.entity.User;
-import ru.skillbox.team13.entity.projection.CommentProjection;
 import ru.skillbox.team13.service.CommentService;
 import ru.skillbox.team13.service.impl.PostServiceImpl;
 
@@ -92,7 +92,7 @@ public class FeedsServiceTest {
         List<Post> postsWithAuthors = postService.getPosts(List.of(p), PageRequest.of(0, 10));
         assertNotNull(postsWithAuthors.get(0).getAuthor());
 
-        List<CommentProjection> comments = commentService.getCommentProjections(postsWithAuthors);
+        List<CommentDto> comments = commentService.getCommentDtos(postsWithAuthors);
         assertTrue(comments.size() > 0);
     }
 

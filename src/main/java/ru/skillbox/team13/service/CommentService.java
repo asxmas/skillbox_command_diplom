@@ -1,12 +1,12 @@
 package ru.skillbox.team13.service;
 
+import ru.skillbox.team13.dto.CommentDto;
 import ru.skillbox.team13.entity.Post;
-import ru.skillbox.team13.entity.projection.CommentProjection;
 
 import java.util.List;
 
 public interface CommentService {
-    List<CommentProjection> getCommentProjections(List<Post> posts);
+    List<CommentDto> getCommentDtos(List<Post> postIds);
 
-    List<CommentProjection> getCommentProjections(Post post);
+    List<CommentDto> getCommentDtos(int id);
 }

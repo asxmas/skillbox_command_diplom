@@ -3,30 +3,32 @@ package ru.skillbox.team13.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import ru.skillbox.team13.util.TimeUtil;
 
 import java.time.LocalDateTime;
 
 @Getter
+@NoArgsConstructor
 public class CommentDto {
-    private final int id;
+    private int id;
 
     @JsonProperty("comment_text")
-    private final String text;
+    private String text;
 
     @JsonProperty("post_id")
-    private final Integer postId;
+    private Integer postId;
 
     @JsonProperty("parent_id")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private final Integer parentId;
-    private final long time;
+    private Integer parentId;
+    private long time;
 
     @JsonProperty("author_id")
-    private final int authorId;
+    private int authorId;
 
     @JsonProperty("is_blocked")
-    private final boolean isBlocked;
+    private boolean isBlocked;
 
     public CommentDto(Integer id, Integer postId, Integer parentId, String text, LocalDateTime time, Integer authorId, Boolean blocked) {
         this.id = id;
