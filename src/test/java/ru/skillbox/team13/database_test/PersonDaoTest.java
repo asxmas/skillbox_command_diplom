@@ -1,5 +1,6 @@
 package ru.skillbox.team13.database_test;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static ru.skillbox.team13.test_util.DomainObjectFactory.makePerson;
@@ -29,14 +31,18 @@ public class PersonDaoTest {
     @Autowired
     PersonDAO personDAO;
 
-    @Test
-    void simple() {
+    int srcid;
+
+    List<Person> persons;
+
+    @BeforeAll
+    void prep() {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
 
         Person person1 = makePerson();
         em.persist(person1);
-        int srcid = person1.getId();
+        srcid = person1.getId();
 
         City city1 = new City();
         city1.setTitle("ny");
@@ -50,7 +56,7 @@ public class PersonDaoTest {
         country.setTitle("usa");
         em.persist(country);
 
-        List<Person> persons = List.of(makePerson(), makePerson(), makePerson());
+        persons = List.of(makePerson(), makePerson(), makePerson());
         persons.get(0).setCity(city1);
         persons.get(0).setCountry(country);
         persons.get(1).setCity(city2);
@@ -64,12 +70,26 @@ public class PersonDaoTest {
 
         em.getTransaction().commit();
         em.close();
+    }
 
+    @Test
+    void testFriends() {
         List<PersonDTO> friends = personDAO.fetchFriendDtos(srcid, FriendshipStatusCode.FRIEND);
         assertEquals(3, friends.size());
         assertEquals(persons.get(0).getFirstName(), friends.get(0).getFirstName());
         assertEquals(persons.get(1).getFirstName(), friends.get(1).getFirstName());
         assertEquals("usa", friends.get(0).getCountry().getTitle());
         assertEquals("la", friends.get(1).getCity().getTitle());
+    }
+
+    @Test
+    void testGetByIds() {
+        List<Integer> ids = persons.stream().map(Person::getId).collect(Collectors.toList());
+        List<PersonDTO> dtos = personDAO.getPersonDtosByIds(ids);
+        assertEquals(3, dtos.size());
+        assertEquals(dtos.get(0).getFirstName(), dtos.get(0).getFirstName());
+        assertEquals(dtos.get(1).getFirstName(), dtos.get(1).getFirstName());
+        assertEquals("usa", dtos.get(0).getCountry().getTitle());
+        assertEquals("la", dtos.get(1).getCity().getTitle());
     }
 }

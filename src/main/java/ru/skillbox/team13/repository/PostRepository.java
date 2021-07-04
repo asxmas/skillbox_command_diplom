@@ -24,6 +24,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "(lower(p.title) like :query or lower(p.postText) like :query) and p.deleted = false order by p.time desc ")
     List<Post> findPostsAndAuthorsFromAuthors(Pageable p, List<Person> authors, String query);
 
+    @Deprecated
     @Query("select size(p.likes) as likeCount, p.id as id from Post p where p in :posts")
     List<LikeCount> countLikesByPosts(List<Post> posts);
 

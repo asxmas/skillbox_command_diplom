@@ -16,12 +16,13 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentDAO commentDAO;
 
+    @Deprecated
     @Override
     public List<CommentDto> getCommentDtos(List<Post> posts) {
-        return commentDAO.getComments(posts.stream().map(Post::getId).collect(Collectors.toList()));
+        return commentDAO.getCommentDtosForPostIds(posts.stream().map(Post::getId).collect(Collectors.toList()));
     }
 
     public List<CommentDto> getCommentDtos(int id) {
-        return commentDAO.getComments(id);
+        return commentDAO.getCommentDtosForPostIds(id);
     }
 }

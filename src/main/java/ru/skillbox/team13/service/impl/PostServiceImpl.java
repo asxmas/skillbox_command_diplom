@@ -82,12 +82,12 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         log.debug("Loading friends for Person id={}, total {} friends.", currentPersonId, personDTOS.size());
 
         List<Integer> authorIds = personDTOS.stream().map(PersonDTO::getId).collect(toList());
-        Page<PostDto> postDtoPage = postDAO.getPostsDtos(authorIds, substr, getPageable(offset, itemPerpage));
+        Page<PostDto> postDtoPage = postDAO.getPostDtosByAuthorIdAndSubstring(authorIds, substr, getPageable(offset, itemPerpage));
         log.debug("Loading page {} of feed containing text/tile \"{}\", total {} posts.",
                 offset / itemPerpage, substr, postDtoPage.getTotalElements());
 
         List<Integer> postIds = postDtoPage.getContent().stream().map(PostDto::getId).collect(toList());
-        List<CommentDto> commentDtos = commentDAO.getComments(postIds);
+        List<CommentDto> commentDtos = commentDAO.getCommentDtosForPostIds(postIds);
         log.debug("Loading comments for page {} of feed, total {} comments.", offset / itemPerpage, commentDtos.size());
 
         List<PostDto> combined = combine(postDtoPage.getContent(), personDTOS, commentDtos);
@@ -96,24 +96,9 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         return WrapperMapper.wrap(combined, (int) postDtoPage.getTotalElements(), offset, itemPerpage, true);
     }
 
-    //todo implement
-//    public DTOWrapper improvedFind(String text, Long timestampFrom, Long timestampTo, int offset, int itemPerPage) {
-//        //get paginated posts with likes, for timestamps and substring
-//        //get comments for posts
-//        //combine
-//        //wrap and return
-//    }
-//
-//    public DTOWrapper improvedFindById(int id) {
-//        //get post
-//        //get comments
-//        //combine
-//        //wrap and return
-//    }
-
-    @Override
     @Deprecated
-    public DTOWrapper find(String text, Long timestampFrom, Long timestampTo, int offset, int itemPerPage) {
+    //todo delete
+    public DTOWrapper findDeprecated(String text, Long timestampFrom, Long timestampTo, int offset, int itemPerPage) {
         Page<Post> page = postDAO.findByTextAndTime(text, getTime(timestampFrom), getTime(timestampTo), getPageable(offset, itemPerPage));
 
         List<LikeCount> likes = postRepository.countLikesByPosts(page.getContent());
@@ -124,9 +109,29 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     }
 
     @Override
+    public DTOWrapper find(String text, Long timestampFrom, Long timestampTo, int offset, int itemPerPage) {
+        Page<PostDto> page = postDAO.getPostsDtosByTimeAndSubstring(text, getTime(timestampFrom), getTime(timestampTo),
+                getPageable(offset, itemPerPage));
+        log.debug("Loading page {} of post search containing text/tile \"{}\", total {} posts.",
+                offset / itemPerPage, text, page.getTotalElements());
+
+        List<Integer> personIds = page.getContent().stream().map(p -> p.getAuthor().getId()).collect(toList());
+        List<PersonDTO> personDtos = personDAO.getPersonDtosByIds(personIds);
+        log.debug("Loading person data for page {} of feed, total {} users.", offset / itemPerPage, personDtos.size());
+
+        List<CommentDto> commentDtos = commentDAO.getCommentDtosForPostIds(personIds);
+        log.debug("Loading comments for page {} of feed, total {} comments.", offset / itemPerPage, commentDtos.size());
+
+        List<PostDto> combined = combine(page.getContent(), personDtos, commentDtos);
+        log.debug("Combining posts, comments and users data for page {} of feed, total {}.", offset / itemPerPage, combined.size());
+
+        return WrapperMapper.wrap(combined, (int) page.getTotalElements(), offset, itemPerPage, true);
+    }
+
+
+    @Override
     @Deprecated
     public DTOWrapper getById(int id) {
-
         //todo refactor
         Post p = postRepository.findById(id).orElseThrow(() -> new BadRequestException("no post for id=" + id));
         LikeCount likes = postRepository.countLikesByPosts(p);
@@ -134,6 +139,14 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         PostDto dto = PostMapper.buildPostDto(p, List.of(likes), comments);
         return WrapperMapper.wrap(dto, true);
     }
+
+    //todo implement
+//    public DTOWrapper improvedFindById(int id) {
+//        //get post
+//        //get comments
+//        //combine
+//        //wrap and return
+//    }
 
     @Override
     @Modifying

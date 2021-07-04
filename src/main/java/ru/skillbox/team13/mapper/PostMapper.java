@@ -12,10 +12,12 @@ import java.util.stream.Collectors;
 
 public class PostMapper {
 
+    @Deprecated
     public static List<PostDto> combinePostsLikesComments(List<Post> posts, List<LikeCount> likes, List<CommentDto> comments) {
         return posts.stream().map(p -> buildPostDto(p, likes, comments)).collect(Collectors.toList());
     }
 
+    @Deprecated
     public static PostDto buildPostDto(Post p, List<LikeCount> likes, List<CommentDto> comments) {
         return PostDto.builder()
                 .id(p.getId())

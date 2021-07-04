@@ -25,12 +25,12 @@ public class CommentDAO {
     private QPost post = comment.post;
     private QComment parentComment = comment.parent;
 
-    public List<CommentDto> getComments(Integer postId) {
+    public List<CommentDto> getCommentDtosForPostIds(Integer postId) {
         Predicate where = post.id.eq(postId);
         return find(where);
     }
 
-    public List<CommentDto> getComments(List<Integer> postIds) {
+    public List<CommentDto> getCommentDtosForPostIds(List<Integer> postIds) {
         Predicate where = post.id.in(postIds);
         return find(where);
     }
@@ -40,16 +40,11 @@ public class CommentDAO {
         JPAQuery<Comment> query = new JPAQuery<>(em);
 
         List<CommentDto> list = query.select(Projections.constructor(CommentDto.class,
-                comment.id,
-                post.id,
-                parentComment.id,
-                comment.commentText,
-                comment.time,
-                author.id,
-                comment.isBlocked))
+                comment.id, post.id, parentComment.id, comment.commentText, comment.time, author.id, comment.isBlocked))
                 .from(comment)
                 .where(where)
                 .fetch();
+
         em.close();
         return list;
     }

@@ -82,7 +82,7 @@ public class CommentTest {
     @Transactional
     void getSingleCommentForSinglePost() {
         int postId = postIds.get(0);
-        List<CommentDto> commentDTOS = commentDAO.getComments(postId);
+        List<CommentDto> commentDTOS = commentDAO.getCommentDtosForPostIds(postId);
 
         assertEquals(1, commentDTOS.size());
         assertEquals("comment 1 to post 1", commentDTOS.get(0).getText());
@@ -95,7 +95,7 @@ public class CommentTest {
     @Transactional
     void getMultipleCommentsForSinglePost() {
         int postId = postIds.get(1);
-        List<CommentDto> commentDTOS = commentDAO.getComments(postId);
+        List<CommentDto> commentDTOS = commentDAO.getCommentDtosForPostIds(postId);
 
         assertEquals(2, commentDTOS.size());
         assertEquals("comment 2 to post 2", commentDTOS.get(0).getText());
@@ -111,7 +111,7 @@ public class CommentTest {
     void getCommentsForMultiplePosts() {
         int postId1 = postIds.get(0);
         int postId2 = postIds.get(1);
-        List<CommentDto> commentDTOS = commentDAO.getComments(List.of(postId1, postId2));
+        List<CommentDto> commentDTOS = commentDAO.getCommentDtosForPostIds(List.of(postId1, postId2));
 
         assertEquals(3, commentDTOS.size());
     }
@@ -120,7 +120,7 @@ public class CommentTest {
     @Transactional
     void getParentChildComments() {
         int pId = postIds.get(2);
-        List<CommentDto> commentDTOS = commentDAO.getComments(pId);
+        List<CommentDto> commentDTOS = commentDAO.getCommentDtosForPostIds(pId);
 
         CommentDto parent = commentDTOS.get(0);
         CommentDto child = commentDTOS.get(1);

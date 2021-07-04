@@ -40,4 +40,25 @@ public class PersonDAO {
         em.close();
         return dtos;
     }
+
+    public List<PersonDTO> getPersonDtosByIds(List<Integer> ids) {
+        QPerson person = QPerson.person;
+        QCity city = QCity.city;
+        QCountry country = QCountry.country;
+
+        EntityManager em = emf.createEntityManager();
+        JPAQuery<Person> query = new JPAQuery<>(em);
+
+        List<PersonDTO> dtos = query
+                .select(Projections.constructor(PersonDTO.class,
+                        person.id, person.firstName, person.lastName, person.regDate, person.birthDate, person.email,
+                        person.phone, person.photo, person.about, city.id, city.title, country.id, country.title))
+                .from(person)
+                .leftJoin(person.country, country)
+                .leftJoin(person.city, city)
+                .where(person.id.in(ids))
+                .fetch();
+        em.close();
+        return dtos;
+    }
 }
