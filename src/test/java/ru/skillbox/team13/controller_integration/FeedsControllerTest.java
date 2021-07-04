@@ -7,12 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
-import ru.skillbox.team13.test_util.DomainObjectFactory;
-import ru.skillbox.team13.test_util.RequestService;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.entity.*;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
+import ru.skillbox.team13.test_util.DomainObjectFactory;
+import ru.skillbox.team13.test_util.RequestService;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -21,11 +21,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
 
+import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.skillbox.team13.test_util.DomainObjectFactory.genString;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -48,17 +48,15 @@ public class FeedsControllerTest {
         Random r = new Random();
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
-        Person mainPerson = DomainObjectFactory.makePerson(genString(5, 0f, false),
-                genString(10, 0f, false), genString(20, 0f, false));
+
+        Person mainPerson = DomainObjectFactory.makePerson();
         em.persist(mainPerson);
 
-        User user = DomainObjectFactory.makeUser("main@mail");
-        user.setPerson(mainPerson);
+        User user = DomainObjectFactory.makeUser("main@mail", mainPerson);
         em.persist(user);
 
         for (int i = 0; i < totalPeople; i++) {
-            Person person = DomainObjectFactory.makePerson(genString(5, 0f, false),
-                    genString(10, 0f, false), genString(20, 0f, false));
+            Person person = DomainObjectFactory.makePerson();
             em.persist(person);
 
             boolean isFriend = r.nextBoolean();
@@ -70,7 +68,7 @@ public class FeedsControllerTest {
             }
 
             while (r.nextBoolean()) {
-                Post post = DomainObjectFactory.makePost(genString(40, 0.1f, false), genString(200, 0.2f, true));
+                Post post = DomainObjectFactory.makePost(person);
 
                 if (r.nextInt(10) == 0) {
                     StringBuilder sb = new StringBuilder(post.getTitle());
@@ -85,14 +83,11 @@ public class FeedsControllerTest {
                 }
 
                 post.setTime(LocalDateTime.now().minus(r.nextInt(1440), ChronoUnit.MINUTES));
-                post.setAuthor(person);
                 em.persist(post);
                 if (isFriend) friendsPosts++;
 
                 while (r.nextBoolean()) {
-                    Comment c = DomainObjectFactory.makeComment(genString(100, 0.2f, true));
-                    c.setAuthor(person);
-                    c.setPost(post);
+                    Comment c = DomainObjectFactory.makeComment(person, post);
                     em.persist(c);
                 }
 
@@ -141,7 +136,7 @@ public class FeedsControllerTest {
     @WithMockUser(username = "main@mail")
     void testContainsComments() {
         List<PostDto> feed = requestService.getAsPostsDtoList(get(url), false);
-        assertTrue(feed.stream().anyMatch(pdto -> pdto.getComments().size() > 0));
+        assertTrue(feed.stream().anyMatch(pdto -> nonNull(pdto.getComments()) && pdto.getComments().size() > 0));
     }
 
 
