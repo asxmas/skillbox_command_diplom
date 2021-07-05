@@ -1,5 +1,6 @@
 package ru.skillbox.team13.controller_integration;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -11,6 +12,8 @@ import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.entity.*;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
+import ru.skillbox.team13.repository.CommentRepository;
+import ru.skillbox.team13.repository.PostRepository;
 import ru.skillbox.team13.test_util.DomainObjectFactory;
 import ru.skillbox.team13.test_util.RequestService;
 
@@ -34,6 +37,12 @@ public class FeedsControllerTest {
 
     @Autowired
     EntityManagerFactory emf;
+
+    @Autowired
+    PostRepository postRepository;
+
+    @Autowired
+    CommentRepository commentRepository;
 
     @Autowired
     RequestService requestService;
@@ -100,6 +109,12 @@ public class FeedsControllerTest {
 
         em.getTransaction().commit();
         em.close();
+    }
+
+    @AfterAll
+    void destroy() {
+        commentRepository.deleteAll();
+        postRepository.deleteAll();
     }
 
 

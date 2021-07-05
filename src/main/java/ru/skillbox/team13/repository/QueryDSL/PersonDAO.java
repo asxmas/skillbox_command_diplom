@@ -10,14 +10,15 @@ import ru.skillbox.team13.entity.*;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
 import java.util.List;
 
 @Repository
+@PersistenceContext
 @RequiredArgsConstructor
 public class PersonDAO {
 
-    private final EntityManagerFactory emf;
+    private final EntityManager em;
 
     public List<PersonDTO> fetchFriendDtos(int srcPersonID, FriendshipStatusCode fsc) {
         QFriendship friendship = QFriendship.friendship;
@@ -25,10 +26,9 @@ public class PersonDAO {
         QCountry country = QCountry.country;
         QCity city = QCity.city;
 
-        EntityManager em = emf.createEntityManager();
         JPAQuery<Person> query = new JPAQuery<>(em);
 
-        List<PersonDTO> dtos = query
+        return query
                 .select(Projections.constructor(PersonDTO.class,
                         person.id, person.firstName, person.lastName, person.regDate, person.birthDate, person.email,
                         person.phone, person.photo, person.about, city.id, city.title, country.id, country.title))
@@ -38,8 +38,6 @@ public class PersonDAO {
                 .leftJoin(person.city, city)
                 .where(friendship.sourcePerson.id.eq(srcPersonID)
                         .and(friendship.status.code.eq(fsc))).fetch();
-        em.close();
-        return dtos;
     }
 
     public List<PersonDTO> getById(List<Integer> ids) {
@@ -57,10 +55,9 @@ public class PersonDAO {
         QCity city = QCity.city;
         QCountry country = QCountry.country;
 
-        EntityManager em = emf.createEntityManager();
         JPAQuery<Person> query = new JPAQuery<>(em);
 
-        List<PersonDTO> dtos = query
+        return query
                 .select(Projections.constructor(PersonDTO.class,
                         person.id, person.firstName, person.lastName, person.regDate, person.birthDate, person.email,
                         person.phone, person.photo, person.about, city.id, city.title, country.id, country.title))
@@ -69,7 +66,5 @@ public class PersonDAO {
                 .leftJoin(person.city, city)
                 .where(predicate)
                 .fetch();
-        em.close();
-        return dtos;
     }
 }

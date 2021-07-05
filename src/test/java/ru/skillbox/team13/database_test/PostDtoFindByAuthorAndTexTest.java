@@ -1,5 +1,6 @@
 package ru.skillbox.team13.database_test;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -13,6 +14,7 @@ import ru.skillbox.team13.entity.Like;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.exception.BadRequestException;
+import ru.skillbox.team13.repository.PostRepository;
 import ru.skillbox.team13.repository.QueryDSL.PostDAO;
 
 import javax.persistence.EntityManager;
@@ -36,6 +38,9 @@ public class PostDtoFindByAuthorAndTexTest {
 
     @Autowired
     PostDAO postDAO;
+
+    @Autowired
+    PostRepository postRepository;
 
     List<Integer> authorsIds;
     List<Integer> postIds;
@@ -66,13 +71,18 @@ public class PostDtoFindByAuthorAndTexTest {
 
         posts.forEach(em::persist);
 
-        postIds = posts.stream().map(p -> p.getId()).collect(Collectors.toList());
+        postIds = posts.stream().map(Post::getId).collect(Collectors.toList());
 
         List<Like> likes = makeLike(persons.get(0), posts.get(5), 10);
         likes.forEach(em::persist);
 
         em.getTransaction().commit();
         em.close();
+    }
+
+    @AfterAll
+    void destroy() {
+        postRepository.deleteAll();
     }
 
     @Test

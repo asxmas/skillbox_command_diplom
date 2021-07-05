@@ -12,40 +12,39 @@ import ru.skillbox.team13.entity.QPerson;
 import ru.skillbox.team13.entity.QPost;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
 import java.util.List;
 
 @Repository
+@PersistenceContext
 @RequiredArgsConstructor
 public class CommentDAO {
 
-    private final EntityManagerFactory emf;
-    private QComment comment = QComment.comment;
-    private QPerson author = comment.author;
-    private QPost post = comment.post;
-    private QComment parentComment = comment.parent;
+    private final EntityManager em;
 
     public List<CommentDto> getCommentDtosForPostIds(Integer postId) {
+        QPost post = QComment.comment.post;
         Predicate where = post.id.eq(postId);
         return find(where);
     }
 
     public List<CommentDto> getCommentDtosForPostIds(List<Integer> postIds) {
+        QPost post = QComment.comment.post;
         Predicate where = post.id.in(postIds);
         return find(where);
     }
 
     private List<CommentDto> find(Predicate where) {
-        EntityManager em = emf.createEntityManager();
+        QComment comment = QComment.comment;
+        QPerson author = comment.author;
+        QPost post = comment.post;
+        QComment parentComment = comment.parent;
         JPAQuery<Comment> query = new JPAQuery<>(em);
 
-        List<CommentDto> list = query.select(Projections.constructor(CommentDto.class,
+        return query.select(Projections.constructor(CommentDto.class,
                 comment.id, post.id, parentComment.id, comment.commentText, comment.time, author.id, comment.isBlocked))
                 .from(comment)
                 .where(where)
                 .fetch();
-
-        em.close();
-        return list;
     }
 }

@@ -17,7 +17,7 @@ import ru.skillbox.team13.entity.QPost;
 import ru.skillbox.team13.exception.BadRequestException;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,34 +25,11 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Repository
+@PersistenceContext
 @RequiredArgsConstructor
 public class PostDAO {
 
-    private final EntityManagerFactory emf;
-
-    @Deprecated
-    public Page<Post> findByTextAndTime(String text, LocalDateTime earliest, LocalDateTime latest, Pageable p) {
-        QPost post = QPost.post;
-        EntityManager em = emf.createEntityManager();
-
-        Predicate predicate = post.deleted.eq(false)
-                .and(post.title.contains(text).or(post.postText.contains(text)));
-
-        BooleanBuilder expr = new BooleanBuilder(predicate);
-        if (earliest != null) expr.and(post.time.after(earliest));
-        if (latest != null) expr.and(post.time.before(latest));
-
-        JPAQuery<Post> query = new JPAQuery<>(em);
-        QueryResults<Post> results = query
-                .from(post)
-                .innerJoin(post.author).fetchJoin()
-                .where(expr)
-                .offset(p.getOffset())
-                .limit(p.getPageSize())
-                .fetchResults();
-        em.close();
-        return new PageImpl<>(results.getResults(), p, results.getTotal());
-    }
+    private final EntityManager em;
 
     public Page<PostDto> getPostDtosByAuthorIdAndSubstring(List<Integer> authorIds, String substr, Pageable p) {
         QPost post = QPost.post;
@@ -70,8 +47,8 @@ public class PostDAO {
         QPost post = QPost.post;
 
         Predicate predicate = post.deleted.isFalse();
-
         BooleanBuilder expr = new BooleanBuilder(predicate);
+
         if (nonNull(earliest)) expr.and(post.time.after(earliest));
         if (nonNull(latest)) expr.and(post.time.before(latest));
         if (nonNull(text) && !text.isBlank()) {
@@ -82,11 +59,12 @@ public class PostDAO {
 
     public PostDto getSingleDtoById(int id) {
         Predicate where = QPost.post.id.eq(id).and(QPost.post.deleted.isFalse());
-        return executeDtoQuery(where, PageRequest.of(0, 1)).getContent().get(0);
+        Page<PostDto> page = executeDtoQuery(where, PageRequest.of(0, 1));
+        if (page.getTotalElements() == 0) throw new BadRequestException("Post request '" + where + "' returns 0 results.");
+        return page.getContent().get(0);
     }
 
     private Page<PostDto> executeDtoQuery(Predicate where, Pageable p) {
-        EntityManager em = emf.createEntityManager();
         QPost post = QPost.post;
         JPAQuery<PostDto> query = new JPAQuery<>(em);
         QueryResults<PostDto> results = query.select(Projections.constructor(PostDto.class,
@@ -97,14 +75,10 @@ public class PostDAO {
                 .limit(p.getPageSize())
                 .orderBy(post.time.desc())
                 .fetchResults();
-        em.close();
-        if (results.getTotal() == 0) throw new BadRequestException("Post request '" + where + "' returns 0 results.");
         return new PageImpl<>(results.getResults(), p, results.getTotal());
     }
 
     public void edit(int id, LocalDateTime time, String title, String text) {
-        EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
         Post post = em.find(Post.class, id);
         if (isNull(post) || post.isDeleted()) {
             throw new BadRequestException("Post id=" + id + "does not exist or was deleted.");
@@ -115,19 +89,13 @@ public class PostDAO {
         }
         post.setTitle(title);
         post.setPostText(text);
-        em.getTransaction().commit();
-        em.close();
     }
 
     public void delete(int id, boolean delete) {
-        EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
         Post post = em.find(Post.class, id);
         if (isNull(post) || post.isDeleted() == delete) {
             throw new BadRequestException("Post id=" + id + "does not exist or was deleted.");
         }
         post.setDeleted(delete);
-        em.getTransaction().commit();
-        em.close();
     }
 }
