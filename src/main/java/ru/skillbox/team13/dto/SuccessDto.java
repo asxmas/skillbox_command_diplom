@@ -12,7 +12,7 @@ import java.util.Map;
 public class SuccessDto {
 
     private String error = "string";
-    private Long timestamp = Instant.now().getEpochSecond();
+    private Long timestamp = Instant.now().toEpochMilli();
     private Object data;
 
     public SuccessDto() {

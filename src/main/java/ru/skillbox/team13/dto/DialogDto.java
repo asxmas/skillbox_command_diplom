@@ -8,10 +8,10 @@ import lombok.Getter;
 @Builder
 public class DialogDto {
 
-    private int id;
+    private Integer id;
 
     @JsonProperty("unread_count")
-    private int unreadCount;
+    private Integer unreadCount;
 
     @JsonProperty("last_message")
     private DialogMessageDto lastMessage;

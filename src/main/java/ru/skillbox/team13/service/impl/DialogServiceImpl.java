@@ -45,10 +45,11 @@ public class DialogServiceImpl implements DialogService {
     @Override
     @Transactional(readOnly = true)
     public DTOWrapper getPersonDialogs(String query, int offset, int itemPerPage) {
+
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         Person person = userService.getAuthorizedUser().getPerson();
         Page<Dialog2Person> dialogPage = dialog2PersonRepository.findPersonDialogs(pageable, query, person.getId());
-        if (dialogPage == null) { throw new BadRequestException("User " + person.getEmail() + " have no dialogs");}
+        if (dialogPage.getTotalElements() == 0) { throw new BadRequestException("User " + person.getEmail() + " have no dialogs");}
         else {
             List<DialogDto> results = dialogPage.stream().map(DialogMapper::convertDialog2PersonToDialogDTO).collect(Collectors.toList());
             return WrapperMapper.wrap(results, (int) dialogPage.getTotalElements(), offset, itemPerPage, true);
@@ -59,16 +60,16 @@ public class DialogServiceImpl implements DialogService {
     @Transactional
     @Modifying
     public DTOWrapper createDialog(ArrayList<Integer> userIds) {
+
         int currentUserId = userService.getAuthorizedUser().getPerson().getId();
         Dialog dialog = new Dialog();
         int dialogId = dialogRepository.saveAndFlush(dialog).getId();
         //добавление текущего пользователя в диалог
         if (!userIds.contains(currentUserId)) userIds.add(currentUserId);
-        List<Dialog2Person> dialog2PersonList = userIds.stream().map(id -> {
-            Person person = personRepository.getById(id);
-            return new Dialog2Person()
-                    .setPerson(person)
-                    .setDialog(dialog);}).collect(Collectors.toList());
+        List<Person> personList = personRepository.findAllById(userIds);
+        List<Dialog2Person> dialog2PersonList = personList.stream().map(person -> new Dialog2Person()
+                .setPerson(person)
+                .setDialog(dialog)).collect(Collectors.toList());
         dialog2PersonRepository.saveAllAndFlush(dialog2PersonList);
         return WrapperMapper.wrap(Map.of("id", dialogId), true);
     }
@@ -77,7 +78,9 @@ public class DialogServiceImpl implements DialogService {
     @Transactional(readOnly = true)
     public DTOWrapper getUnreadCount() {
         int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
-        int countUnread = dialog2PersonRepository.countAllUnread(currentPersonId);
+        Integer countUnread = dialog2PersonRepository.countAllUnread(currentPersonId);
+        //при отсутствии диалогов у пользователя вернется null, нет непрочитанных сообщений
+        if (countUnread == null) countUnread = 0;
         return WrapperMapper.wrap(Map.of("count", countUnread), true);
     }
 
@@ -85,10 +88,14 @@ public class DialogServiceImpl implements DialogService {
     @Transactional
     @Modifying
     public DTOWrapper deleteDialog(int dialogId) {
+
+        //удаляем перекрестную ссылку на Message (поле lastMessage) в диалоге для устранения ограничений внешнего ключа
         Dialog dialog = dialogRepository.getById(dialogId);
         dialog.setLastMessage(null);
         dialogRepository.saveAndFlush(dialog);
-        messageRepository.deleteMessageByDialogId(dialogId);
+
+        dialog2PersonRepository.deleteByDialog(dialog);
+
         dialogRepository.deleteById(dialogId);
         return WrapperMapper.wrap(Map.of("id", dialogId), true);
     }
@@ -97,15 +104,10 @@ public class DialogServiceImpl implements DialogService {
     @Transactional
     @Modifying
     public DTOWrapper sendMessage(int dialogId, String messageText) {
+
         Person currentPerson = userService.getAuthorizedUser().getPerson();
         Dialog dialog = dialogRepository.findById(dialogId).get();
-        Message message = new Message()
-                .setTime(LocalDateTime.now())
-                .setAuthor(currentPerson)
-                .setRecipient(currentPerson)
-                .setMessageText(messageText)
-                .setReadStatus(MessageReadStatus.SENT)
-                .setDialog(dialog);
+        Message message = createMessage(dialog, currentPerson, messageText);
         dialog.setLastMessage(message);
         messageRepository.save(message);
         dialogRepository.save(dialog);
@@ -117,6 +119,7 @@ public class DialogServiceImpl implements DialogService {
     @Override
     @Transactional(readOnly = true)
     public DTOWrapper getDialogMessages(int dialogId, String query, int offset, int itemPerPage) {
+
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         Page<Message> messagePage = messageRepository.findByDialog(pageable, query, dialogId);
         List<DialogMessageDto> results = messagePage.stream().map(DialogMapper::convertMessageToDialogMessageDTO).collect(Collectors.toList());
@@ -133,5 +136,16 @@ public class DialogServiceImpl implements DialogService {
                                 d2p.setUnreadCount(d2p.getUnreadCount() + 1);
                                 return d2p;})
                          .collect(Collectors.toList()));
+    }
+
+    private Message createMessage(Dialog dialog, Person currentPerson, String messageText){
+
+        return new Message()
+                .setTime(LocalDateTime.now())
+                .setAuthor(currentPerson)
+                .setRecipient(currentPerson)
+                .setMessageText(messageText)
+                .setReadStatus(MessageReadStatus.SENT)
+                .setDialog(dialog);
     }
 }

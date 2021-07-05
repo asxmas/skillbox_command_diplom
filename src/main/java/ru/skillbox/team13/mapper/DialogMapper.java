@@ -12,7 +12,7 @@ public class DialogMapper {
     public static DialogMessageDto convertMessageToDialogMessageDTO(Message message) {
         return DialogMessageDto.builder()
                 .id(message.getId())
-                .time(message.getTime().toEpochSecond(OffsetDateTime.now().getOffset()) * 1000)
+                .time(message.getTime().toInstant(OffsetDateTime.now().getOffset()).toEpochMilli())
                 .authorId(message.getAuthor().getId())
                 .recipientId(message.getRecipient().getId())
                 .messageText(message.getMessageText())

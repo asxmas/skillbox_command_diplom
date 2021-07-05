@@ -25,7 +25,7 @@ public class Dialog {
     @JoinColumn(name = "last_message_id")
     private Message lastMessage;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "dialog")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "dialog", cascade = CascadeType.ALL)
     private List<Message> messages;
 
     @ManyToMany(cascade = CascadeType.PERSIST)

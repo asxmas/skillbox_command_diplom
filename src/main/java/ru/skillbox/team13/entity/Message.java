@@ -34,7 +34,7 @@ public class Message extends Notified {
     @Column(name = "read_status", nullable = false)
     private MessageReadStatus readStatus;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dialog_id", nullable = false)
     private Dialog dialog;
 }

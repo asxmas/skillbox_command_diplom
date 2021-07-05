@@ -17,6 +17,8 @@ public interface Dialog2PersonRepository extends JpaRepository<Dialog2Person, In
 
     List<Dialog2Person> findDialog2PersonByDialog(Dialog dialog);
 
+    void deleteByDialog(Dialog dialog);
+
     @Query("select sum(d2p.unreadCount) from Dialog2Person d2p where d2p.person.id = :personId")
-    int countAllUnread(int personId);
+    Integer countAllUnread(int personId);
 }

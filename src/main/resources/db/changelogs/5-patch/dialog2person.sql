@@ -13,8 +13,6 @@ CREATE TABLE "public"."dialog2person"
 COMMENT ON TABLE "public"."dialog2person" IS 'связи ползователей с диалогами';
 
 ALTER TABLE "public"."dialog2person"
-ADD CONSTRAINT "dialog2person_dialog_id_fk" FOREIGN KEY ("dialog_id") REFERENCES "public"."dialog" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
-
-ALTER TABLE "public"."dialog2person"
+ADD CONSTRAINT "dialog2person_dialog_id_fk" FOREIGN KEY ("dialog_id") REFERENCES "public"."dialog" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION,
 ADD CONSTRAINT "dialog2person_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."person" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 

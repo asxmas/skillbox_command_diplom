@@ -21,8 +21,8 @@ import ru.skillbox.team13.entity.enums.UserType;
 import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.exception.UnauthorizedException;
 import ru.skillbox.team13.mapper.PersonMapper;
-import ru.skillbox.team13.repository.PersonRepository;
 import ru.skillbox.team13.repository.BlacklistedTokenRepository;
+import ru.skillbox.team13.repository.PersonRepository;
 import ru.skillbox.team13.repository.UserRepository;
 import ru.skillbox.team13.security.Jwt.JwtTokenProvider;
 import ru.skillbox.team13.service.UserService;
@@ -120,8 +120,8 @@ public class UserServiceImpl implements UserService {
         finally {
             SecurityContextHolder.clearContext();
             SecurityContextHolder.createEmptyContext();
-            return true;
         }
+        return true;
     }
 
     //метод получения текущего авторизованного пользователя
@@ -160,17 +160,18 @@ public class UserServiceImpl implements UserService {
     //метод генерации ссылки и отправки по email кода для смены пароля
     @Override
     @Transactional
-    public Boolean codeGenerationAndEmail(String email){
+    public Boolean codeGenerationAndEmail(String email, String origin){
         try {
             //генерируем ссылку
-            String token = UUID.randomUUID().toString().replaceAll("-", "");
+            String link = UUID.randomUUID().toString().replaceAll("-", "");
             //записываем code в БД
             User user = checkUserRegistration(email).orElseThrow(() -> new BadRequestException("user not registered"));
-            user.setConfirmationCode(token);
+            user.setConfirmationCode(link);
             userRepository.save(user);
             //отправляем ссылку по email
-            mailServiceImpl.sendMessage(email, "Password recovery code",
-                    "<p>Your password recovery code is: " + token + "</p>");
+            mailServiceImpl.sendMessage(email, "Password recovery link to Team13",
+                    "<p><a href=\"" + origin + "/api/v1/account/password/reset?link=" +
+                            link + "\">Нажмите на ссылку для восстановления пароля в Team13</a></p>");
         }
         catch (Exception e) {
             //при любой ошибке возвращаем false
@@ -183,15 +184,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public Boolean setPassword(String token, String password) {
-        User user;
-        try {
-            user = userRepository.findByConfirmationCode(token).get();
-        }
-        catch (NoSuchElementException e) {
-            log.info("IN setPassword - user not found to change password");
-            return false;
-        }
-        user.setConfirmationCode(null);
+        User user = userRepository.findByName(jwtTokenProvider.getUsername(token)).get();
         user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
         log.info("IN setPassword - password of {} has changed ", user.getEmail());
@@ -217,5 +210,19 @@ public class UserServiceImpl implements UserService {
     public Boolean setNotification(NotificationCode notificationCode, Boolean enabled) {
         //TODO сохраняем настройки по конкретному типу оповещений для этого пользователя
         return true;
+    }
+
+    @Override
+    @Transactional
+    public String getRecoveryToken(String link) {
+        //сбрасываем пароль если пользователь перешел по ссылке восстановления пароля
+        User user = userRepository.findByConfirmationCode(link).get();
+        //ссылка будет работать на один переход
+        user.setConfirmationCode(null);
+        //новый пароль
+        user.setPassword(UUID.randomUUID().toString());
+        userRepository.save(user);
+        //передаем токен для фронта
+        return jwtTokenProvider.createToken(user.getEmail(), user.getType());
     }
 }
