@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.NotificationDto;
+import ru.skillbox.team13.entity.Comment;
 import ru.skillbox.team13.entity.Notification;
 import ru.skillbox.team13.mapper.NotificationMapper;
 import ru.skillbox.team13.mapper.WrapperMapper;
@@ -45,5 +46,6 @@ public class NotificationServiceImpl implements NotificationService {
         noteRepository.deleteByPersonIdAndId(currentPersonId, id);
         return WrapperMapper.wrap(noteArray, 1, 0, 10, true);
     }
+
 
 }

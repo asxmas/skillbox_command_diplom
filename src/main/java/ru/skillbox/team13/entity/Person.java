@@ -83,4 +83,7 @@ public class Person extends Notified {
 
     @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
     private Set<Block> blocks;
+
+    @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+    private Set<Subscription> subscriptions;
 }

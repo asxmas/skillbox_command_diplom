@@ -17,4 +17,5 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
             "c.parent.id as parentId, c.time as time, c.author.id as authorId, " +
             "c.isBlocked as blocked from Comment c")
     List<CommentProjection> getCommProjections(Post post);
+
 }

@@ -4,7 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.skillbox.team13.dto.CommentToPostDto;
 import ru.skillbox.team13.dto.DTOWrapper;
+import ru.skillbox.team13.repository.CommentRepository;
+import ru.skillbox.team13.service.CommentService;
 import ru.skillbox.team13.service.PostService;
 
 import java.util.Map;
@@ -15,6 +18,7 @@ import java.util.Map;
 public class PostsController {
 
     private final PostService postService;
+    private final CommentService commentService;
 
     @GetMapping()
 //Поиск публикации
@@ -51,4 +55,18 @@ public class PostsController {
     ResponseEntity<DTOWrapper> recoverPost(@PathVariable int id) {
         return new ResponseEntity<>(postService.recoverById(id), HttpStatus.OK);
     }
+
+    @GetMapping("/{id}/comments")
+        //Получение комментариев к посту
+    ResponseEntity<DTOWrapper> takeCommentByPostId(@PathVariable int id,
+                                                   @RequestParam(required = false, defaultValue = "0") int offset,
+                                                   @RequestParam(required = false, defaultValue = "20") int itemPerPage) {
+        return new ResponseEntity<>(commentService.getAllCommentByPost(id, offset, itemPerPage), HttpStatus.OK);
+    }
+
+//    @PostMapping("/{id}/comments")
+//    ResponseEntity<DTOWrapper> insertCommentToPost(@PathVariable int id,
+//                                                   @RequestBody(required = true) CommentToPostDto commentToPostDto) {
+//
+//    }
 }

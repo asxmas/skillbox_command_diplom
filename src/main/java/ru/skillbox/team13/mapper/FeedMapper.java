@@ -31,7 +31,7 @@ public class FeedMapper {
         return o.map(LikeCount::getLikeCount).orElse(0);
     }
 
-    private static List<CommentDto> getCommentsForPostId(int pId, List<CommentProjection> comments) {
+    public static List<CommentDto> getCommentsForPostId(int pId, List<CommentProjection> comments) {
         return comments.stream().filter(c -> c.getPostId() == pId)
                 .map(f -> CommentDto.builder()
                         .parentId(f.getParentId())
