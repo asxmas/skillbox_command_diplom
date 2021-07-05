@@ -12,6 +12,7 @@ import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.entity.Like;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
+import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.repository.QueryDSL.PostDAO;
 
 import javax.persistence.EntityManager;
@@ -19,6 +20,7 @@ import javax.persistence.EntityManagerFactory;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,6 +38,7 @@ public class PostDtoFindByAuthorAndTexTest {
     PostDAO postDAO;
 
     List<Integer> authorsIds;
+    List<Integer> postIds;
 
     @BeforeAll
     void prepare() {
@@ -62,6 +65,8 @@ public class PostDtoFindByAuthorAndTexTest {
         posts.get(3).setTime(LocalDateTime.now().plusHours(1));
 
         posts.forEach(em::persist);
+
+        postIds = posts.stream().map(p -> p.getId()).collect(Collectors.toList());
 
         List<Like> likes = makeLike(persons.get(0), posts.get(5), 10);
         likes.forEach(em::persist);
@@ -125,5 +130,18 @@ public class PostDtoFindByAuthorAndTexTest {
         Page<PostDto> page = postDAO.getPostsDtosByTimeAndSubstring("substring", null,
                 LocalDateTime.now().plusMinutes(1), PageRequest.of(0, 100));
         assertEquals(2, page.getTotalElements());
+    }
+
+    @Test
+    void testGetById() {
+        Random random = new Random();
+        PostDto postDto = postDAO.getSingleDtoById(postIds.get(random.nextInt(postIds.size())));
+        assertNotNull(postDto.getAuthor());
+        assertNotNull(postDto.getText());
+    }
+
+    @Test
+    void testGetWrongId() {
+        assertThrows(BadRequestException.class, () -> postDAO.getSingleDtoById(100500));
     }
 }

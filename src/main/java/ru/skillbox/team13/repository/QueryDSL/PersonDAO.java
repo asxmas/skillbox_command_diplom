@@ -1,5 +1,6 @@
 package ru.skillbox.team13.repository.QueryDSL;
 
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +42,17 @@ public class PersonDAO {
         return dtos;
     }
 
-    public List<PersonDTO> getPersonDtosByIds(List<Integer> ids) {
+    public List<PersonDTO> getById(List<Integer> ids) {
+        Predicate where = QPerson.person.id.in(ids);
+        return find(where);
+    }
+
+    public PersonDTO getById(int authorId) {
+        Predicate where = QPerson.person.id.eq(authorId);
+        return find(where).get(0);
+    }
+
+    private List<PersonDTO> find(Predicate predicate) {
         QPerson person = QPerson.person;
         QCity city = QCity.city;
         QCountry country = QCountry.country;
@@ -56,7 +67,7 @@ public class PersonDAO {
                 .from(person)
                 .leftJoin(person.country, country)
                 .leftJoin(person.city, city)
-                .where(person.id.in(ids))
+                .where(predicate)
                 .fetch();
         em.close();
         return dtos;

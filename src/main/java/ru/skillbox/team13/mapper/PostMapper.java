@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Deprecated
 public class PostMapper {
 
     @Deprecated
@@ -31,11 +32,13 @@ public class PostMapper {
                 .build();
     }
 
+    @Deprecated
     private static Integer getLikeCountForPostId(int pId, List<LikeCount> likes) {
         Optional<LikeCount> o = likes.stream().filter(l -> l.getId() == pId).findFirst();
         return o.map(LikeCount::getLikeCount).orElse(0);
     }
 
+    @Deprecated
     private static List<CommentDto> filterCommentsByPost(int pId, List<CommentDto> comments) {
         return comments.stream().filter(c -> c.getPostId() == pId)
                 .collect(Collectors.toList());

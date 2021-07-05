@@ -11,14 +11,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skillbox.team13.test_util.DomainObjectFactory;
-import ru.skillbox.team13.test_util.RequestService;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.repository.PostRepository;
+import ru.skillbox.team13.test_util.DomainObjectFactory;
+import ru.skillbox.team13.test_util.RequestService;
 import ru.skillbox.team13.util.TimeUtil;
 
 import javax.persistence.EntityManager;
@@ -27,7 +27,8 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.skillbox.team13.test_util.DomainObjectFactory.genString;
@@ -57,18 +58,17 @@ public class PostControllerTest {
     void prepare() {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
-        mainPerson = DomainObjectFactory.makePerson(genString(5), genString(10), genString(20));
+        mainPerson = DomainObjectFactory.makePerson();
         em.persist(mainPerson);
 
-        User user = DomainObjectFactory.makeUser("main@mail");
-        user.setPerson(mainPerson);
+        User user = DomainObjectFactory.makeUser("main@mail", mainPerson);
         em.persist(user);
         em.getTransaction().commit();
         em.close();
     }
 
     @Test
-//    @Transactional
+    @Transactional
     @WithMockUser(username = "main@mail")
     void testSimpleFind() {
         createAndPersistPost("substring", "substring");
@@ -80,7 +80,7 @@ public class PostControllerTest {
     @Transactional
     @WithMockUser(username = "main@mail")
     void findByID() {
-        int id = createAndPersistPost("", "");
+        int id = createAndPersistPost();
         PostDto dto = requestService.getAsPostDto(get(url + "/" + id), false);
 
         assertEquals(200, dto.getText().length());
@@ -91,11 +91,9 @@ public class PostControllerTest {
     @Transactional
     @WithMockUser(username = "main@mail")
     void findDeletedByID() {
-        int id = createAndPersistPost("", "");
-        Post p = postRepository.getById(id);
-        p.setDeleted(true);
-        postRepository.save(p);
-
+        Post post = DomainObjectFactory.makePost(mainPerson);
+        post.setDeleted(true);
+        int id = createAndPersistPost(post);
         requestService.doRequest(get(url + "/" + id), status().isBadRequest(), true);
     }
 
@@ -106,11 +104,10 @@ public class PostControllerTest {
     }
 
     @Test
-    @Transactional
+//    @Transactional
     @WithMockUser(username = "main@mail")
     void testEdit() throws JsonProcessingException {
-        int id = createAndPersistPost("", "");
-
+        int id = createAndPersistPost();
         Map<String, String> payload = Map.of("title", "rootin", "post_text", "tootin");
         PostDto dto = requestService.getAsPostDto(put(url + "/" + id)
                 .contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsString(payload)), true);
@@ -118,6 +115,18 @@ public class PostControllerTest {
         assertEquals("rootin", dto.getTitle());
         assertEquals("tootin", dto.getText());
         assertTrue(dto.getTimestamp() - TimeUtil.getTimestamp(LocalDateTime.now()) < 1000);
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "main@mail")
+    void testEditNonExisting() throws JsonProcessingException {
+        Map<String, String> payload = Map.of("k1", "v1", "k2", "v2");
+
+        requestService.doRequest(put(url + "/" + 100500)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(payload)),
+                status().isBadRequest(), true);
     }
 
     @Test
@@ -165,10 +174,22 @@ public class PostControllerTest {
         requestService.doRequest(get(url + "/" + id), status().isOk(), true); //exists
     }
 
+    int createAndPersistPost(Post post) {
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+        em.persist(post);
+        int id = post.getId();
+
+        em.getTransaction().commit();
+        em.close();
+        return id;
+    }
+
     int createAndPersistPost(String title, String text) {
-        Post post = DomainObjectFactory.makePost(title.isBlank() ? genString(10) : title,
-                text.isBlank() ? genString(200, 0.1f, true) : text);
-        post.setAuthor(mainPerson);
-        return postRepository.saveAndFlush(post).getId();
+        return createAndPersistPost(DomainObjectFactory.makePost(title, text, mainPerson));
+    }
+
+    int createAndPersistPost() {
+        return createAndPersistPost(genString(20), genString(200));
     }
 }

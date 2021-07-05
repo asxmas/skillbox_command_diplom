@@ -116,7 +116,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
                 offset / itemPerPage, text, page.getTotalElements());
 
         List<Integer> personIds = page.getContent().stream().map(p -> p.getAuthor().getId()).collect(toList());
-        List<PersonDTO> personDtos = personDAO.getPersonDtosByIds(personIds);
+        List<PersonDTO> personDtos = personDAO.getById(personIds);
         log.debug("Loading person data for page {} of feed, total {} users.", offset / itemPerPage, personDtos.size());
 
         List<CommentDto> commentDtos = commentDAO.getCommentDtosForPostIds(personIds);
@@ -128,10 +128,9 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         return WrapperMapper.wrap(combined, (int) page.getTotalElements(), offset, itemPerPage, true);
     }
 
-
-    @Override
+    //todo delete
     @Deprecated
-    public DTOWrapper getById(int id) {
+    public DTOWrapper getByIdDeprecated(int id) {
         //todo refactor
         Post p = postRepository.findById(id).orElseThrow(() -> new BadRequestException("no post for id=" + id));
         LikeCount likes = postRepository.countLikesByPosts(p);
@@ -140,23 +139,21 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         return WrapperMapper.wrap(dto, true);
     }
 
-    //todo implement
-//    public DTOWrapper improvedFindById(int id) {
-//        //get post
-//        //get comments
-//        //combine
-//        //wrap and return
-//    }
+    @Override
+    public DTOWrapper getById(int id) {
+        PostDto postDto = postDAO.getSingleDtoById(id);
+        int authorId = postDto.getAuthor().getId();
+        PersonDTO personDTO = personDAO.getById(authorId);
+        List<CommentDto> commentDtos = commentDAO.getCommentDtosForPostIds(id);
+        combine(postDto, personDTO, commentDtos);
+        return WrapperMapper.wrap(postDto, true);
+    }
 
     @Override
     @Modifying
     @Transactional
     public DTOWrapper edit(int id, Long pubDate, String title, String text) {
-        Post p = postRepository.findById(id).orElseThrow(() -> new BadRequestException("no post for id=" + id));
-        if (pubDate != null) p.setTime(TimeUtil.getTime(pubDate));
-        p.setTitle(title);
-        p.setPostText(text);
-        postRepository.save(p);
+        postDAO.edit(id, TimeUtil.getTime(pubDate), title, text);
         return getById(id);
     }
 
@@ -164,9 +161,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     @Modifying
     @Transactional
     public DTOWrapper deleteById(int id) {
-        Post p = postRepository.findById(id).orElseThrow(() -> new BadRequestException("no post for id=" + id));
-        p.setDeleted(true);
-        postRepository.save(p);
+        postDAO.delete(id, true);
         return WrapperMapper.wrap(Map.of("id", id), true);
     }
 
@@ -174,16 +169,16 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     @Modifying
     @Transactional
     public DTOWrapper recoverById(int id) {
-        Post p = postRepository.findByIdAndDeleted(id, true).orElseThrow(() -> new BadRequestException("no post for id=" + id));
-        p.setDeleted(false);
-        postRepository.save(p);
+        postDAO.delete(id, false);
         return getById(id);
     }
 
+    @Deprecated
     public List<Post> getPosts(List<Person> persons, Pageable p) {
         return postRepository.findPostsAndAuthorsFromAuthors(p, persons);
     }
 
+    @Deprecated
     public List<Post> getPosts(List<Person> persons, Pageable p, String query) {
         return postRepository.findPostsAndAuthorsFromAuthors(p, persons, getQuery(query));
     }
@@ -197,6 +192,11 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
             p.setComments(commentMap.get(p.getId()));
         }
         return posts;
+    }
+
+    private void combine(PostDto post, PersonDTO person, List<CommentDto> comments) {
+        post.setAuthor(person);
+        post.setComments(comments);
     }
 
     private String getQuery(String query) {

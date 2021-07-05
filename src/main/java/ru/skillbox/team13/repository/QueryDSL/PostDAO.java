@@ -8,17 +8,20 @@ import com.querydsl.jpa.impl.JPAQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.entity.QPost;
+import ru.skillbox.team13.exception.BadRequestException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Repository
@@ -77,6 +80,11 @@ public class PostDAO {
         return executeDtoQuery(expr, p);
     }
 
+    public PostDto getSingleDtoById(int id) {
+        Predicate where = QPost.post.id.eq(id).and(QPost.post.deleted.isFalse());
+        return executeDtoQuery(where, PageRequest.of(0, 1)).getContent().get(0);
+    }
+
     private Page<PostDto> executeDtoQuery(Predicate where, Pageable p) {
         EntityManager em = emf.createEntityManager();
         QPost post = QPost.post;
@@ -90,6 +98,36 @@ public class PostDAO {
                 .orderBy(post.time.desc())
                 .fetchResults();
         em.close();
+        if (results.getTotal() == 0) throw new BadRequestException("Post request '" + where + "' returns 0 results.");
         return new PageImpl<>(results.getResults(), p, results.getTotal());
+    }
+
+    public void edit(int id, LocalDateTime time, String title, String text) {
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+        Post post = em.find(Post.class, id);
+        if (isNull(post) || post.isDeleted()) {
+            throw new BadRequestException("Post id=" + id + "does not exist or was deleted.");
+        }
+
+        if (nonNull(time)) {
+            post.setTime(time);
+        }
+        post.setTitle(title);
+        post.setPostText(text);
+        em.getTransaction().commit();
+        em.close();
+    }
+
+    public void delete(int id, boolean delete) {
+        EntityManager em = emf.createEntityManager();
+        em.getTransaction().begin();
+        Post post = em.find(Post.class, id);
+        if (isNull(post) || post.isDeleted() == delete) {
+            throw new BadRequestException("Post id=" + id + "does not exist or was deleted.");
+        }
+        post.setDeleted(delete);
+        em.getTransaction().commit();
+        em.close();
     }
 }

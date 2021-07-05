@@ -85,7 +85,7 @@ public class PersonDaoTest {
     @Test
     void testGetByIds() {
         List<Integer> ids = persons.stream().map(Person::getId).collect(Collectors.toList());
-        List<PersonDTO> dtos = personDAO.getPersonDtosByIds(ids);
+        List<PersonDTO> dtos = personDAO.getById(ids);
         assertEquals(3, dtos.size());
         assertEquals(dtos.get(0).getFirstName(), dtos.get(0).getFirstName());
         assertEquals(dtos.get(1).getFirstName(), dtos.get(1).getFirstName());
