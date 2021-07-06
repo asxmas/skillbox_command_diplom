@@ -2,43 +2,73 @@ package ru.skillbox.team13.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import ru.skillbox.team13.util.TimeUtil;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PersonDTO {
 
-    private final int id;
+    private int id;
 
     @JsonProperty("first_name")
-    private final String firstName;
+    private String firstName;
 
     @JsonProperty("last_name")
-    private final String lastName;
+    private String lastName;
 
     @JsonProperty("reg_date")
-    private final long registrationDate;
+    private long registrationDate;
 
     @JsonProperty("birth_date")
-    private final long birthDate;
+    private long birthDate;
 
-    private final String email;
-    private final String phone;
-    private final String photo;
-    private final String about;
-    private final CityDto city;
-    private final CountryDto country;
+    private String email;
+    private String phone;
+    private String photo;
+    private String about;
+    private CityDto city;
+    private CountryDto country;
 
     @JsonProperty("messages_permission")
-    private final String messagesPermission;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String messagesPermission;
 
     @JsonProperty("last_online_time")
-    private final long lastOnlineTime;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Long lastOnlineTime;
 
     @JsonProperty("is_blocked")
-    private final boolean isBlocked;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean isBlocked;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private final String token;
+    private String token;
+
+    public PersonDTO(int id, String firstName, String lastName, LocalDateTime registrationDate, LocalDateTime birthDate,
+                     String email, String phone, String photo, String about, int cityId, String cityTitle,
+                     int countryId, String countryTitle) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.registrationDate = TimeUtil.getTimestamp(registrationDate);
+        this.birthDate = TimeUtil.getTimestamp(birthDate);
+        this.email = email;
+        this.phone = phone;
+        this.photo = photo;
+        this.about = about;
+        this.city = new CityDto(cityId, cityTitle);
+        this.country = new CountryDto(countryId, countryTitle);
+    }
+
+    public PersonDTO(int id) {
+        this.id = id;
+    }
 }

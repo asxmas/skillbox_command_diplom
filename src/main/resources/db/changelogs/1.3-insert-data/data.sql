@@ -26,3 +26,16 @@ VALUES (4, 'tag two'), (5, 'tag one');;
 
 INSERT INTO "public"."post2tag" ("post_id", "tag_id")
 VALUES (3, 4), (3, 5);;
+
+-- liquibase formatted sql
+-- changeset MikeVs:1-3-data
+
+INSERT INTO "public"."city" ("id", "title")
+VALUES (1, 'Moscow'), (2, 'Belgorod');;
+
+INSERT INTO "public"."country" ("id", "title")
+VALUES (1, 'Russia'), (2, 'Moldova');;
+
+INSERT INTO "public"."languages" ("id", "title")
+VALUES (1, 'Russian'), (2, 'English');;
+

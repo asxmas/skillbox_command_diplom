@@ -1,4 +1,4 @@
-package ru.skillbox.team13.integr;
+package ru.skillbox.team13.controller_integration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,13 +16,12 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skillbox.team13.DomainObjectFactory;
+import ru.skillbox.team13.test_util.DomainObjectFactory;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.MessageDTO;
 import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.dto.UserFriendshipStatusDTO;
 import ru.skillbox.team13.entity.Friendship;
-import ru.skillbox.team13.entity.FriendshipStatus;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
@@ -237,8 +236,7 @@ public class FriendsControllerTest {
     private void makeFriendship(int from, int to, FriendshipStatusCode code, String statusName) {
         Person fromP = personRepository.findById(from).get();
         Person toP = personRepository.findById(to).get();
-        FriendshipStatus friendshipStatus = new FriendshipStatus(LocalDateTime.now(), statusName, code);
-        Friendship friendship = new Friendship(friendshipStatus, fromP, toP);
+        Friendship friendship = new Friendship(LocalDateTime.now(), statusName, code, fromP, toP);
         frRepo.save(friendship);
     }
 

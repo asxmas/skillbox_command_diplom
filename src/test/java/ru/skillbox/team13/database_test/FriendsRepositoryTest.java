@@ -1,4 +1,4 @@
-package ru.skillbox.team13.jpatest;
+package ru.skillbox.team13.database_test;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -8,9 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skillbox.team13.DomainObjectFactory;
+import ru.skillbox.team13.test_util.DomainObjectFactory;
 import ru.skillbox.team13.entity.Friendship;
-import ru.skillbox.team13.entity.FriendshipStatus;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
 import ru.skillbox.team13.repository.FriendshipRepository;
@@ -130,7 +129,7 @@ public class FriendsRepositoryTest {
         Person fromDB = personRepository.findById(bobId).get();
         List<Friendship> f = friendshipRepo.findRequestedFriendships(PageRequest.of(0, 10), fromDB.getId(), REQUEST);
         assertEquals(2, f.size());
-        assertTrue(f.stream().map(fr -> fr.getStatus()).anyMatch(s -> s.getName().equals("from bob to tim")));
+        assertTrue(f.stream().anyMatch(friendship -> friendship.getName().equals("from bob to tim")));
     }
 
     @Test
@@ -188,15 +187,14 @@ public class FriendsRepositoryTest {
 
         List<Friendship> f = friendshipRepo.findFriendshipsFromIdsToId(jimId, new int[]{bobId, timId});
 
-        assertEquals(1, f.stream().filter(fr -> fr.getStatus().getCode().equals(FRIEND)).count());
-        assertEquals(1, f.stream().filter(fr -> fr.getStatus().getCode().equals(REQUEST)).count());
+        assertEquals(1, f.stream().filter(fr -> fr.getCode().equals(FRIEND)).count());
+        assertEquals(1, f.stream().filter(fr -> fr.getCode().equals(REQUEST)).count());
     }
 
     private void makeFriendship(int from, int to, FriendshipStatusCode code, String statusName) {
         List<Person> p = getPersonsFromDB(from, to);
 
-        FriendshipStatus friendshipStatus = new FriendshipStatus(LocalDateTime.now(), statusName, code);
-        Friendship friendship = new Friendship(friendshipStatus, p.get(0), p.get(1));
+        Friendship friendship = new Friendship(LocalDateTime.now(), statusName, code, p.get(0), p.get(1));
         friendshipRepo.save(friendship);
     }
 

@@ -4,3 +4,4 @@
 *.xml
 !pom.xml
 *.iml
+/target
