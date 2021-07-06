@@ -16,4 +16,6 @@ databaseChangeLog:
   - include:
       file: db/changelogs/5-patch/storage.sql
   - include:
+      file: db/changelogs/6-patch-posts/deleted-column.sql
+  - include:
       file: db/changelogs/7-patch-tag/unique-tag.sql

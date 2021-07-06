@@ -1,4 +1,4 @@
-package ru.skillbox.team13.integr;
+package ru.skillbox.team13.controller_integration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skillbox.team13.DomainObjectFactory;
+import ru.skillbox.team13.test_util.DomainObjectFactory;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.MessageDTO;
 import ru.skillbox.team13.dto.PersonDTO;

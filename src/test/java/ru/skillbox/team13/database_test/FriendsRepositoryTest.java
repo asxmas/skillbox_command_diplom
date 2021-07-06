@@ -1,4 +1,4 @@
-package ru.skillbox.team13.jpatest;
+package ru.skillbox.team13.database_test;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skillbox.team13.DomainObjectFactory;
+import ru.skillbox.team13.test_util.DomainObjectFactory;
 import ru.skillbox.team13.entity.Friendship;
 import ru.skillbox.team13.entity.FriendshipStatus;
 import ru.skillbox.team13.entity.Person;

@@ -45,4 +45,7 @@ public class Post extends Notified {
 
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Attachment> attachments;
+
+    @Column(name = "deleted")
+    private boolean deleted;
 }
