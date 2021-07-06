@@ -25,13 +25,13 @@ import ru.skillbox.team13.repository.BlacklistedTokenRepository;
 import ru.skillbox.team13.repository.PersonRepository;
 import ru.skillbox.team13.repository.UserRepository;
 import ru.skillbox.team13.security.Jwt.JwtTokenProvider;
+import ru.skillbox.team13.security.TokenType;
 import ru.skillbox.team13.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService {
             User user = userRepository.findByEmail(username).get();
             Person person = personRepository.getById(user.getPerson().getId());
             log.info("IN login - user: {} successfully login", loginDto.getEmail());
-            return PersonMapper.convertPersonToPersonDTOWithToken(person, jwtTokenProvider.createToken(username, user.getType()));
+            return PersonMapper.convertPersonToPersonDTOWithToken(person, jwtTokenProvider.createToken(username, TokenType.ORDINARY));
         } catch (AuthenticationException e) {
             throw new BadRequestException("Invalid username or password");
         }
@@ -104,14 +104,8 @@ public class UserServiceImpl implements UserService {
             username = getAuthorizedUser().getEmail();
             String token = jwtTokenProvider.resolveToken(request);
             if (token != null) {
-                Date tokenExpirationDate = jwtTokenProvider.resolveTokenDate(token);
-                if (new Date().before(tokenExpirationDate)) {
-                    BlacklistedToken expiredToken = new BlacklistedToken();
-                    expiredToken.setToken(token);
-                    expiredToken.setExpiredDate(LocalDateTime.ofInstant(tokenExpirationDate.toInstant().plusSeconds(10), ZoneId.systemDefault()));
-                    blacklistedTokenRepo.save(expiredToken);
+                    putTokenToBlackList(token);
                     log.info("IN logout - user: {} successfully logout", username);
-                }
             }
         }
         catch (JwtException | UnauthorizedException e) {
@@ -162,16 +156,13 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public Boolean codeGenerationAndEmail(String email, String origin){
         try {
-            //генерируем ссылку
-            String link = UUID.randomUUID().toString().replaceAll("-", "");
-            //записываем code в БД
             User user = checkUserRegistration(email).orElseThrow(() -> new BadRequestException("user not registered"));
-            user.setConfirmationCode(link);
-            userRepository.save(user);
+            //генерируем токен для сброса пароля
+            String link = jwtTokenProvider.createToken(user.getEmail(), TokenType.MAIL_LINK);
             //отправляем ссылку по email
-            mailServiceImpl.sendMessage(email, "Password recovery link to Team13",
+            mailServiceImpl.sendMessage(email, "Password reset link to Team13",
                     "<p><a href=\"" + origin + "/api/v1/account/password/reset?link=" +
-                            link + "\">Нажмите на ссылку для восстановления пароля в Team13</a></p>");
+                            link + "\">Нажмите на ссылку для сброса пароля в Team13</a></p>");
         }
         catch (Exception e) {
             //при любой ошибке возвращаем false
@@ -184,7 +175,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public Boolean setPassword(String token, String password) {
-        User user = userRepository.findByName(jwtTokenProvider.getUsername(token)).get();
+
+        User user;
+        if (jwtTokenProvider.validateToken(token)) { user = userRepository.findByName(jwtTokenProvider.getUsername(token)).get(); }
+        else {
+            log.info("IN setPassword - password was't changed, JWT Expired");
+            return false;
+        }
         user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
         log.info("IN setPassword - password of {} has changed ", user.getEmail());
@@ -214,15 +211,30 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public String getRecoveryToken(String link) {
-        //сбрасываем пароль если пользователь перешел по ссылке восстановления пароля
-        User user = userRepository.findByConfirmationCode(link).get();
-        //ссылка будет работать на один переход
-        user.setConfirmationCode(null);
-        //новый пароль
+    public String resetPasswordAndGetToken(String token) {
+        //получаем user'a из токена
+        User user;
+        if (jwtTokenProvider.validateToken(token)) { user = userRepository.findByName(jwtTokenProvider.getUsername(token)).get(); }
+        else {
+            log.info("IN setPassword - password was't changed, JWT Expired");
+            return null;
+        }
+        //ссылка будет работать на один переход - отправляем токен в blacklist
+        putTokenToBlackList(token);
+        //сбрасываем пароль
         user.setPassword(UUID.randomUUID().toString());
         userRepository.save(user);
-        //передаем токен для фронта
-        return jwtTokenProvider.createToken(user.getEmail(), user.getType());
+        return jwtTokenProvider.createToken(user.getEmail(), TokenType.RECOVERY);
+    }
+
+    private void putTokenToBlackList(String token) {
+
+        Date tokenExpirationDate = jwtTokenProvider.resolveTokenDate(token);
+        if (new Date().before(tokenExpirationDate)) {
+            BlacklistedToken expiredToken = new BlacklistedToken();
+            expiredToken.setToken(token);
+            expiredToken.setExpiredDate(LocalDateTime.ofInstant(tokenExpirationDate.toInstant().plusSeconds(10), ZoneId.systemDefault()));
+            blacklistedTokenRepo.save(expiredToken);
+        }
     }
 }

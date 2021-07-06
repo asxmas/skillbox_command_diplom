@@ -20,8 +20,12 @@ public class DefaultController {
     }
 
     @GetMapping("/api/v1/account/password/reset")
-    public String passwordReset(@RequestParam String link, HttpServletRequest request){
+    public String passwordReset(@RequestParam("link") String token, HttpServletRequest request){
+
+        String recoveryToken = userService.resetPasswordAndGetToken(token);
+        if (recoveryToken == null) return "redirect:" +  request.getScheme() + "://" + request.getServerName() +
+                ":" + request.getServerPort() + "/forgot-expired";
         return "redirect:" +  request.getScheme() + "://" + request.getServerName() +
-                ":" + request.getServerPort() + "/change-password/" + userService.getRecoveryToken(link);
+                ":" + request.getServerPort() + "/change-password/" + recoveryToken;
     }
 }

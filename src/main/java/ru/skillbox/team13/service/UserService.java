@@ -31,5 +31,5 @@ public interface UserService {
 
     Boolean setNotification(NotificationCode notificationcode, Boolean enabled);
 
-    String getRecoveryToken(String link);
+    String resetPasswordAndGetToken(String link);
 }
