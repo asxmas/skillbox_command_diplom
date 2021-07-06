@@ -184,6 +184,7 @@ public class UserServiceImpl implements UserService {
         }
         user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
+        putTokenToBlackList(token);
         log.info("IN setPassword - password of {} has changed ", user.getEmail());
         return true;
     }
