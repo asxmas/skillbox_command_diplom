@@ -70,9 +70,7 @@ public class FeedsControllerTest {
 
             boolean isFriend = r.nextBoolean();
             if (isFriend) {
-                FriendshipStatus friendshipStatus = new FriendshipStatus(LocalDateTime.now(), "", FriendshipStatusCode.FRIEND);
-                Friendship friendship = new Friendship(friendshipStatus, mainPerson, person);
-                em.persist(friendshipStatus);
+                Friendship friendship = new Friendship(LocalDateTime.now(), "", FriendshipStatusCode.FRIEND, mainPerson, person);
                 em.persist(friendship);
             }
 
