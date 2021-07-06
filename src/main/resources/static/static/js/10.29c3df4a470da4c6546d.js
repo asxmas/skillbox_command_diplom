@@ -1,0 +1,2 @@
+webpackJsonp([10],{ZmMF:function(s,e,t){"use strict";Object.defineProperty(e,"__esModule",{value:!0});var n={render:function(){var s=this.$createElement,e=this._self._c||s;return e("div",{staticClass:"change-password-success"},[e("simple-svg",{attrs:{filepath:"/static/img/success-change-password.svg"}})],1)},staticRenderFns:[]};var a=t("VU/8")({name:"ChangePasswordSuccess"},n,!1,function(s){t("s8db")},null,null);e.default=a.exports},s8db:function(s,e){}});
+//# sourceMappingURL=10.29c3df4a470da4c6546d.js.map
