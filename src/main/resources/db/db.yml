@@ -20,6 +20,6 @@ databaseChangeLog:
   - include:
       file: db/changelogs/6-patch-posts/deleted-column.sql
   - include:
-      file: db/changelogs/7-patch-notification/change-notification.sql
+      file: db/changelogs/8-patch-notification/change-notification.sql
   - include:
-      file: db/changelogs/8-patch-create-subscription/subscription.sql
+      file: db/changelogs/9-patch-create-subscription/subscription.sql

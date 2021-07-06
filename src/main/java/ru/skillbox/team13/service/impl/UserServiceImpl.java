@@ -9,20 +9,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skillbox.team13.dto.LoginDto;
-import ru.skillbox.team13.dto.PersonDTO;
-import ru.skillbox.team13.dto.UserDto;
+import ru.skillbox.team13.dto.*;
 import ru.skillbox.team13.entity.BlacklistedToken;
 import ru.skillbox.team13.entity.Person;
+import ru.skillbox.team13.entity.Subscription;
 import ru.skillbox.team13.entity.User;
-import ru.skillbox.team13.entity.enums.NotificationCode;
 import ru.skillbox.team13.entity.enums.PersonMessagePermission;
 import ru.skillbox.team13.entity.enums.UserType;
 import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.exception.UnauthorizedException;
 import ru.skillbox.team13.mapper.PersonMapper;
+import ru.skillbox.team13.mapper.WrapperMapper;
 import ru.skillbox.team13.repository.PersonRepository;
 import ru.skillbox.team13.repository.BlacklistedTokenRepository;
+import ru.skillbox.team13.repository.SubscriptionRepository;
 import ru.skillbox.team13.repository.UserRepository;
 import ru.skillbox.team13.security.Jwt.JwtTokenProvider;
 import ru.skillbox.team13.service.UserService;
@@ -30,10 +30,7 @@ import ru.skillbox.team13.service.UserService;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -46,6 +43,7 @@ public class UserServiceImpl implements UserService {
     private final JwtTokenProvider jwtTokenProvider;
     private final BlacklistedTokenRepository blacklistedTokenRepo;
     private final MailServiceImpl mailServiceImpl;
+    private final SubscriptionRepository subRep;
 
     @Override
     @Transactional
@@ -214,8 +212,29 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Boolean setNotification(NotificationCode notificationCode, Boolean enabled) {
-        //TODO сохраняем настройки по конкретному типу оповещений для этого пользователя
-        return true;
+    public DTOWrapper setNotification(SubscribeResponseDto subscribeType) {
+        Person person = getAuthorizedUser().getPerson();
+        Set<Subscription> subSet = person.getSubscriptions();
+        Subscription sub = new Subscription();
+        sub.setPerson(person);
+        sub.setType(subscribeType.getType());
+        SubscribeNotificationDto request = new SubscribeNotificationDto();
+        request.setMessage("ok");
+        boolean isSubscribe = false;
+        for(Subscription s : subSet) {
+            if(s.getType() == subscribeType.getType()) {
+                isSubscribe = true;
+                break;
+            }
+        }
+        if(subscribeType.isEnable() && !isSubscribe) {
+            subRep.save(sub);
+            return WrapperMapper.wrap(request, false);
+        }
+        if(!subscribeType.isEnable() && isSubscribe) {
+            subRep.delete(sub);
+            return WrapperMapper.wrap(request, false);
+        }
+        return WrapperMapper.wrap(request, false);
     }
 }

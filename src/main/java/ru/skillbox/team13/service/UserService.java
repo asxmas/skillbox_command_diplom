@@ -1,9 +1,7 @@
 package ru.skillbox.team13.service;
 
 
-import ru.skillbox.team13.dto.LoginDto;
-import ru.skillbox.team13.dto.PersonDTO;
-import ru.skillbox.team13.dto.UserDto;
+import ru.skillbox.team13.dto.*;
 import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.entity.enums.NotificationCode;
 
@@ -27,5 +25,5 @@ public interface UserService {
 
     Boolean setEmail(String email);
 
-    Boolean setNotification(NotificationCode notificationcode, Boolean enabled);
+    DTOWrapper setNotification(SubscribeResponseDto subscribeType);
 }
