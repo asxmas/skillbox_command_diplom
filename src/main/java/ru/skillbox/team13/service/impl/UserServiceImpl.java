@@ -182,6 +182,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Person getInactivePerson() {
+        return personRepository.getById(13);
+    }
+
+    @Override
     @Transactional
     public Boolean setPassword(String token, String password) {
         User user;

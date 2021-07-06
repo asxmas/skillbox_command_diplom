@@ -2,10 +2,11 @@
 -- changeset lc:1-3-data
 
 INSERT INTO "public"."notified" ("id")
-VALUES (2), (3);;
+VALUES (2), (3), (13);
 
 INSERT INTO "public"."person" ("first_name", "is_blocked", "last_name", "messages_permission", "id")
-VALUES ('Sebastian', FALSE, 'Pereira', 'ALL', 2);;
+VALUES ('Sebastian', FALSE, 'Pereira', 'ALL', 2),
+       ('Inactive', FALSE, 'User', 'ALL', 13);
 
 INSERT INTO "public"."usr" ("id", "e_mail", "name", "password", "reg_date", "type", "person_id", "is_approved")
 VALUES (1, 'admin@example.com', 'admin', 'password', '2021-06-04 19:45:03.06865', 'ADMIN', 2, TRUE);;
@@ -26,3 +27,16 @@ VALUES (4, 'tag two'), (5, 'tag one');;
 
 INSERT INTO "public"."post2tag" ("post_id", "tag_id")
 VALUES (3, 4), (3, 5);;
+
+-- changeset add cities and countries
+
+INSERT INTO "public"."city" ("id","title")
+VALUES (1, 'Moscow'),
+       (2, 'Saint Petersburg'),
+       (3, 'Kiev'),
+       (4, 'Odessa');
+
+INSERT INTO "public"."country" ("id","title")
+VALUES (1, 'Russia'),
+       (2, 'Ukraine');
+

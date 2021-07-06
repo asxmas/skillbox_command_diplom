@@ -4,20 +4,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import ru.skillbox.team13.entity.Person;
+import lombok.Setter;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Set;
 
 @Getter
 @AllArgsConstructor
 @Builder
+@Setter
 public class PostDTO {
 
     private final Integer id;
 
-    private final PersonDTO author;
+    private PersonDTO author;
 
     @JsonProperty("title")
     private final String title;

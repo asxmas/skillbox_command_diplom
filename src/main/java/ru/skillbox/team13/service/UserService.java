@@ -4,12 +4,11 @@ package ru.skillbox.team13.service;
 import ru.skillbox.team13.dto.LoginDto;
 import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.dto.UserDto;
-import ru.skillbox.team13.entity.NotificationType;
+import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.entity.enums.NotificationCode;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 public interface UserService {
 
@@ -24,6 +23,8 @@ public interface UserService {
     User getAuthorizedUser();
 
     Boolean codeGenerationAndEmail(String email);
+
+    Person getInactivePerson();
 
     Boolean setPassword(String token, String password);
 

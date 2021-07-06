@@ -7,6 +7,10 @@ UPDATE public.person
 SET email = 'admin@example.com'
 WHERE id = 2;
 
+UPDATE public.person
+SET email = 'inactive@yandex.ru'
+WHERE id = 13;
+
 ALTER TABLE person
     ALTER COLUMN email SET NOT NULL;
 

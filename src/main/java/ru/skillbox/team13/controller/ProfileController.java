@@ -5,13 +5,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import ru.skillbox.team13.dto.ErrorDto;
 import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.dto.PostDTO;
 import ru.skillbox.team13.dto.SuccessDto;
-import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.service.PersonService;
 import ru.skillbox.team13.service.PostsService;
 import ru.skillbox.team13.service.UserService;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 
 @RestController
 @RequestMapping("/api/v1/")
@@ -31,7 +34,12 @@ public class ProfileController {
   @GetMapping("users/me")
   @PreAuthorize("hasAuthority('user')")
   public ResponseEntity<SuccessDto> getCurrentUser(){
-    return ResponseEntity.ok(new SuccessDto(userService.getCurrentUserDto()));
+    try {
+      return ResponseEntity.ok(new SuccessDto(userService.getCurrentUserDto()));
+    }
+    catch (Exception ex)  {
+      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
   }
 
   @PutMapping("/users/me")
@@ -41,13 +49,16 @@ public class ProfileController {
       return ResponseEntity.ok(personDTO);
     }
     catch (Exception ex)  {
-      return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+      ex.printStackTrace();
+      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
   }
   @DeleteMapping("/users/me")
-  public ResponseEntity deleteCurrentPerson()  {
+  public ResponseEntity deleteCurrentPerson(HttpServletRequest request)  {
     try {
-      return ResponseEntity.ok(personService.deleteCurrentUser(userService.getCurrentUserDto()));
+      personService.deleteCurrentUser(userService.getCurrentUserDto());
+      request.logout();
+      return ResponseEntity.ok(new SuccessDto());
     }
     catch (Exception ex)  {
       return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
@@ -74,10 +85,8 @@ public class ProfileController {
   @PostMapping("/users/{id}/wall")
   public ResponseEntity createPost(@PathVariable("id") Integer id, @RequestBody PostDTO postDTO) {
     try {
-      PersonDTO author = userService.getCurrentUserDto();
-      Post post = postsService.addPost(postDTO, personService.getPersonBiId(author.getId()));
-      personService.addPostToWall(id, post);
-      return ResponseEntity.ok(post);
+      personService.addPostToWall(id, postDTO);
+      return ResponseEntity.ok(postDTO);
     }
     catch (Exception ex)  {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);

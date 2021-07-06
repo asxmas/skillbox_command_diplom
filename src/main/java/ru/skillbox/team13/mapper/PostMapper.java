@@ -26,7 +26,6 @@ public class PostMapper {
                 .comments(CommentMapper.convertSetCommentToSetCommentDTO(post.getComments()))
                 .tags(TagMapper.convertSetTagToSetTagDTO(post.getTags())).build();
     }
-
     public static Set<PostDTO> convertSetPostToSetPostDTO(Set<Post> posts) {
         if (posts.size() == 0)   {
             return null;

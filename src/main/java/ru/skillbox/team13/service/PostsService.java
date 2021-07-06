@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
-import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.dto.PostDTO;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
+import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.mapper.PostMapper;
 import ru.skillbox.team13.repository.RepoPost;
 
@@ -20,6 +20,7 @@ import java.util.Set;
 public class PostsService {
     private final RepoPost repoPost;
     private final CommentService commentService;
+    private final UserService userService;
 
     public Post getPostById(int id)  {
         return repoPost.findById(id).stream().findFirst().orElse(null);
@@ -63,10 +64,13 @@ public class PostsService {
     }
 
     @Modifying
-    public void setNullAuthor(Integer personId) {
-        List<Post> posts = repoPost.getPostsByAuthorId(PageRequest.of(0,10), personId);
+    public void setInactiveAuthor() {
+        User currentUser = userService.getAuthorizedUser();
+        Person currentPerson = currentUser.getPerson();
+        Person inactiveAuthor = userService.getInactivePerson();
+        List<Post> posts = repoPost.getPostsByAuthorId(PageRequest.of(0,10), currentPerson.getId());
         for (Post post : posts) {
-            post.setAuthor(null);
+            post.setAuthor(inactiveAuthor);
         }
         repoPost.saveAllAndFlush(posts);
     }

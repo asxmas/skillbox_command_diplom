@@ -41,8 +41,8 @@ public class Person extends Notified {
     @Column(name = "about")
     private String about;
 
-    @Column(name = "is_active")
-    private boolean isActive;
+    @Column(name = "is_archive")
+    private boolean isArchive;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "city_id")

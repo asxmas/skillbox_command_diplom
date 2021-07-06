@@ -16,7 +16,6 @@ CREATE TABLE "public"."person"
     "id"                  INTEGER      NOT NULL,
     "city_id"                INTEGER,
     "country_id"             INTEGER,
-    "is_active"           BOOLEAN       NOT NULL DEFAULT true,
     CONSTRAINT "person_pkey" PRIMARY KEY ("id")
 );
 
@@ -31,3 +30,6 @@ COMMENT ON COLUMN "public"."person"."country_id" IS 'страна прожива
 COMMENT ON COLUMN "public"."person"."messages_permission" IS 'разрешение на получение сообщений: ALL - от всех пользователей (кроме заблокированных), FRIENDS - только от друзей';
 COMMENT ON COLUMN "public"."person"."last_online_time" IS 'время последнего пребывания онлайн';
 COMMENT ON COLUMN "public"."person"."is_blocked" IS 'блокировка пользователя модератором / администратором';
+
+
+
