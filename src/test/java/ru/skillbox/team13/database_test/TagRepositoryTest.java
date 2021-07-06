@@ -1,4 +1,4 @@
-package ru.skillbox.team13.jpatest;
+package ru.skillbox.team13.database_test;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -46,7 +46,6 @@ public class TagRepositoryTest {
         em.persist(secondTag);
         em.persist(thirdTag);
 
-
         firstTagId = tagRepository.save(firstTag).getId();
         secondTagId = tagRepository.save(secondTag).getId();
         thirdTagId = tagRepository.save(thirdTag).getId();
@@ -66,13 +65,13 @@ public class TagRepositoryTest {
     }
 
     @Test
-    void  testCountByName() {
+    void testCountByName() {
         int countTags = tagRepository.countTags("%is worked");
         assertEquals(2, countTags);
     }
 
     @Test
-    void testCreateDuplicateTag(){
+    void testCreateDuplicateTag() {
         boolean throwned = false;
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
@@ -89,19 +88,10 @@ public class TagRepositoryTest {
         try {
             tagRepository.save(duplicateTag);
             tagRepository.countTags("%is original");
-        } catch (DataIntegrityViolationException ex){
+        } catch (DataIntegrityViolationException ex) {
             throwned = true;
         }
-  //todo      assertThrows()
+        //todo      assertThrows()
         assertTrue(throwned);
     }
-
-
-
-
-
-
-
-
-
 }
