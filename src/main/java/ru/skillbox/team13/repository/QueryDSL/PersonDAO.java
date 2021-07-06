@@ -37,7 +37,7 @@ public class PersonDAO {
                 .leftJoin(person.country, country)
                 .leftJoin(person.city, city)
                 .where(friendship.sourcePerson.id.eq(srcPersonID)
-                        .and(friendship.status.code.eq(fsc))).fetch();
+                        .and(friendship.code.eq(fsc))).fetch();
     }
 
     public List<PersonDTO> getById(List<Integer> ids) {

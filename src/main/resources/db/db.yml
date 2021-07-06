@@ -19,3 +19,5 @@ databaseChangeLog:
       file: db/changelogs/6-patch-posts/deleted-column.sql
   - include:
       file: db/changelogs/7-patch-tag/unique-tag.sql
+  - includeAll:
+      path: db/changelogs/10-friendship-fix

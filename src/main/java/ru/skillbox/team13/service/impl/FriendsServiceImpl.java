@@ -10,7 +10,6 @@ import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.dto.UserFriendshipStatusDTO;
 import ru.skillbox.team13.entity.City;
 import ru.skillbox.team13.entity.Friendship;
-import ru.skillbox.team13.entity.FriendshipStatus;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
 import ru.skillbox.team13.exception.BadRequestException;
@@ -145,7 +144,7 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
         Integer currentPersonId = userService.getAuthorizedUser().getPerson().getId();
         List<Friendship> friendships = friendshipRepo.findFriendshipsFromIdsToId(currentPersonId, friendsIds);
         List<UserFriendshipStatusDTO> results = friendships.stream()
-                .map(f -> new UserFriendshipStatusDTO(f.getSourcePerson().getId(), f.getStatus().getCode().name()))
+                .map(f -> new UserFriendshipStatusDTO(f.getSourcePerson().getId(), f.getCode().name()))
                 .collect(Collectors.toList());
         return WrapperMapper.wrap(results, false);
     }
@@ -162,7 +161,7 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
         } catch (BadRequestException ignored) {
         }
         if (friendship != null) {
-            friendship.getStatus().setCode(FriendshipStatusCode.FRIEND);
+            friendship.setCode(FriendshipStatusCode.FRIEND);
             friendshipRepo.save(friendship);
         }
     }
@@ -177,7 +176,7 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
         if (friendship != null) {
             throw new BadRequestException(
                     "friendship from id=" + srcCurrentPersonId + " to id=" + dstFriendId + " already exists " +
-                            "with code=" + friendship.getStatus().getCode());
+                            "with code=" + friendship.getCode());
         } else {
             friendship = createNewFriendship(srcCurrentPersonId, dstFriendId, FriendshipStatusCode.REQUEST);
             friendshipRepo.save(friendship);
@@ -187,8 +186,7 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
     private Friendship createNewFriendship(Integer src, Integer dst, FriendshipStatusCode code) {
         Person srcPerson = personRepository.findById(src).get(); //todo exception handling
         Person dstPerson = personRepository.findById(dst).get();
-        FriendshipStatus status = new FriendshipStatus(LocalDateTime.now(), "", FriendshipStatusCode.REQUEST);
-        return new Friendship(status, srcPerson, dstPerson);
+        return new Friendship(LocalDateTime.now(), "", FriendshipStatusCode.REQUEST, srcPerson, dstPerson);
     }
 
     private Friendship getRequestedFriendship(Integer src, Integer dst) {

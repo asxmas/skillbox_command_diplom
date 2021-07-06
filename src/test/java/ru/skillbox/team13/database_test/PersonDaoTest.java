@@ -63,10 +63,8 @@ public class PersonDaoTest {
         persons.get(1).setCountry(country);
         persons.forEach(em::persist);
 
-        FriendshipStatus fs = new FriendshipStatus(LocalDateTime.now(), "1000", FriendshipStatusCode.FRIEND);
-        em.persist(fs);
-
-        persons.stream().map(p -> new Friendship(fs, person1, p)).forEach(em::persist);
+        persons.stream().map(p -> new Friendship(
+                LocalDateTime.now(), "1000", FriendshipStatusCode.FRIEND, person1, p)).forEach(em::persist);
 
         em.getTransaction().commit();
         em.close();
