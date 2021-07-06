@@ -10,6 +10,7 @@ import ru.skillbox.team13.dto.UserDto;
 import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.service.UserService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @RestController
@@ -26,8 +27,8 @@ public class AccountController {
     }
 
     @PutMapping("password/recovery")
-    public ResponseEntity<SuccessDto> recovery(@RequestBody @Valid LoginDto loginDto){
-        if (userService.codeGenerationAndEmail(loginDto.getEmail())) {return ResponseEntity.ok(new SuccessDto());}
+    public ResponseEntity<SuccessDto> recovery(@RequestBody @Valid LoginDto loginDto, @RequestHeader("origin") String origin){
+        if (userService.codeGenerationAndEmail(loginDto.getEmail(), origin)) {return ResponseEntity.ok(new SuccessDto());}
         else throw new BadRequestException("user not registered");
     }
 

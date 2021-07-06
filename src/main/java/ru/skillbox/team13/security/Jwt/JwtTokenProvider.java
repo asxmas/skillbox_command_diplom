@@ -10,9 +10,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
-import ru.skillbox.team13.entity.enums.UserType;
 import ru.skillbox.team13.repository.BlacklistedTokenRepository;
 import ru.skillbox.team13.security.JwtUserDetailsService;
+import ru.skillbox.team13.security.TokenType;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -26,8 +26,14 @@ public class JwtTokenProvider {
     @Value("${jwt.token.secret}")
     private String secret;
 
-    @Value("${jwt.token.expired}")
-    private long validityInMilliseconds;
+    @Value("${jwt.token.ordinary.expired}")
+    private long ordinaryValidityInMillis;
+
+    @Value("${jwt.token.recovery.expired}")
+    private long recoveryValidityInMillis;
+
+    @Value("${jwt.token.mail.expired}")
+    private long mailValidityInMillis;
 
     @Autowired
     private JwtUserDetailsService userDetailsService;
@@ -37,7 +43,7 @@ public class JwtTokenProvider {
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
-        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(12);
         return bCryptPasswordEncoder;
     }
 
@@ -46,13 +52,27 @@ public class JwtTokenProvider {
         secret = Base64.getEncoder().encodeToString(secret.getBytes());
     }
 
-    public String createToken(String username, UserType type) {
+    public String createToken(String username, TokenType type) {
 
         Claims claims = Jwts.claims().setSubject(username);
-        claims.put("role", type.toString());
+        claims.put("type", type.toString());
+
+        //установка времени валидности токена для аутентификации, перехода по mail и ввода пароля
+        long tokenValidity = 0;
+        switch (type) {
+            case ORDINARY:
+                tokenValidity = ordinaryValidityInMillis;
+                break;
+            case MAIL_LINK:
+                tokenValidity = mailValidityInMillis;
+                break;
+            case RECOVERY:
+                tokenValidity = mailValidityInMillis;
+                break;
+        }
 
         Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds);
+        Date validity = new Date(now.getTime() + tokenValidity);
 
         return Jwts.builder()
                 .setClaims(claims)

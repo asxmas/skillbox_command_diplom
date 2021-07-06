@@ -14,6 +14,12 @@ databaseChangeLog:
   - include:
       file: db/changelogs/4-patch/modify-like.sql
   - include:
+      file: db/changelogs/5-patch/dialog2person.sql
+  - include:
+      file: db/changelogs/5-patch/dialog-in-message.sql
+  - include:
+      file: db/changelogs/5-patch/modify-dialog.sql
+  - include:
       file: db/changelogs/5-patch/storage.sql
   - include:
       file: db/changelogs/6-patch-posts/deleted-column.sql

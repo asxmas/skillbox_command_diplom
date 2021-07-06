@@ -6,15 +6,13 @@ import lombok.Getter;
 
 @Getter
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DTOWrapper {
 
     private String error;
     private long timestamp;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private int total;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private int offset;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private int perPage;
+    private Integer total;
+    private Integer offset;
+    private Integer perPage;
     private final Object data;
 }

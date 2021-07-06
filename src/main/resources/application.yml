@@ -16,7 +16,12 @@ spring:
 jwt:
   token:
     secret: stream-team13
-    expired: 3600000
+    ordinary:
+      expired: 3600000
+    recovery:
+      expired: 60000
+    mail:
+      expired: 60000
 
 spring.mail:
   host: smtp.gmail.com
