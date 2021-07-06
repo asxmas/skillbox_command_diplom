@@ -19,8 +19,10 @@ import ru.skillbox.team13.service.UserService;
 import ru.skillbox.team13.util.TimeUtil;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.util.stream.Collectors.*;
 import static ru.skillbox.team13.util.PageUtil.getPageable;
@@ -120,7 +122,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
         for (PostDto p : posts) {
             p.setAuthor(personMap.get(p.getAuthor().getId()));
-            p.setComments(commentMap.get(p.getId()));
+            p.setComments(Objects.requireNonNullElse(commentMap.get(p.getId()), Collections.emptyList()));
         }
         return posts;
     }
