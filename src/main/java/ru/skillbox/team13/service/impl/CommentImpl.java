@@ -8,12 +8,14 @@ import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.entity.Comment;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.entity.projection.CommentProjection;
+import ru.skillbox.team13.mapper.CommentMapper;
 import ru.skillbox.team13.mapper.FeedMapper;
 import ru.skillbox.team13.mapper.WrapperMapper;
 import ru.skillbox.team13.repository.CommentRepository;
 import ru.skillbox.team13.repository.PostRepository;
 import ru.skillbox.team13.service.CommentService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -22,6 +24,7 @@ public class CommentImpl implements CommentService {
 
     private final CommentRepository commRep;
     private final PostRepository postRep;
+    private final UserServiceImpl userService;
 
     @Override
     public DTOWrapper getAllCommentByPost(int id, int offset, int itemPerPage) {
@@ -37,7 +40,14 @@ public class CommentImpl implements CommentService {
     @Override
     @Transactional
     public DTOWrapper setCommentToPost(CommentToPostDto commentToPostDto, int id) {
-       Post post = postRep.getById(id);
+        Post post = postRep.getById(id);
+        Comment comment = CommentMapper.mapToCommentEntity(commentToPostDto,
+                post,
+                commRep,
+                userService);
+        commRep.save(comment);
+        
+
         return null;
     }
 
