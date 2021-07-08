@@ -13,7 +13,8 @@ import java.util.Set;
 @Entity
 @NoArgsConstructor
 @Table(name = "post_comment")
-public class  Comment extends Notified {
+public class Comment extends Notified {
+
     @Column(name = "time", nullable = false)
     private LocalDateTime time;
 

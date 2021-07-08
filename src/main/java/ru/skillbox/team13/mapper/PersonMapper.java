@@ -18,14 +18,14 @@ public class PersonMapper {
                 .firstName(p.getFirstName())
                 .lastName(p.getLastName())
                 .registrationDate(TimeUtil.getTimestamp(p.getRegDate()))
-                .birthDate(TimeUtil.getTimestamp(p.getBirthDate()))
+                .birthDateLDT(p.getBirthDate())
                 .email(p.getEmail())
                 .phone(p.getPhone())
                 .photo(p.getPhoto())
                 .about(p.getAbout())
-                .city(convertCityToCityDTO(p.getCity()))
-                .country(convertCountryToCountryDTO(p.getCountry()))
-                .messagesPermission(p.getMessagesPermission().name())
+                .cityDto(convertCityToCityDTO(p.getCity()))
+                .countryDto(convertCountryToCountryDTO(p.getCountry()))
+                .messagesPermission(p.getMessagesPermission())
                 .lastOnlineTime(TimeUtil.getTimestamp(p.getLastOnlineTime()))
                 .isBlocked(p.isBlocked()).build();
     }
@@ -36,25 +36,25 @@ public class PersonMapper {
                 .firstName(p.getFirstName())
                 .lastName(p.getLastName())
                 .registrationDate(TimeUtil.getTimestamp(p.getRegDate()))
-                .birthDate(TimeUtil.getTimestamp(p.getBirthDate()))
+                .birthDateLDT(p.getBirthDate())
                 .email(p.getEmail())
                 .phone(p.getPhone())
                 .photo(p.getPhoto())
                 .about(p.getAbout())
-                .city(convertCityToCityDTO(p.getCity()))
-                .country(convertCountryToCountryDTO(p.getCountry()))
-                .messagesPermission(p.getMessagesPermission().name())
+                .cityDto(convertCityToCityDTO(p.getCity()))
+                .countryDto(convertCountryToCountryDTO(p.getCountry()))
+                .messagesPermission(p.getMessagesPermission())
                 .lastOnlineTime(TimeUtil.getTimestamp(p.getLastOnlineTime()))
                 .isBlocked(p.isBlocked())
                 .token(token).build();
     }
 
-    private static CountryDto convertCountryToCountryDTO(Country c) {
+    public static CountryDto convertCountryToCountryDTO(Country c) {
         if (c == null) return null;
         return CountryDto.builder().id(c.getId()).title(c.getTitle()).build();
     }
 
-    private static CityDto convertCityToCityDTO(City c) {
+    public static CityDto convertCityToCityDTO(City c) {
         if (c == null) return null;
         return CityDto.builder().id(c.getId()).title(c.getTitle()).build();
     }

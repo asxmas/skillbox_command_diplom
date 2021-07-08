@@ -173,6 +173,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Person getInactivePerson() {
+        return personRepository.getById(13);
+    }
+
+    @Override
     @Transactional
     public Boolean setPassword(String token, String password) {
 
@@ -208,6 +213,11 @@ public class UserServiceImpl implements UserService {
     public Boolean setNotification(NotificationCode notificationCode, Boolean enabled) {
         //TODO сохраняем настройки по конкретному типу оповещений для этого пользователя
         return true;
+    }
+
+    @Transactional
+    public void deleteUserById(Integer personId) {
+        userRepository.deleteUserByPersonId(personId);
     }
 
     @Override
