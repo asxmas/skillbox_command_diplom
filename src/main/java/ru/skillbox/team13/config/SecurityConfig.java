@@ -2,6 +2,7 @@ package ru.skillbox.team13.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,8 +11,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import ru.skillbox.team13.security.Jwt.JwtConfigurer;
 import ru.skillbox.team13.security.Jwt.JwtTokenProvider;
+
+import java.util.Arrays;
 
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -20,12 +26,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 private final JwtTokenProvider jwtTokenProvider;
 
-private static final String LOGIN_ENDPOINT = "/api/v1/auth/login";
-private static final String REGISTER_ENDPOINT = "/api/v1/account/register";
-private static final String PASSWORD_RECOVERY_SET_ENDPOINT = "/api/v1/account/password/**";
+    @Value("${server.base_url}")
+    private String BASE_URL;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+
         http
                 .httpBasic().disable()
                 .csrf().disable()
@@ -35,7 +41,20 @@ private static final String PASSWORD_RECOVERY_SET_ENDPOINT = "/api/v1/account/pa
                 .antMatchers("/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
+                .cors()
+                .and()
                 .apply(new JwtConfigurer(jwtTokenProvider));
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList(BASE_URL));
+        configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Override

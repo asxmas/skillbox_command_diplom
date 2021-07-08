@@ -40,7 +40,6 @@ public class DialogServiceImpl implements DialogService {
     private final PersonRepository personRepository;
     private final MessageRepository messageRepository;
     private final UserServiceImpl userService;
-    private final EntityManagerFactory emf;
 
     @Override
     @Transactional(readOnly = true)
