@@ -48,11 +48,8 @@ public class DialogServiceImpl implements DialogService {
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         Person person = userService.getAuthorizedUser().getPerson();
         Page<Dialog2Person> dialogPage = dialog2PersonRepository.findPersonDialogs(pageable, query, person.getId());
-        if (dialogPage.getTotalElements() == 0) { throw new BadRequestException("User " + person.getEmail() + " have no dialogs");}
-        else {
-            List<DialogDto> results = dialogPage.stream().map(DialogMapper::convertDialog2PersonToDialogDTO).collect(Collectors.toList());
-            return WrapperMapper.wrap(results, (int) dialogPage.getTotalElements(), offset, itemPerPage, true);
-        }
+        List<DialogDto> results = dialogPage.stream().map(DialogMapper::convertDialog2PersonToDialogDTO).collect(Collectors.toList());
+        return WrapperMapper.wrap(results, (int) dialogPage.getTotalElements(), offset, itemPerPage, true);
     }
 
     @Override
