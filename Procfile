@@ -1,0 +1,1 @@
+web: java -jar target/socnet-1.0.jar

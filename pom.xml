@@ -6,7 +6,7 @@
 
     <groupId>ru.skillbox.team13</groupId>
     <artifactId>socnet</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <name>demo</name>
 
     <properties>
