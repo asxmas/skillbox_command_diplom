@@ -6,9 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.LoginDto;
 import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.dto.UserDto;
@@ -21,19 +24,20 @@ import ru.skillbox.team13.entity.enums.UserType;
 import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.exception.UnauthorizedException;
 import ru.skillbox.team13.mapper.PersonMapper;
+import ru.skillbox.team13.mapper.WrapperMapper;
 import ru.skillbox.team13.repository.BlacklistedTokenRepository;
 import ru.skillbox.team13.repository.PersonRepository;
 import ru.skillbox.team13.repository.UserRepository;
 import ru.skillbox.team13.security.Jwt.JwtTokenProvider;
 import ru.skillbox.team13.security.TokenType;
 import ru.skillbox.team13.service.UserService;
+import ru.skillbox.team13.util.TimeUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -46,6 +50,7 @@ public class UserServiceImpl implements UserService {
     private final JwtTokenProvider jwtTokenProvider;
     private final BlacklistedTokenRepository blacklistedTokenRepo;
     private final MailServiceImpl mailServiceImpl;
+    private final SessionRegistry sessionRegistry;
 
     @Override
     @Transactional
@@ -226,6 +231,25 @@ public class UserServiceImpl implements UserService {
         user.setPassword(UUID.randomUUID().toString());
         userRepository.save(user);
         return jwtTokenProvider.createToken(user.getEmail(), TokenType.RECOVERY);
+    }
+
+    @Override
+    public DTOWrapper getUserActivity(int userId) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new BadRequestException("User for id=" + userId + " is not found"));
+
+        List<String> userIdentifiers = sessionRegistry.getAllPrincipals().stream()
+                .map(o -> (UserDetails) o)
+                .map(UserDetails::getUsername)
+                .collect(Collectors.toList());
+
+        boolean isOnline = userIdentifiers.stream().anyMatch(email -> email.equals(user.getEmail()));
+
+        LocalDateTime lastOnlineTime = user.getPerson().getLastOnlineTime();
+        Long timestamp = TimeUtil.getTimestamp(lastOnlineTime);
+        log.debug("Checking online status for user id {} ({}, last online: {}). Total online users: {}",
+                userId, isOnline, lastOnlineTime, userIdentifiers.size());
+        return WrapperMapper.wrap(Map.of("online", isOnline, "last_activity", timestamp), true);
     }
 
     private void putTokenToBlackList(String token) {

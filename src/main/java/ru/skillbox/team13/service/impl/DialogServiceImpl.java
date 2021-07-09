@@ -1,6 +1,7 @@
 package ru.skillbox.team13.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +16,6 @@ import ru.skillbox.team13.entity.Dialog2Person;
 import ru.skillbox.team13.entity.Message;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.enums.MessageReadStatus;
-import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.mapper.DialogMapper;
 import ru.skillbox.team13.mapper.WrapperMapper;
 import ru.skillbox.team13.repository.Dialog2PersonRepository;
@@ -24,13 +24,13 @@ import ru.skillbox.team13.repository.MessageRepository;
 import ru.skillbox.team13.repository.PersonRepository;
 import ru.skillbox.team13.service.DialogService;
 
-import javax.persistence.EntityManagerFactory;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DialogServiceImpl implements DialogService {
@@ -123,17 +123,14 @@ public class DialogServiceImpl implements DialogService {
     }
 
     @Override
-    public DTOWrapper markAsRead(int dialogId, int messageId) {
-        return null;
+    public DTOWrapper setStatus(int msgId, MessageReadStatus status) {
+        messageRepository.setStatusForId(status, msgId);
+        log.debug("Setting status {} for message id {}", status.name(), msgId);
+        return WrapperMapper.wrap(Map.of("message", "ok"), true);
     }
 
     @Override
-    public DTOWrapper getUserActivity(int dialogId, int userId) {
-        return null;
-    }
-
-    @Override
-    public DTOWrapper setUserDialogStatus(int dialogId, int userId) {
+    public DTOWrapper setUserDialogStatus(int dialogId, int userId) { //todo implement
         return null;
     }
 

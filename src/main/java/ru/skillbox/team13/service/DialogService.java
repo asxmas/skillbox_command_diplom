@@ -1,6 +1,7 @@
 package ru.skillbox.team13.service;
 
 import ru.skillbox.team13.dto.DTOWrapper;
+import ru.skillbox.team13.entity.enums.MessageReadStatus;
 
 import java.util.ArrayList;
 
@@ -18,9 +19,7 @@ public interface DialogService {
 
     DTOWrapper getDialogMessages(int dialogId, String query, int offset, int itemPerPage);
 
-    DTOWrapper markAsRead(int dialogId, int messageId);
-
-    DTOWrapper getUserActivity(int dialogId, int userId);
+    DTOWrapper setStatus(int messageId, MessageReadStatus read);
 
     DTOWrapper setUserDialogStatus(int dialogId, int userId);
 }

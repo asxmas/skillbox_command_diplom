@@ -1,6 +1,7 @@
 package ru.skillbox.team13.service;
 
 
+import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.LoginDto;
 import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.dto.UserDto;
@@ -32,4 +33,6 @@ public interface UserService {
     Boolean setNotification(NotificationCode notificationcode, Boolean enabled);
 
     String resetPasswordAndGetToken(String link);
+
+    DTOWrapper getUserActivity(int userId);
 }

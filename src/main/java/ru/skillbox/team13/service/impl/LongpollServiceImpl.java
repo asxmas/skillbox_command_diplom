@@ -8,12 +8,12 @@ import ru.skillbox.team13.service.LongpollService;
 @Service
 public class LongpollServiceImpl implements LongpollService {
     @Override
-    public DTOWrapper getConnectionData() {
+    public DTOWrapper getConnectionData() {//todo implement
         return null;
     }
 
     @Override
-    public DTOWrapper getSomething(LongpollParamDto paramDto) {
+    public DTOWrapper getSomething(LongpollParamDto paramDto) {//todo implement
         return null;
     }
 }

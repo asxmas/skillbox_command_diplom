@@ -6,8 +6,10 @@ import org.springframework.web.bind.annotation.*;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.LongpollParamDto;
 import ru.skillbox.team13.dto.PlainObjectDto;
+import ru.skillbox.team13.entity.enums.MessageReadStatus;
 import ru.skillbox.team13.service.DialogService;
 import ru.skillbox.team13.service.LongpollService;
+import ru.skillbox.team13.service.UserService;
 
 import java.util.ArrayList;
 
@@ -18,6 +20,7 @@ public class DialogController {
 
     private final DialogService dialogService;
     private final LongpollService longpollService;
+    private final UserService userService;
 
     @GetMapping("dialogs")
     //получение списка диалогов
@@ -64,16 +67,16 @@ public class DialogController {
 
     @PutMapping("dialogs/{dlg_id}/messages/{msg_id}/read")
     //Пометить сообщение как "Прочитанное"
-    public ResponseEntity<DTOWrapper> markMessageAsRead(@PathVariable("dlg_id") int dialogId,
+    public ResponseEntity<DTOWrapper> markMessageAsRead(@PathVariable("dlg_id") int dialogId, //dialog id is not used
                                                         @PathVariable("msg_id") int messageId) {
-        return ResponseEntity.ok(dialogService.markAsRead(dialogId, messageId));
+        return ResponseEntity.ok(dialogService.setStatus(messageId, MessageReadStatus.READ));
     }
 
     @GetMapping("dialogs/{dlg_id}/activity/{user_id}")
     //Получить последнюю активность и текущий статус для пользователя с которым ведется диалог
-    public ResponseEntity<DTOWrapper> getUserStatus(@PathVariable("dlg_id") int dialogId,
+    public ResponseEntity<DTOWrapper> getUserStatus(@PathVariable("dlg_id") int dialogId, //dialog id is not used
                                                     @PathVariable("user_id") int userId) {
-        return ResponseEntity.ok(dialogService.getUserActivity(dialogId, userId));
+        return ResponseEntity.ok(userService.getUserActivity(userId));
     }
 
     @PostMapping("dialogs/{dlg_id}/activity/{user_id}")
