@@ -11,5 +11,9 @@ UPDATE public.person
 SET reg_date = '2021-06-06 22:00:16.000000'
 WHERE id = 2;
 
+UPDATE public.person
+SET reg_date = '2021-07-04 22:00:16.000000'
+WHERE id = 13;
+
 ALTER TABLE person
     ALTER COLUMN reg_date SET NOT NULL;

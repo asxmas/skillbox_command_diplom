@@ -1,5 +1,6 @@
 package ru.skillbox.team13.entity;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -40,11 +41,14 @@ public class Person extends Notified {
     @Column(name = "about")
     private String about;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @Column(name = "is_archive")
+    private boolean isArchive;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "city_id")
     private City city;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_id")
     private Country country;
 

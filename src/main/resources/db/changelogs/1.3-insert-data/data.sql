@@ -2,10 +2,10 @@
 -- changeset lc:1-3-data
 
 INSERT INTO "public"."notified" ("id")
-VALUES (2), (3);;
+VALUES (2), (3);
 
 INSERT INTO "public"."person" ("first_name", "is_blocked", "last_name", "messages_permission", "id")
-VALUES ('Sebastian', FALSE, 'Pereira', 'ALL', 2);;
+VALUES ('Sebastian', FALSE, 'Pereira', 'ALL', 2);
 
 INSERT INTO "public"."usr" ("id", "e_mail", "name", "password", "reg_date", "type", "person_id", "is_approved")
 VALUES (1, 'admin@example.com', 'admin', 'password', '2021-06-04 19:45:03.06865', 'ADMIN', 2, TRUE);;
@@ -26,16 +26,3 @@ VALUES (4, 'tag two'), (5, 'tag one');;
 
 INSERT INTO "public"."post2tag" ("post_id", "tag_id")
 VALUES (3, 4), (3, 5);;
-
--- liquibase formatted sql
--- changeset MikeVs:1-3-data
-
-INSERT INTO "public"."city" ("id", "title")
-VALUES (1, 'Moscow'), (2, 'Belgorod');;
-
-INSERT INTO "public"."country" ("id", "title")
-VALUES (1, 'Russia'), (2, 'Moldova');;
-
-INSERT INTO "public"."languages" ("id", "title")
-VALUES (1, 'Russian'), (2, 'English');;
-

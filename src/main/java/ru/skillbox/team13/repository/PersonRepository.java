@@ -2,6 +2,7 @@ package ru.skillbox.team13.repository;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import ru.skillbox.team13.entity.City;
 import ru.skillbox.team13.entity.Person;
@@ -19,4 +20,8 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
     List<Person> findByCity(Pageable p, City city);
 
     Integer countByCity(City city);
+
+    @Modifying
+    @Query("DELETE FROM Person where id =:id")
+    void deletePersonById(Integer id);
 }

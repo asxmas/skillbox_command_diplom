@@ -176,6 +176,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Person getInactivePerson() {
+        return personRepository.getById(13);
+    }
+
+    @Override
     @Transactional
     public Boolean setPassword(String token, String password) {
 
@@ -232,6 +237,11 @@ public class UserServiceImpl implements UserService {
             return WrapperMapper.wrap(request, false);
         }
         return WrapperMapper.wrap(request, false);
+    }
+
+    @Transactional
+    public void deleteUserById(Integer personId) {
+        userRepository.deleteUserByPersonId(personId);
     }
 
     @Override
