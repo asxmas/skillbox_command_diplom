@@ -6,22 +6,14 @@ import static ru.skillbox.team13.entity.enums.NotificationCode.*;
 
 public class MapNotification {
 
-    public static int mapNotificationCode(NotificationCode note) {
-        if(note.equals(POST)) {
-            return 1;
+    public static Integer mapNotificationCode(NotificationCode note) {
+        switch (note) {
+            case POST : return 1;
+            case POST_COMMENT : return 2;
+            case COMMENT_COMMENT : return 3;
+            case FRIEND_REQUEST : return 4;
+            case MESSAGE : return 5;
         }
-        if(note.equals(POST_COMMENT)) {
-            return 2;
-        }
-        if(note.equals(COMMENT_COMMENT)) {
-            return 3;
-        }
-        if(note.equals(FRIEND_REQUEST)) {
-            return 4;
-        }
-        if(note.equals(MESSAGE)) {
-            return 5;
-        }
-      return 1;
+      return null;
     }
 }

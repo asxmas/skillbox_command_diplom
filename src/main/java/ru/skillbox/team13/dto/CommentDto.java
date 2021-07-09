@@ -22,7 +22,7 @@ public class CommentDto {
     private String text;
 
     @JsonProperty("post_id")
-    private String postId;
+    private Integer postId;
 
     @JsonProperty("parent_id")
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -35,7 +35,7 @@ public class CommentDto {
     @JsonProperty("is_blocked")
     private boolean isBlocked;
 
-    public CommentDto(Integer id, String postId, Integer parentId, String text, LocalDateTime time, Integer authorId, Boolean blocked) {
+    public CommentDto(Integer id, Integer postId, Integer parentId, String text, LocalDateTime time, Integer authorId, Boolean blocked) {
         this.id = id;
         this.postId = postId;
         this.parentId = parentId;

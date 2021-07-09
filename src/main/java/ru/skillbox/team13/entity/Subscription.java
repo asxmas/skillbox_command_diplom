@@ -18,11 +18,11 @@ public class Subscription {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    int id;
+    private int id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "person", nullable = false)
-    Person person;
+    private Person person;
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    NotificationCode type;
+    private NotificationCode type;
 }

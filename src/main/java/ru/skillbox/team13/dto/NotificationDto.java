@@ -8,12 +8,12 @@ import lombok.Setter;
 @Setter
 public class NotificationDto {
 
-    int id;
+    private int id;
     @JsonProperty("type_id")
-    int typeId;
+    private int typeId;
     @JsonProperty("sent_time")
-    long sentTime;
+    private long sentTime;
     @JsonProperty("entity_id")
-    int entityId;
+    private int entityId;
     String info;
 }
