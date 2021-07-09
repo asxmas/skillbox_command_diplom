@@ -19,11 +19,14 @@ public interface UserService {
 
     User getAuthorizedUser();
 
-    Boolean codeGenerationAndEmail(String email);
+    Boolean codeGenerationAndEmail(String email, String origin);
 
     Boolean setPassword(String token, String password);
 
     Boolean setEmail(String email);
 
     DTOWrapper setNotification(SubscribeResponseDto subscribeType);
+
+    String resetPasswordAndGetToken(String link);
+
 }

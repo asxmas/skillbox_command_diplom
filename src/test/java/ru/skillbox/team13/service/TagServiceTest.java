@@ -18,7 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.util.Arrays;
-import static ru.skillbox.team13.DomainObjectFactory.*;
+
+import static ru.skillbox.team13.test_util.DomainObjectFactory.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -42,7 +43,7 @@ public class TagServiceTest {
     void addTagTest() {
         TagDto tagDto1 = new TagDto();
         TagDto savedTagDto1;
-        String stringForAddedToSecondTag = genString(20, 0.1f, false);;
+        String stringForAddedToSecondTag = genString(20, 0.1f, false);
         String stringForTagDto1and3 = stringForAddedToSecondTag + genString(20, 0.1f, false);
         tagDto1.setTag(stringForTagDto1and3);
         savedTagDto1 = tagService.addTag(tagDto1);
@@ -52,12 +53,12 @@ public class TagServiceTest {
     }
 
     @Test
-    void addDuplicateTagTest(){
+    void addDuplicateTagTest() {
         TagDto tagDto1 = new TagDto();
         TagDto tagDto2 = new TagDto();
         TagDto tagDto3 = new TagDto();
         String stringForAddedToSecondTag = genString(20, 0.1f, false);
-        String stringForTagDto1and3 = stringForAddedToSecondTag + genString(20, 0.1f, false);;
+        String stringForTagDto1and3 = stringForAddedToSecondTag + genString(20, 0.1f, false);
         tagDto1.setTag(stringForTagDto1and3);
         tagDto2.setTag(stringForAddedToSecondTag);
         tagDto3.setTag(stringForTagDto1and3);
@@ -98,7 +99,7 @@ public class TagServiceTest {
     }
 
     @Test
-    void deleteTagTest(){
+    void deleteTagTest() {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
         Tag tag1 = new Tag();

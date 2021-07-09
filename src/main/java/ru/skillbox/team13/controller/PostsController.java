@@ -39,7 +39,7 @@ public class PostsController {
     @PutMapping("{id}")
 //Редактирование публикации по ID
     ResponseEntity<DTOWrapper> editPost(@PathVariable int id,
-                                        @RequestParam(name = "publish_date") Long pubDate,
+                                        @RequestParam(name = "publish_date", required = false) Long pubDate, //todo wtf??
                                         @RequestBody Map<String, String> payload) {
         return new ResponseEntity<>(postService.edit(id, pubDate, payload.get("title"), payload.get("post_text")), HttpStatus.OK);
     }
