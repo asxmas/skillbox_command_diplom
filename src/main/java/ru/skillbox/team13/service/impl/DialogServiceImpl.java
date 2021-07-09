@@ -122,6 +122,21 @@ public class DialogServiceImpl implements DialogService {
         return WrapperMapper.wrap(results, (int) messagePage.getTotalElements(), offset, itemPerPage, true);
     }
 
+    @Override
+    public DTOWrapper markAsRead(int dialogId, int messageId) {
+        return null;
+    }
+
+    @Override
+    public DTOWrapper getUserActivity(int dialogId, int userId) {
+        return null;
+    }
+
+    @Override
+    public DTOWrapper setUserDialogStatus(int dialogId, int userId) {
+        return null;
+    }
+
     private void incrementUnread(Dialog dialog, Person currentPerson){
 
         List<Dialog2Person> dialog2Person = dialog2PersonRepository.findDialog2PersonByDialog(dialog);
