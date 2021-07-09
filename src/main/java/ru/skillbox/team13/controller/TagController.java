@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.team13.dto.DTOWrapper;
-import ru.skillbox.team13.dto.SuccessDto;
 import ru.skillbox.team13.dto.TagDto;
 import ru.skillbox.team13.exception.UnauthorizedException;
 import ru.skillbox.team13.mapper.WrapperMapper;

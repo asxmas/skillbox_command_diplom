@@ -19,6 +19,7 @@ public class PostDto {
     private PersonDTO author;
     private String title;
 
+
     @JsonProperty("post_text")
     private String text;
 
@@ -29,13 +30,13 @@ public class PostDto {
 
     private List<CommentDto> comments;
 
-    public PostDto(int id, LocalDateTime ldt, int authorId, String title, String text, boolean isBlocked, int likes) {
-        this.id = id;
-        this.timestamp = TimeUtil.getTimestamp(ldt);
-        this.author = new PersonDTO(authorId);
-        this.title = title;
-        this.text = text;
-        this.isBlocked = isBlocked;
-        this.likes = likes;
-    }
+//    public PostDto(int id, LocalDateTime ldt, int authorId, String title, String text, boolean isBlocked, int likes) {
+//        this.id = id;
+//        this.timestamp = TimeUtil.getTimestamp(ldt);
+//        this.author = new PersonDTO(authorId);
+//        this.title = title;
+//        this.text = text;
+//        this.isBlocked = isBlocked;
+//        this.likes = likes;
+//    }
 }

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
-import ru.skillbox.team13.dto.PostDTO;
+import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.entity.User;
@@ -35,7 +35,7 @@ public class PostsService {
             return false;
         }
     }
-    public Post addPost(PostDTO postDTO, Person currentPerson) {
+    public Post addPost(PostDto postDTO, Person currentPerson) {
         Post post = new Post();
         post.setAuthor(currentPerson);
         post.setTime(LocalDateTime.now());
@@ -44,21 +44,15 @@ public class PostsService {
         return post;
     }
 
-    private void fillPostFields(Post post, PostDTO postDTO) {
-        post.setPostText(postDTO.getPostText());
+    private void fillPostFields(Post post, PostDto postDTO) {
+        post.setPostText(postDTO.getText());
         if (postDTO.getComments() == null)  {
             post.setComments(null);
         }
-        else {
-            post.setComments(commentService.getSetComments(postDTO.getComments()));
-        }
         post.setTitle(postDTO.getTitle());
-        if (post.getTime() == null) {
-            post.setTime(postDTO.getTime());
-        }
     }
 
-    public Set<PostDTO> getSetPostsByAuthorId(Integer id)   {
+    public Set<PostDto> getSetPostsByAuthorId(Integer id)   {
         List<Post> postsByAuthor = repoPost.getPostsByAuthorId(PageRequest.of(0,10),id);
         return PostMapper.convertSetPostToSetPostDTO(Set.copyOf(postsByAuthor));
     }

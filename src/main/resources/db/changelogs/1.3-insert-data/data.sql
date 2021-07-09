@@ -2,11 +2,10 @@
 -- changeset lc:1-3-data
 
 INSERT INTO "public"."notified" ("id")
-VALUES (2), (3), (13);
+VALUES (2), (3);
 
 INSERT INTO "public"."person" ("first_name", "is_blocked", "last_name", "messages_permission", "id")
-VALUES ('Sebastian', FALSE, 'Pereira', 'ALL', 2),
-       ('Inactive', FALSE, 'User', 'ALL', 13);
+VALUES ('Sebastian', FALSE, 'Pereira', 'ALL', 2);
 
 INSERT INTO "public"."usr" ("id", "e_mail", "name", "password", "reg_date", "type", "person_id", "is_approved")
 VALUES (1, 'admin@example.com', 'admin', 'password', '2021-06-04 19:45:03.06865', 'ADMIN', 2, TRUE);;

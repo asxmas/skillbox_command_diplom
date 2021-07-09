@@ -5,12 +5,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.CityDto;
 import ru.skillbox.team13.dto.CountryDto;
-import ru.skillbox.team13.dto.PostDTO;
+import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.mapper.PersonMapper;
-import ru.skillbox.team13.repository.PersonRepo;
+import ru.skillbox.team13.repository.PersonRepository;
 import ru.skillbox.team13.service.impl.UserServiceImpl;
 import ru.skillbox.team13.util.TimeUtil;
 
@@ -20,11 +20,11 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class PersonService {
 
-    private final PersonRepo repoPerson;
+    private final PersonRepository personRepository;
     private final UserServiceImpl userService;
     private final PostsService postsService;
-    private final CityService cityService;
-    private final CountryService countryService;
+    private final CityServiceRepo cityServiceRepo;
+    private final CountryServiceRepo countryServiceRepo;
 
     public PersonDTO updateCurrentPerson(PersonDTO personDTO)   {
         PersonDTO currentPersonDTO = userService.getCurrentUserDto();
@@ -32,39 +32,39 @@ public class PersonService {
         Person person = new Person();
         Integer personId = currentPersonDTO.getId();
         if (personId != null)  {
-            person = repoPerson.getById(personId);
+            person = personRepository.getById(personId);
         }
         fillPersonFields(person, personDTO);
-        repoPerson.saveAndFlush(person);
+        personRepository.saveAndFlush(person);
         return PersonMapper.convertPersonToPersonDTO(person);
     }
 
     private PersonDTO fillPersonDTOFields(PersonDTO personDTO)    {
-        CityDto cityDTO = PersonMapper.convertCityToCityDTO(cityService.getById(personDTO.getTownId()));
-        CountryDto countryDto = PersonMapper.convertCountryToCountryDTO(countryService.getCountryById(personDTO.getCountryId()));
+        CityDto cityDTO = PersonMapper.convertCityToCityDTO(cityServiceRepo.getById(personDTO.getTownId()));
+        CountryDto countryDto = PersonMapper.convertCountryToCountryDTO(countryServiceRepo.getCountryById(personDTO.getCountryId()));
         personDTO.setCityDto(cityDTO);
         personDTO.setCountryDto(countryDto);
         personDTO.setBirthDateLDT(TimeUtil.toLocalDateTime(personDTO.getBirthDate()));
         return personDTO;
     }
 
-    public void addPostToWall (int id, PostDTO postDTO)   {
-        Person person = repoPerson.getById(id);
+    public void addPostToWall (int id, PostDto postDTO)   {
+        Person person = personRepository.getById(id);
         PersonDTO personDTO = PersonMapper.convertPersonToPersonDTO(person);
         postDTO.setAuthor(personDTO);
         Post post = postsService.addPost(postDTO, person);
         Set<Post> personPosts = person.getPosts();
         personPosts.add(post);
         person.setPosts(personPosts);
-        repoPerson.save(person);
+        personRepository.save(person);
     }
     public PersonDTO getPersonDTOById(int id) {
-        Person person = repoPerson.getById(id);
+        Person person = personRepository.getById(id);
         return PersonMapper.convertPersonToPersonDTO(person);
     }
 
     public Person getById(int id)   {
-        return repoPerson.getById(id);
+        return personRepository.getById(id);
     }
 
     private void fillPersonFields (Person person, PersonDTO dto)    {
@@ -87,10 +87,10 @@ public class PersonService {
             person.setMessagesPermission(dto.getMessagesPermission());
         }
         if (dto.getTownId() != null)    {
-            person.setCity(cityService.getById(dto.getTownId()));
+            person.setCity(cityServiceRepo.getById(dto.getTownId()));
         }
         if (dto.getCountryId() != null)    {
-            person.setCountry(countryService.getCountryById(dto.getCountryId()));
+            person.setCountry(countryServiceRepo.getCountryById(dto.getCountryId()));
         }
         if (dto.getBirthDateLDT() != null) {
             person.setBirthDate(dto.getBirthDateLDT());
@@ -99,10 +99,10 @@ public class PersonService {
 
     @Transactional
     public PersonDTO deleteCurrentUser (PersonDTO personDTO) {
-        Person person = repoPerson.getById(personDTO.getId());
+        Person person = personRepository.getById(personDTO.getId());
         postsService.setInactiveAuthor();
         person.setArchive(true);
-        repoPerson.save(person);
+        personRepository.save(person);
         return personDTO;
     }
 }

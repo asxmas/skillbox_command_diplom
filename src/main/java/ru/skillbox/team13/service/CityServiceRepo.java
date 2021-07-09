@@ -12,7 +12,7 @@ import ru.skillbox.team13.repository.CityRepo;
 @Component
 @Setter
 @RequiredArgsConstructor
-public class CityService {
+public class CityServiceRepo {
     private final CityRepo cityRepo;
 
     public City getById(Integer id) {

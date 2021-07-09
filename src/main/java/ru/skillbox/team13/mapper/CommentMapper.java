@@ -1,7 +1,7 @@
 package ru.skillbox.team13.mapper;
 
 import lombok.RequiredArgsConstructor;
-import ru.skillbox.team13.dto.CommentDTO;
+import ru.skillbox.team13.dto.CommentDto;
 import ru.skillbox.team13.entity.Comment;
 import ru.skillbox.team13.service.CommentService;
 
@@ -13,25 +13,25 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CommentMapper {
     private static CommentService commentService;
-    public static CommentDTO convertCommentToCommentDTO(Comment comment)    {
-        return CommentDTO.builder()
+    public static CommentDto convertCommentToCommentDTO(Comment comment)    {
+        return CommentDto.builder()
                 .parentId(comment.getParent().getId())
-                .commentText(comment.getCommentText())
-                .time(Timestamp.valueOf(comment.getTime()))
+                .text(comment.getCommentText())
+                .time(comment.getTime().getSecond()*1000)
                 .build();
     }
 
-    public static Comment convertCommentDTOToComment(CommentDTO commentDto)    {
-        Comment comment = new Comment();
-        Comment parent = commentService.getCommentById(commentDto.getParentId());
-        String commentText = commentDto.getCommentText();
-        LocalDateTime time = commentDto.getTime().toLocalDateTime();
-        comment.setParent(parent);
-        comment.setCommentText(commentText);
-        return comment;
-    }
+//    public static Comment convertCommentDTOToComment(CommentDto commentDto)    {
+//        Comment comment = new Comment();
+//        Comment parent = commentService.getCommentById(commentDto.getParentId());
+//        String commentText = commentDto.getCommentText();
+//        LocalDateTime time = commentDto.getTime().toLocalDateTime();
+//        comment.setParent(parent);
+//        comment.setCommentText(commentText);
+//        return comment;
+//    }
 
-    public static Set<CommentDTO> convertSetCommentToSetCommentDTO(Set<Comment> comments)  {
+    public static Set<CommentDto> convertSetCommentToSetCommentDTO(Set<Comment> comments)  {
         return comments.stream()
                 .map(CommentMapper::convertCommentToCommentDTO)
                 .collect(Collectors.toSet());

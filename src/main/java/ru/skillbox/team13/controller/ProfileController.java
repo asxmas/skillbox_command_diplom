@@ -7,7 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.team13.dto.ErrorDto;
 import ru.skillbox.team13.dto.PersonDTO;
-import ru.skillbox.team13.dto.PostDTO;
+import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.dto.SuccessDto;
 import ru.skillbox.team13.service.PersonService;
 import ru.skillbox.team13.service.PostsService;
@@ -83,7 +83,7 @@ public class ProfileController {
     }
   }
   @PostMapping("/users/{id}/wall")
-  public ResponseEntity createPost(@PathVariable("id") Integer id, @RequestBody PostDTO postDTO) {
+  public ResponseEntity createPost(@PathVariable("id") Integer id, @RequestBody PostDto postDTO) {
     try {
       personService.addPostToWall(id, postDTO);
       return ResponseEntity.ok(postDTO);

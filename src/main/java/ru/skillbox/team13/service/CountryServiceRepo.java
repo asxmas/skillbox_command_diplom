@@ -7,7 +7,7 @@ import ru.skillbox.team13.repository.RepoCountry;
 
 @Service
 @RequiredArgsConstructor
-public class CountryService {
+public class CountryServiceRepo {
     private final RepoCountry repoCountry;
 
     public Country getCountryById (Integer id)  {

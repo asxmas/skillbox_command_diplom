@@ -71,5 +71,4 @@ public class PersonDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private final String token;
 
-
 }
