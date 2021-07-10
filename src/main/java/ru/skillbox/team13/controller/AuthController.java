@@ -34,7 +34,7 @@ public class AuthController {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
         }
         catch (AuthenticationException e) {
-            throw new BadRequestException("Invalid username or password");
+            throw new BadRequestException("Неверный логин или пароль");
         }
         return ResponseEntity.ok(new SuccessDto(userService.login(loginDto)));
     }

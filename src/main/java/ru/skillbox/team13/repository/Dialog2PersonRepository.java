@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import ru.skillbox.team13.entity.Dialog;
 import ru.skillbox.team13.entity.Dialog2Person;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public interface Dialog2PersonRepository extends JpaRepository<Dialog2Person, Integer> {
@@ -21,4 +22,8 @@ public interface Dialog2PersonRepository extends JpaRepository<Dialog2Person, In
 
     @Query("select sum(d2p.unreadCount) from Dialog2Person d2p where d2p.person.id = :personId")
     Integer countAllUnread(int personId);
+
+    List<Dialog2Person> findAllByDialogIdAndPersonIdIsIn(int dialogId, ArrayList<Integer> personIds);
+
+    void deleteAllByDialogIdAndPersonIdIsIn(int dialogId, ArrayList<Integer> personIds);
 }

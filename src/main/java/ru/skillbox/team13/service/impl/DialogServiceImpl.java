@@ -57,16 +57,16 @@ public class DialogServiceImpl implements DialogService {
     @Modifying
     public DTOWrapper createDialog(ArrayList<Integer> userIds) {
 
-        int currentUserId = userService.getAuthorizedUser().getPerson().getId();
+        int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
         Dialog dialog = new Dialog();
         int dialogId = dialogRepository.saveAndFlush(dialog).getId();
         //добавление текущего пользователя в диалог
-        if (!userIds.contains(currentUserId)) userIds.add(currentUserId);
+        if (!userIds.contains(currentPersonId)) userIds.add(currentPersonId);
         List<Person> personList = personRepository.findAllById(userIds);
         List<Dialog2Person> dialog2PersonList = personList.stream().map(person -> new Dialog2Person()
                 .setPerson(person)
                 .setDialog(dialog)).collect(Collectors.toList());
-        dialog2PersonRepository.saveAllAndFlush(dialog2PersonList);
+        dialog2PersonRepository.saveAll(dialog2PersonList);
         return WrapperMapper.wrap(Map.of("id", dialogId), true);
     }
 
@@ -120,6 +120,35 @@ public class DialogServiceImpl implements DialogService {
         Page<Message> messagePage = messageRepository.findByDialog(pageable, query, dialogId);
         List<DialogMessageDto> results = messagePage.stream().map(DialogMapper::convertMessageToDialogMessageDTO).collect(Collectors.toList());
         return WrapperMapper.wrap(results, (int) messagePage.getTotalElements(), offset, itemPerPage, true);
+    }
+
+    @Override
+    @Transactional
+    @Modifying
+    public DTOWrapper addUsersToDialog(int dialogId, ArrayList<Integer> userIds) {
+
+        //проверка на присутствие пользователей в диалоге
+        List<Dialog2Person> personsInDialog = dialog2PersonRepository.findAllByDialogIdAndPersonIdIsIn(dialogId, userIds);
+        if (!personsInDialog.isEmpty()) { throw new BadRequestException("Пользователь участвует в диалоге"); }
+        List<Person> personList = personRepository.findAllById(userIds);
+        Dialog dialog = dialogRepository.getById(dialogId);
+        List<Dialog2Person> dialog2PersonList = personList.stream().map(person -> new Dialog2Person()
+                .setPerson(person)
+                .setDialog(dialog)
+                //при добавлении пользователя в диалог устанавливаем непрочитанными - все сообщения
+                .setUnreadCount(dialog.getMessages().size())).collect(Collectors.toList()) ;
+        dialog2PersonRepository.saveAll(dialog2PersonList);
+        return WrapperMapper.wrap(Map.of("user_ids", userIds), true);
+    }
+
+    @Override
+    @Transactional
+    @Modifying
+    public DTOWrapper deleteUserFromDialog(int dialogId, ArrayList<Integer> userIds) {
+        if (!dialogRepository.existsById(dialogId)) { throw new BadRequestException("Диалога не существует");}
+        dialog2PersonRepository.deleteAllByDialogIdAndPersonIdIsIn(dialogId, userIds);
+        //todo если в диалоге не осталось собеседников, то его почистить вместе с сообщениями
+        return WrapperMapper.wrap(Map.of("user_ids", userIds), true);
     }
 
     private void incrementUnread(Dialog dialog, Person currentPerson){

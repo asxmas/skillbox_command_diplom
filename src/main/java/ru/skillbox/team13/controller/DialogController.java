@@ -8,6 +8,8 @@ import ru.skillbox.team13.dto.PlainObjectDto;
 import ru.skillbox.team13.service.DialogService;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -52,10 +54,21 @@ public class DialogController {
     }
 
     @GetMapping("dialogs/{id}/messages")
+    //получение сообщений диалога
     public ResponseEntity<DTOWrapper> getDialogMessages(@PathVariable("id") Integer dialogId,
                                                         @RequestParam(required = false, defaultValue = "") String query,
                                                         @RequestParam(required = false, defaultValue = "0") int offset,
                                                         @RequestParam(required = false, defaultValue = "10") int itemPerPage) {
         return ResponseEntity.ok(dialogService.getDialogMessages(dialogId, query, offset,itemPerPage));
+    }
+
+    @PutMapping("dialogs/{id}/users")
+    public ResponseEntity<DTOWrapper> addUserToDialog(@PathVariable("id") Integer dialogId, @RequestBody Map<String, ArrayList<Integer>> userIds){
+        return ResponseEntity.ok(dialogService.addUsersToDialog(dialogId, userIds.get("user_ids")));
+    }
+
+    @DeleteMapping("dialogs/{id}/users")
+    public ResponseEntity<DTOWrapper> deleteUserFromDialog(@PathVariable("id") Integer dialogId, @RequestBody Map<String, ArrayList<Integer>> userIds){
+        return ResponseEntity.ok(dialogService.deleteUserFromDialog(dialogId, userIds.get("user_ids")));
     }
 }
