@@ -3,6 +3,7 @@ package ru.skillbox.team13.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import ru.skillbox.team13.entity.Dialog;
 import ru.skillbox.team13.entity.Dialog2Person;
@@ -18,7 +19,9 @@ public interface Dialog2PersonRepository extends JpaRepository<Dialog2Person, In
 
     List<Dialog2Person> findDialog2PersonByDialog(Dialog dialog);
 
-    void deleteByDialog(Dialog dialog);
+    @Modifying
+    @Query("delete from Dialog2Person d2p where d2p.dialog.id = :dialogId")
+    void deleteAllByDialog(int dialogId);
 
     @Query("select sum(d2p.unreadCount) from Dialog2Person d2p where d2p.person.id = :personId")
     Integer countAllUnread(int personId);

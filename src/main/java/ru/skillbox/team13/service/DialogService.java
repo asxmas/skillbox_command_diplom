@@ -21,4 +21,8 @@ public interface DialogService {
     DTOWrapper addUsersToDialog(int dialogId, ArrayList<Integer> userIds);
 
     DTOWrapper deleteUserFromDialog(int dialogId, ArrayList<Integer> userIds);
+
+    DTOWrapper getInviteLink(int dialogId);
+
+    DTOWrapper addUserToDialogByLink(int dialogId, String inviteLink);
 }

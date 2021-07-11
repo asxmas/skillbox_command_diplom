@@ -27,3 +27,5 @@ databaseChangeLog:
       file: db/changelogs/7-patch-tag/unique-tag.sql
   - includeAll:
       path: db/changelogs/10-friendship-fix
+  - include:
+      file: db/changelogs/11-patch-dialog/dialog-link.sql

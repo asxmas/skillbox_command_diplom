@@ -6,6 +6,7 @@ import ru.skillbox.team13.util.TimeUtil;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -15,7 +16,7 @@ public class WrapperMapper {
         if (errorAndTimestamp) {
             return DTOWrapper.builder()
                     .error("string")
-                    .timestamp(Instant.now().getEpochSecond())
+                    .timestamp(LocalDateTime.now().toInstant(OffsetDateTime.now().getOffset()).toEpochMilli())
                     .total(count)
                     .data(getDataByClass(payload))
                     .offset(offset)
@@ -34,7 +35,7 @@ public class WrapperMapper {
         if (errorAndTimestamp) {
             return DTOWrapper.builder()
                     .error("string")
-                    .timestamp(TimeUtil.getTimestamp(LocalDateTime.now()))
+                    .timestamp(LocalDateTime.now().toInstant(OffsetDateTime.now().getOffset()).toEpochMilli())
                     .data(getDataByClass(payload))
                     .build();
 
@@ -45,7 +46,7 @@ public class WrapperMapper {
 
     public static DTOWrapper wrapMessage(MessageDTO message) {
         return DTOWrapper.builder().error("string")
-                .timestamp(TimeUtil.getTimestamp(LocalDateTime.now()))
+                .timestamp(LocalDateTime.now().toInstant(OffsetDateTime.now().getOffset()).toEpochMilli())
                 .data(message)
                 .build();
     }

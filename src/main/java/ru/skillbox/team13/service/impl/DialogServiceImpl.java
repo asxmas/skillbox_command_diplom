@@ -26,9 +26,7 @@ import ru.skillbox.team13.service.DialogService;
 
 import javax.persistence.EntityManagerFactory;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,6 +47,7 @@ public class DialogServiceImpl implements DialogService {
         Person person = userService.getAuthorizedUser().getPerson();
         Page<Dialog2Person> dialogPage = dialog2PersonRepository.findPersonDialogs(pageable, query, person.getId());
         List<DialogDto> results = dialogPage.stream().map(DialogMapper::convertDialog2PersonToDialogDTO).collect(Collectors.toList());
+        System.err.println(results);
         return WrapperMapper.wrap(results, (int) dialogPage.getTotalElements(), offset, itemPerPage, true);
     }
 
@@ -90,7 +89,7 @@ public class DialogServiceImpl implements DialogService {
         dialog.setLastMessage(null);
         dialogRepository.saveAndFlush(dialog);
 
-        dialog2PersonRepository.deleteByDialog(dialog);
+        dialog2PersonRepository.deleteAllByDialog(dialog.getId());
 
         dialogRepository.deleteById(dialogId);
         return WrapperMapper.wrap(Map.of("id", dialogId), true);
@@ -147,8 +146,40 @@ public class DialogServiceImpl implements DialogService {
     public DTOWrapper deleteUserFromDialog(int dialogId, ArrayList<Integer> userIds) {
         if (!dialogRepository.existsById(dialogId)) { throw new BadRequestException("Диалога не существует");}
         dialog2PersonRepository.deleteAllByDialogIdAndPersonIdIsIn(dialogId, userIds);
-        //todo если в диалоге не осталось собеседников, то его почистить вместе с сообщениями
+        //todo если в диалоге не осталось собеседников, то... выяснить логику: почистить вместе с сообщениями?
         return WrapperMapper.wrap(Map.of("user_ids", userIds), true);
+    }
+
+    @Override
+    @Transactional
+    @Modifying
+    public DTOWrapper getInviteLink(int dialogId) {
+
+        Dialog dialog = dialogRepository.findById(dialogId).get();
+        //сли у диалога уже есть ссылка-приглашение, то овозвращаем её
+        String inviteLink = dialog.getInviteLink();
+        //если нет, то создаем и сохраняем новую
+        if (dialog.getInviteLink() == null) {
+            inviteLink = UUID.randomUUID().toString();
+            dialog.setInviteLink(inviteLink);
+            dialogRepository.save(dialog);
+        }
+        return WrapperMapper.wrap(Map.of("link", inviteLink) ,true);
+    }
+
+    @Override
+    @Transactional
+    public DTOWrapper addUserToDialogByLink(int dialogId, String inviteLink) {
+
+        Dialog dialog = dialogRepository.findFirstByInviteLink(inviteLink);
+        Person person = userService.getAuthorizedUser().getPerson();
+        //todo нужна или нет проверка на то что пользователь входит по своему же приглашению...
+        Dialog2Person dialog2Person = new Dialog2Person()
+                .setDialog(dialog)
+                .setPerson(person)
+                .setUnreadCount(dialog.getMessages().size());
+        dialog2PersonRepository.save(dialog2Person);
+        return WrapperMapper.wrap(Map.of("user_ids", List.of(person.getId())), true);
     }
 
     private void incrementUnread(Dialog dialog, Person currentPerson){
