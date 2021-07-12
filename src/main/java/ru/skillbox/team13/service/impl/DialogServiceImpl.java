@@ -129,11 +129,6 @@ public class DialogServiceImpl implements DialogService {
         return WrapperMapper.wrap(Map.of("message", "ok"), true);
     }
 
-    @Override
-    public DTOWrapper setUserDialogStatus(int dialogId, int userId) { //todo implement
-        return null;
-    }
-
     private void incrementUnread(Dialog dialog, Person currentPerson){
 
         List<Dialog2Person> dialog2Person = dialog2PersonRepository.findDialog2PersonByDialog(dialog);

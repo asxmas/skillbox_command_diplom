@@ -29,6 +29,7 @@ import ru.skillbox.team13.repository.BlacklistedTokenRepository;
 import ru.skillbox.team13.repository.PersonRepository;
 import ru.skillbox.team13.repository.UserRepository;
 import ru.skillbox.team13.security.Jwt.JwtTokenProvider;
+import ru.skillbox.team13.security.Jwt.JwtUser;
 import ru.skillbox.team13.security.TokenType;
 import ru.skillbox.team13.service.UserService;
 import ru.skillbox.team13.util.TimeUtil;
@@ -37,7 +38,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -235,21 +235,38 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public DTOWrapper getUserActivity(int userId) {
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new BadRequestException("User for id=" + userId + " is not found"));
+        User user = getUser(userId);
 
-        List<String> userIdentifiers = sessionRegistry.getAllPrincipals().stream()
-                .map(o -> (UserDetails) o)
-                .map(UserDetails::getUsername)
-                .collect(Collectors.toList());
-
-        boolean isOnline = userIdentifiers.stream().anyMatch(email -> email.equals(user.getEmail()));
-
+        boolean isOnline = isOnline(user);
         LocalDateTime lastOnlineTime = user.getPerson().getLastOnlineTime();
         Long timestamp = TimeUtil.getTimestamp(lastOnlineTime);
-        log.debug("Checking online status for user id {} ({}, last online: {}). Total online users: {}",
-                userId, isOnline, lastOnlineTime, userIdentifiers.size());
+        log.debug("Checking online status for user id {} ({}, last online: {}).", userId, isOnline, lastOnlineTime);
         return WrapperMapper.wrap(Map.of("online", isOnline, "last_activity", timestamp), true);
+    }
+
+    @Override
+    public DTOWrapper setUserDialogStatus(int userId, String status) {
+        User user = getUser(userId);
+        JwtUser ud = getUserDetails(user.getEmail());
+        ud.setOnlineStatus(status);
+        log.debug("Setting status '{}' to user id={} .", status, userId);
+        return WrapperMapper.wrap(Map.of("message", "ok"), true);
+    }
+
+    private JwtUser getUserDetails(String username) {
+        return (JwtUser) sessionRegistry.getAllPrincipals().stream()
+                .filter(o -> ((JwtUser) o).getUsername().equals(username))
+                .findAny().orElseThrow(() -> new BadRequestException("Internal user ID mismatch"));
+    }
+
+    private boolean isOnline(User user) {
+        return sessionRegistry.getAllPrincipals().stream()
+                .anyMatch(principal -> ((UserDetails) principal).getUsername().equals(user.getEmail()));
+    }
+
+    private User getUser(int userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
+                new BadRequestException("User for id=" + userId + " is not found"));
     }
 
     private void putTokenToBlackList(String token) {

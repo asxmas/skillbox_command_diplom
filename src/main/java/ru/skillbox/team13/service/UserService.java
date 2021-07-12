@@ -35,4 +35,6 @@ public interface UserService {
     String resetPasswordAndGetToken(String link);
 
     DTOWrapper getUserActivity(int userId);
+
+    DTOWrapper setUserDialogStatus(int userId, String status);
 }

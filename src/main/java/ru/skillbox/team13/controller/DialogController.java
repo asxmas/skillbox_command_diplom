@@ -12,6 +12,7 @@ import ru.skillbox.team13.service.LongpollService;
 import ru.skillbox.team13.service.UserService;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 @RestController
 @RequiredArgsConstructor
@@ -81,9 +82,10 @@ public class DialogController {
 
     @PostMapping("dialogs/{dlg_id}/activity/{user_id}")
     //    Изменить статус набора текста пользователем в диалоге.
-    public ResponseEntity<DTOWrapper> setUserDialogStatus(@PathVariable("dlg_id") int dialogId,
+    public ResponseEntity<DTOWrapper> setUserDialogStatus(@PathVariable("dlg_id") int dialogId, //dialog id is not used
                                                           @PathVariable("user_id") int userId) {
-        return ResponseEntity.ok(dialogService.setUserDialogStatus(dialogId, userId));
+        String[] stat = {"Typing", "Writing", "Singing", "Shitposting", "Barking"};
+        return ResponseEntity.ok(userService.setUserDialogStatus(userId, stat[new Random().nextInt(stat.length)]));
     }
 
     @GetMapping("dialogs/longpoll")

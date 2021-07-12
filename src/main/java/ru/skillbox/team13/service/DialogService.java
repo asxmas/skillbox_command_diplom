@@ -20,6 +20,4 @@ public interface DialogService {
     DTOWrapper getDialogMessages(int dialogId, String query, int offset, int itemPerPage);
 
     DTOWrapper setStatus(int messageId, MessageReadStatus read);
-
-    DTOWrapper setUserDialogStatus(int dialogId, int userId);
 }
