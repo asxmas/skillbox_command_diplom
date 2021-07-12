@@ -44,7 +44,6 @@ public class PersonService {
         CountryDto countryDto = PersonMapper.convertCountryToCountryDTO(countryServiceRepo.getCountryById(personDTO.getCountryId()));
         personDTO.setCityDto(cityDTO);
         personDTO.setCountryDto(countryDto);
-        personDTO.setBirthDateLDT(TimeUtil.toLocalDateTime(personDTO.getBirthDate()));
         return personDTO;
     }
 
@@ -74,9 +73,6 @@ public class PersonService {
         if (dto.getLastName() != null) {
             person.setLastName(dto.getLastName());
         }
-        if (dto.getBirthDateLDT() != null) {
-            person.setBirthDate(dto.getBirthDateLDT());
-        }
         if (dto.getPhone() != null) {
             person.setPhone(dto.getPhone());
         }
@@ -91,9 +87,6 @@ public class PersonService {
         }
         if (dto.getCountryId() != null)    {
             person.setCountry(countryServiceRepo.getCountryById(dto.getCountryId()));
-        }
-        if (dto.getBirthDateLDT() != null) {
-            person.setBirthDate(dto.getBirthDateLDT());
         }
     }
 

@@ -14,8 +14,6 @@ databaseChangeLog:
   - include:
       file: db/changelogs/4-patch/modify-like.sql
   - include:
-      file: db/changelogs/5-patch/add-inactive-user.sql
-  - include:
       file: db/changelogs/5-patch/dialog2person.sql
   - include:
       file: db/changelogs/5-patch/dialog-in-message.sql
@@ -29,3 +27,5 @@ databaseChangeLog:
       file: db/changelogs/7-patch-tag/unique-tag.sql
   - includeAll:
       path: db/changelogs/10-friendship-fix
+  - includeAll:
+      path: db/changelogs/11-patch
