@@ -5,20 +5,26 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.*;
+import ru.skillbox.team13.entity.City;
+import ru.skillbox.team13.entity.Country;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.mapper.PersonMapper;
 import ru.skillbox.team13.mapper.WrapperMapper;
+import ru.skillbox.team13.repository.CitiesRepository;
+import ru.skillbox.team13.repository.CountryRepository;
 import ru.skillbox.team13.repository.PersonRepository;
 import ru.skillbox.team13.service.*;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ProfileServiceImpl implements ProfileService {
+public class PersonServiceImpl implements PersonService {
 
     private final PersonRepository personRepository;
     private final UserService userService;
+    private final CitiesRepository citiesRepository;
+    private final CountryRepository countryRepository;
     private final PostsService postsService; //todo refactor
     private final CityServiceRepo cityServiceRepo; //todo refactor
     private final CountryServiceRepo countryServiceRepo; //todo refactor
@@ -33,11 +39,11 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     @Transactional
-    public DTOWrapper updateMyProfile(PersonDTO personDTO) { //todo tests
+    public DTOWrapper updateMyProfile(EditPersonDto editPersonDto) { //todo tests
         Person myPerson = userService.getAuthorizedUser().getPerson();
         log.debug("Updating person data for id={}.", myPerson.getId());
-        fillPersonDTOFields(personDTO);
-        fillPersonFields(myPerson, personDTO);
+        fillPersonFields(myPerson, editPersonDto);
+
         personRepository.save(myPerson);
 
         PersonDTO newDto = PersonMapper.convertPersonToPersonDTO(myPerson);
@@ -63,14 +69,15 @@ public class ProfileServiceImpl implements ProfileService {
         return WrapperMapper.wrap(PersonMapper.convertPersonToPersonDTO(person), true);
     }
 
-    private void fillPersonDTOFields(PersonDTO personDTO) {
-        CityDto cityDTO = PersonMapper.convertCityToCityDTO(cityServiceRepo.getById(personDTO.getTownId()));
-        CountryDto countryDto = PersonMapper.convertCountryToCountryDTO(countryServiceRepo.getCountryById(personDTO.getCountryId()));
-        personDTO.setCityDto(cityDTO);
-        personDTO.setCountryDto(countryDto);
+    private void fillPersonDTOFields(PersonDTO personDTO) { //todo check
+//        CityDto cityDTO = PersonMapper.convertCityToCityDTO(cityServiceRepo.getById(personDTO.getTownId()));
+//        CountryDto countryDto = PersonMapper.convertCountryToCountryDTO(countryServiceRepo.getCountryById(personDTO.getCountryId()));
+//        personDTO.setCityDto(cityDTO);
+//        personDTO.setCountryDto(countryDto);
     }
 
-    private void fillPersonFields(Person person, PersonDTO dto) {
+    private void fillPersonFields(Person person, EditPersonDto dto) {
+
         if (dto.getFirstName() != null) {
             person.setFirstName(dto.getFirstName());
         }
@@ -83,14 +90,19 @@ public class ProfileServiceImpl implements ProfileService {
         if (dto.getPhoto() != null) {
             person.setPhoto(dto.getPhoto());
         }
-        if (dto.getMessagesPermission() != null) {
-            person.setMessagesPermission(dto.getMessagesPermission());
+        if (dto.getPermission() != null) {
+            person.setMessagesPermission(dto.getPermission());
         }
-        if (dto.getTownId() != null) {
-            person.setCity(cityServiceRepo.getById(dto.getTownId()));
+        if (dto.getCityId() != null) {
+            City city = citiesRepository.findById(dto.getCityId())
+                    .orElseThrow(() -> new BadRequestException("No city for id " + dto.getCityId() + " found."));
+            person.setCity(city);
         }
+
         if (dto.getCountryId() != null) {
-            person.setCountry(countryServiceRepo.getCountryById(dto.getCountryId()));
+            Country country = countryRepository.findById(dto.getCityId())
+                    .orElseThrow(() -> new BadRequestException("No country for id " + dto.getCityId() + " found."));
+            person.setCountry(country);
         }
     }
 }

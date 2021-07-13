@@ -1,15 +1,12 @@
 package ru.skillbox.team13.dto;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import ru.skillbox.team13.entity.enums.PersonMessagePermission;
 import ru.skillbox.team13.util.TimeUtil;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Builder
 @Getter
@@ -26,19 +23,15 @@ public class PersonDTO {
     @JsonProperty("last_name")
     private String lastName;
 
+    @JsonProperty("reg_date")
+    private long registrationDate;
+
     @JsonProperty("birth_date")
     private long birthDate;
 
-    @JsonProperty("email")
     private String email;
-
-    @JsonProperty("photo")
-    private String photo;
-
-    @JsonProperty("phone")
     private String phone;
-
-    @JsonProperty("about")
+    private String photo;
     private String about;
 
     @JsonProperty("city")
@@ -48,6 +41,7 @@ public class PersonDTO {
     private CountryDto countryDto;
 
     @JsonProperty("messages_permission")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private PersonMessagePermission messagesPermission;
 
     @JsonProperty("last_online_time")
@@ -55,18 +49,11 @@ public class PersonDTO {
     private Long lastOnlineTime;
 
     @JsonProperty("is_blocked")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private boolean isBlocked;
-
-    @JsonProperty("country_id")
-    private Integer countryId;
-
-    @JsonProperty("town_id")
-    private Integer townId;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String token;
-
-    private long registrationDate;
 
     public PersonDTO(int id, String firstName, String lastName, LocalDateTime registrationDate, LocalDateTime birthDate,
                      String email, String phone, String photo, String about, int cityId, String cityTitle,

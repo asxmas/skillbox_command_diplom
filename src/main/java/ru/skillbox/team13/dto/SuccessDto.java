@@ -1,11 +1,8 @@
 package ru.skillbox.team13.dto;
 
 import lombok.Getter;
-import lombok.Value;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.Map;
 
 @Getter

@@ -6,8 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.team13.dto.DTOWrapper;
+import ru.skillbox.team13.dto.EditPersonDto;
 import ru.skillbox.team13.dto.PersonDTO;
-import ru.skillbox.team13.service.ProfileService;
+import ru.skillbox.team13.service.PersonService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -16,9 +17,9 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users/")
-public class ProfileController {
+public class PersonController {
 
-    private final ProfileService profileService;
+    private final PersonService profileService;
 
     @GetMapping("me")
     @PreAuthorize("hasAuthority('user')") //todo preauth??
@@ -29,7 +30,7 @@ public class ProfileController {
 
     @PutMapping("me")
     //Редактирование текущего пользователя
-    public ResponseEntity<DTOWrapper> updateMyProfile(@RequestBody PersonDTO personDTO) {
+    public ResponseEntity<DTOWrapper> updateMyProfile(@RequestBody EditPersonDto personDTO) {
         return ResponseEntity.ok(profileService.updateMyProfile(personDTO));
     }
 

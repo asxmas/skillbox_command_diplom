@@ -19,7 +19,6 @@ public class PostDto {
     private PersonDTO author;
     private String title;
 
-
     @JsonProperty("post_text")
     private String text;
 
