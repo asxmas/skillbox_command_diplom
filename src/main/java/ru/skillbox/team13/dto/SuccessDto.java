@@ -9,6 +9,7 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 
 @Getter
+@Deprecated
 public class SuccessDto {
 
     private String error = "string";

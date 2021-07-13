@@ -6,7 +6,7 @@ import ru.skillbox.team13.entity.Comment;
 import ru.skillbox.team13.entity.Like;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
-import ru.skillbox.team13.service.PersonService;
+//import ru.skillbox.team13.service.PersonService;
 import ru.skillbox.team13.util.TimeUtil;
 
 import java.sql.Timestamp;

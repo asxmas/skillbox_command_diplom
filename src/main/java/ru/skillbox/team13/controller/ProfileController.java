@@ -1,95 +1,50 @@
 package ru.skillbox.team13.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import ru.skillbox.team13.dto.ErrorDto;
+import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.PersonDTO;
-import ru.skillbox.team13.dto.PostDto;
-import ru.skillbox.team13.dto.SuccessDto;
-import ru.skillbox.team13.service.PersonService;
-import ru.skillbox.team13.service.PostsService;
-import ru.skillbox.team13.service.UserService;
+import ru.skillbox.team13.service.ProfileService;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 
+@Slf4j
 @RestController
-@RequestMapping("/api/v1/")
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/users/")
 public class ProfileController {
 
-  private final PersonService personService;
-  private final PostsService postsService;
-  private final UserService userService;
+    private final ProfileService profileService;
 
-  @Autowired
-  public ProfileController(PersonService personService, PostsService postsService, UserService userService)  {
-    this.personService = personService;
-    this.postsService = postsService;
-    this.userService = userService;
-  }
+    @GetMapping("me")
+    @PreAuthorize("hasAuthority('user')") //todo preauth??
+    //Получить текущего пользователя
+    public ResponseEntity<DTOWrapper> getMyProfile() {
+        return ResponseEntity.ok(profileService.getMyProfile());
+    }
 
-  @GetMapping("users/me")
-  @PreAuthorize("hasAuthority('user')")
-  public ResponseEntity<SuccessDto> getCurrentUser(){
-    try {
-      return ResponseEntity.ok(new SuccessDto(userService.getCurrentUserDto()));
+    @PutMapping("me")
+    //Редактирование текущего пользователя
+    public ResponseEntity<DTOWrapper> updateMyProfile(@RequestBody PersonDTO personDTO) {
+        return ResponseEntity.ok(profileService.updateMyProfile(personDTO));
     }
-    catch (Exception ex)  {
-      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
-  }
 
-  @PutMapping("/users/me")
-  public ResponseEntity updateCurrentPerson(@RequestBody PersonDTO personDTO) {
-    try {
-      personService.updateCurrentPerson(personDTO);
-      return ResponseEntity.ok(personDTO);
+    @DeleteMapping("me")
+    //Удаление текущего пользователя
+    public ResponseEntity<DTOWrapper> deleteMyProfile(HttpServletRequest request) throws ServletException {
+            DTOWrapper w = profileService.deleteMyProfile();
+            log.debug("Logging out.");
+            request.logout();
+            return ResponseEntity.ok(w);
     }
-    catch (Exception ex)  {
-      ex.printStackTrace();
-      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
+    @GetMapping("{id}")
+    //Получить пользователя по id
+    public ResponseEntity<DTOWrapper> getUserProfile(@PathVariable("id") int id) {
+        return ResponseEntity.ok(profileService.getProfile(id));
     }
-  }
-  @DeleteMapping("/users/me")
-  public ResponseEntity deleteCurrentPerson(HttpServletRequest request)  {
-    try {
-      personService.deleteCurrentUser(userService.getCurrentUserDto());
-      request.logout();
-      return ResponseEntity.ok(new SuccessDto());
-    }
-    catch (Exception ex)  {
-      return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
-    }
-  }
-  @GetMapping("/users/{id}")
-  public ResponseEntity getPersonById(@PathVariable("id") Integer id) {
-    try {
-      return ResponseEntity.ok(personService.getPersonDTOById(id));
-    } catch (Exception ex) {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-  }
-  @GetMapping("/users/{id}/wall")
-  public ResponseEntity getListPosts(@PathVariable("id") Integer id) {
-    try {
-      PersonDTO personDTO = personService.getPersonDTOById(id);
-      return ResponseEntity.ok(postsService.getSetPostsByAuthorId(personDTO.getId()));
-    }
-    catch (Exception ex)  {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-  }
-  @PostMapping("/users/{id}/wall")
-  public ResponseEntity createPost(@PathVariable("id") Integer id, @RequestBody PostDto postDTO) {
-    try {
-      personService.addPostToWall(id, postDTO);
-      return ResponseEntity.ok(postDTO);
-    }
-    catch (Exception ex)  {
-      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-  }
 }

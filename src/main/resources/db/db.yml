@@ -27,5 +27,5 @@ databaseChangeLog:
       file: db/changelogs/7-patch-tag/unique-tag.sql
   - includeAll:
       path: db/changelogs/10-friendship-fix
-  - includeAll:
-      path: db/changelogs/11-patch
+  - include:
+      file: db/changelogs/11-patch/add-deleted-user.sql

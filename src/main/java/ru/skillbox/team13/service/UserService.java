@@ -18,8 +18,6 @@ public interface UserService {
 
     Boolean logout(HttpServletRequest request);
 
-    PersonDTO getCurrentUserDto();
-
     User getAuthorizedUser();
 
     Boolean codeGenerationAndEmail(String email, String origin);

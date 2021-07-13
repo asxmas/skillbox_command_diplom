@@ -1,6 +1,7 @@
 package ru.skillbox.team13.service;
 
 import ru.skillbox.team13.dto.DTOWrapper;
+import ru.skillbox.team13.dto.PostDto;
 
 public interface PostService {
     DTOWrapper find(String text, Long timestampFrom, Long timestampTo, int offset, int itemPerPage);
@@ -14,4 +15,8 @@ public interface PostService {
     DTOWrapper deleteById(int id);
 
     DTOWrapper recoverById(int id);
+
+    DTOWrapper getWallForUserId(int id, int offset, int itemPerPage);
+
+    DTOWrapper post(PostDto postDTO, Integer id, Long pubDate);
 }

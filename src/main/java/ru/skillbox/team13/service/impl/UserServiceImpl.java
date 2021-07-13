@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.LoginDto;
 import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.dto.UserDto;
@@ -21,6 +22,7 @@ import ru.skillbox.team13.entity.enums.UserType;
 import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.exception.UnauthorizedException;
 import ru.skillbox.team13.mapper.PersonMapper;
+import ru.skillbox.team13.mapper.WrapperMapper;
 import ru.skillbox.team13.repository.BlacklistedTokenRepository;
 import ru.skillbox.team13.repository.PersonRepository;
 import ru.skillbox.team13.repository.UserRepository;
@@ -139,12 +141,6 @@ public class UserServiceImpl implements UserService {
     public void blackListExpiredTokensClear(){
         blacklistedTokenRepo.deleteExpiredTokens();
         log.info("Scheduled task complete - IN blackListExpiredTokensClear: expired tokens deleted");
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public PersonDTO getCurrentUserDto(){
-        return PersonMapper.convertPersonToPersonDTO(getAuthorizedUser().getPerson());
     }
 
     private Optional<User> checkUserRegistration(String email) {

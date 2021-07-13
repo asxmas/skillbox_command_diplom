@@ -116,6 +116,31 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         return getById(id);
     }
 
+    @Override
+    public DTOWrapper getWallForUserId(int id, int offset, int itemPerPage) { //todo implement
+        //    public PersonDTO getPersonDTOById(int id) {
+        //        Person person = personRepository.getById(id);
+        //        return PersonMapper.convertPersonToPersonDTO(person);
+        //    }
+        return null;
+    }
+
+    @Override
+    @Transactional
+    public DTOWrapper post(PostDto postDTO, Integer id, Long pubDate) { //todo implement
+        //    public void addPostToWall(int id, PostDto postDTO) {
+        //        Person person = personRepository.getById(id);
+        //        PersonDTO personDTO = PersonMapper.convertPersonToPersonDTO(person);
+        //        postDTO.setAuthor(personDTO);
+        //        Post post = postsService.addPost(postDTO, person);
+        //        Set<Post> personPosts = person.getPosts();
+        //        personPosts.add(post);
+        //        person.setPosts(personPosts);
+        //        personRepository.save(person);
+        //    }
+        return null;
+    }
+
     private List<PostDto> combine(List<PostDto> posts, List<PersonDTO> persons, List<CommentDto> comments) {
         Map<Integer, PersonDTO> personMap = persons.stream().collect(toMap(PersonDTO::getId, p -> p));
         Map<Integer, List<CommentDto>> commentMap = comments.stream().collect(groupingBy(CommentDto::getPostId));
