@@ -44,9 +44,9 @@ public class CommentServiceImpl implements CommentService {
                 commRep,
                 userService);
         commRep.save(comment);
-        
 
-        return null;
+        //ToDoo make create notification
+        return WrapperMapper.wrap();
     }
 
     @Override

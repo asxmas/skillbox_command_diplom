@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Set;
 import ru.skillbox.team13.dto.CommentToPostDto;
+import ru.skillbox.team13.dto.PostCommentDto;
 import ru.skillbox.team13.entity.Comment;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.entity.projection.CommentProjection;
@@ -88,5 +89,12 @@ public class CommentMapper {
                         .isBlocked(f.getBlocked())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    public static PostCommentDto mapToPostCommentDto(CommentToPostDto commentToPost) {
+        PostCommentDto postComment = PostCommentDto.builder()
+                .parentId(commentToPost.getParentId())
+                .commentText(commentToPost.getText())
+                .id(commentToPost.get)
     }
 }

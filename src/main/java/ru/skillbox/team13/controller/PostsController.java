@@ -64,9 +64,37 @@ public class PostsController {
         return new ResponseEntity<>(commentService.getAllCommentByPost(id, offset, itemPerPage), HttpStatus.OK);
     }
 
-//    @PostMapping("/{id}/comments")
-//    ResponseEntity<DTOWrapper> insertCommentToPost(@PathVariable int id,
-//                                                   @RequestBody(required = true) CommentToPostDto commentToPostDto) {
+    @PostMapping("/{id}/comments")
+    ResponseEntity<DTOWrapper> insertCommentToPost(@PathVariable int id,
+                                                   @RequestBody(required = true) CommentToPostDto commentToPostDto) {
+
+    }
+
+//    @PutMapping("/{id}/comments/{comment_id}")
+//    ResponseEntity<DTOWrapper> editCommentToPost() {
+//    }
+//
+//    @DeleteMapping("/{id}/comments/{comment_id}")
+//    ResponseEntity<DTOWrapper> deleteComment() {
 //
 //    }
+//
+//    @PutMapping("/{id}/comments/{comment_id}/recover")
+//    ResponseEntity<DTOWrapper> restoreComment() {
+//
+//    }
+//
+//    @PostMapping("{id}/report")
+//    ResponseEntity<DTOWrapper> reportToPost() {
+//
+//    }
+//
+//    @PostMapping("{id}/comments/{comment_id}/report")
+//    ResponseEntity<DTOWrapper> reportToComment() {
+//
+//    }
+
+
+
+
 }
