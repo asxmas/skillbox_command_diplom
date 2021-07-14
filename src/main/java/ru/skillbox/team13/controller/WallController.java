@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.team13.dto.DTOWrapper;
-import ru.skillbox.team13.dto.PostDto;
+import ru.skillbox.team13.dto.AddPostDto;
 import ru.skillbox.team13.service.PostService;
 
 @RestController
@@ -15,6 +15,7 @@ public class WallController {
     private final PostService postService;
 
     @GetMapping
+    //Получение записей на стене пользователя
     public ResponseEntity<DTOWrapper> getListPosts(@PathVariable("id") int id,
                                                    @RequestParam(required = false, defaultValue = "0") int offset,
                                                    @RequestParam(required = false, defaultValue = "20") int itemPerPage) {
@@ -22,9 +23,13 @@ public class WallController {
     }
 
     @PostMapping
+    //Добавление публикации на стену пользователя
     public ResponseEntity<DTOWrapper> createPost(@PathVariable("id") Integer id,
                                                  @RequestParam(value = "publish_date", required = false) Long pubDate,
-                                                 @RequestBody PostDto postDTO) {
-        return ResponseEntity.ok(postService.post(postDTO, id, pubDate));
+                                                 @RequestBody AddPostDto payload) {
+        String title = payload.getTitle();
+        String text = payload.getPostText();
+        //todo pass tags!!
+        return ResponseEntity.ok(postService.post(title, text, id, pubDate));
     }
 }
