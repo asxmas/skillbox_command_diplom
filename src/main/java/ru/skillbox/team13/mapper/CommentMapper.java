@@ -5,8 +5,6 @@ import ru.skillbox.team13.dto.CommentDto;
 import ru.skillbox.team13.entity.Comment;
 import ru.skillbox.team13.service.CommentService;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.Set;
 import ru.skillbox.team13.dto.CommentToPostDto;
 import ru.skillbox.team13.dto.PostCommentDto;
@@ -25,7 +23,9 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class CommentMapper {
-    private static CommentService commentService;
+
+    private final CommentService commentService;
+
     public static CommentDto convertCommentToCommentDTO(Comment comment)    {
         return CommentDto.builder()
                 .parentId(comment.getParent().getId())

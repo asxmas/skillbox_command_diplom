@@ -1,8 +1,8 @@
 spring:
   datasource:
-    username: ${USERNAME}
-    password: ${PASS}
-    url: jdbc:postgresql://localhost:5432/skillbox_team13
+    username: ${RDS_USERNAME}
+    password: ${RDS_PASSWORD}
+    url: jdbc:postgresql://${RDS_HOSTNAME:localhost}:${RDS_PORT:5432}/${RDS_DB_NAME:skillbox_team13}
   liquibase:
     enabled: true
     change-log: db/db.yml
@@ -13,7 +13,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
-
 jwt:
   token:
     secret: stream-team13

@@ -1,51 +1,38 @@
 package ru.skillbox.team13.dto;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import ru.skillbox.team13.entity.enums.PersonMessagePermission;
+import ru.skillbox.team13.util.TimeUtil;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Builder
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class PersonDTO {
 
-    private final Integer id;
+    private int id;
 
     @JsonProperty("first_name")
-    private final String firstName;
+    private String firstName;
 
     @JsonProperty("last_name")
-    private final String lastName;
+    private String lastName;
 
     @JsonProperty("reg_date")
-    private final long registrationDate;
-
-    @JsonProperty("birth_date_LocalDateTime")
-    private LocalDateTime birthDateLDT;
+    private long registrationDate;
 
     @JsonProperty("birth_date")
-    private Timestamp birthDate;
+    private long birthDate;
 
-    @JsonProperty("email")
-    private final String email;
-
-    @JsonProperty("phone")
-    private final String phone;
-
-    @JsonProperty("photo")
-    private final String photo;
-
-    @JsonProperty("about")
-    private final String about;
+    private String email;
+    private String phone;
+    private String photo;
+    private String about;
 
     @JsonProperty("city")
     private CityDto cityDto;
@@ -54,21 +41,37 @@ public class PersonDTO {
     private CountryDto countryDto;
 
     @JsonProperty("messages_permission")
-    private final PersonMessagePermission messagesPermission;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private PersonMessagePermission messagesPermission;
 
     @JsonProperty("last_online_time")
-    private final long lastOnlineTime;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Long lastOnlineTime;
 
     @JsonProperty("is_blocked")
-    private final boolean isBlocked;
-
-    @JsonProperty("country_id")
-    private final Integer countryId;
-
-    @JsonProperty("town_id")
-    private final Integer townId;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private boolean isBlocked;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private final String token;
+    private String token;
 
+    public PersonDTO(int id, String firstName, String lastName, LocalDateTime registrationDate, LocalDateTime birthDate,
+                     String email, String phone, String photo, String about, int cityId, String cityTitle,
+                     int countryId, String countryTitle) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.registrationDate = TimeUtil.getTimestamp(registrationDate);
+        this.birthDate = TimeUtil.getTimestamp(birthDate);
+        this.email = email;
+        this.phone = phone;
+        this.photo = photo;
+        this.about = about;
+        this.cityDto = new CityDto(cityId, cityTitle);
+        this.countryDto = new CountryDto(countryId, countryTitle);
+    }
+
+    public PersonDTO(int id) {
+        this.id = id;
+    }
 }

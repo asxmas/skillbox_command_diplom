@@ -77,7 +77,7 @@ public class PersonDaoTest {
         assertEquals(persons.get(0).getFirstName(), friends.get(0).getFirstName());
         assertEquals(persons.get(1).getFirstName(), friends.get(1).getFirstName());
         assertEquals("usa", friends.get(0).getCountryDto().getTitle());
-        assertEquals("la", friends.get(1).getCountryDto().getTitle());
+        assertEquals("la", friends.get(1).getCityDto().getTitle());
     }
 
     @Test
@@ -88,6 +88,6 @@ public class PersonDaoTest {
         assertEquals(dtos.get(0).getFirstName(), dtos.get(0).getFirstName());
         assertEquals(dtos.get(1).getFirstName(), dtos.get(1).getFirstName());
         assertEquals("usa", dtos.get(0).getCountryDto().getTitle());
-        assertEquals("la", dtos.get(1).getCountryDto().getTitle());
+        assertEquals("la", dtos.get(1).getCityDto().getTitle());
     }
 }
