@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class TagServiceImpl implements TagService {
 
@@ -28,6 +28,7 @@ public class TagServiceImpl implements TagService {
     @Override
     @Transactional(readOnly = true)
     public DTOWrapper getTags(String tag, int offset, int itemPerPage){
+        log.debug("Searching tags by '{}'", tag);
         int page = offset / itemPerPage;
         Pageable pageable = PageRequest.of(page, itemPerPage);
         List<Tag> tags = tagRepository.findTagsByTag(pageable, tag);
@@ -49,6 +50,7 @@ public class TagServiceImpl implements TagService {
             return TagMapper.mapToTagDto(tagRepository.findTagByTag(tagDto.getTag()));
         }
         Tag tag = tagDtoToTagMapper(tagDto);
+        log.debug("Saving tag '{}'", tagDto.getTag());
         tagRepository.save(tag);
         return TagMapper.mapToTagDto(tag);
     }
@@ -57,6 +59,7 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public Optional<String> deleteTag(int id){
         if(tagRepository.findById(id).isPresent()) {
+            log.debug("Deleting tag id={}", id);
             tagRepository.deleteById(id);
         }
         return Optional.of("ok");

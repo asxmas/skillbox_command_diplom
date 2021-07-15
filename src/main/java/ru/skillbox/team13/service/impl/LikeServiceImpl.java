@@ -1,6 +1,7 @@
 package ru.skillbox.team13.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.DTOWrapper;
@@ -21,6 +22,7 @@ import ru.skillbox.team13.service.UserService;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LikeServiceImpl implements LikeService {
@@ -66,6 +68,7 @@ public class LikeServiceImpl implements LikeService {
             default -> throw new BadRequestException("Bad 'type' parameter");
         };
 
+        log.debug("id={} liked {} (id={})", liker.getId(), type, id);
         applyLike(liker, postOrComment);
         return getLikedBy(id, type);
     }
@@ -78,6 +81,7 @@ public class LikeServiceImpl implements LikeService {
             throw new BadRequestException("Person id=" + liker.getId() + " has hasn't liked id=" + itemId);
         }
 
+        log.debug("id={} removed like from {} (id={})", liker.getId(), type, itemId);
         likeRepo.deleteByLikerAndId(liker, itemId);
 
         return getLikedBy(itemId, type);

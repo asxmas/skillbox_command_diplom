@@ -1,6 +1,7 @@
 package ru.skillbox.team13.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import ru.skillbox.team13.service.MailService;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MailServiceImpl implements MailService {
@@ -23,6 +25,7 @@ public class MailServiceImpl implements MailService {
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(text,true);
+        log.info("Sending message to:'{}', subj:'{}', text:'{}'", to, subject, text);
         emailSender.send(htmlMessage);
     }
 }

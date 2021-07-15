@@ -33,8 +33,8 @@ import static java.util.stream.Collectors.*;
 import static ru.skillbox.team13.util.PageUtil.getPageable;
 import static ru.skillbox.team13.util.TimeUtil.getTime;
 
-@Service
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
@@ -151,8 +151,8 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         post.setDeleted(false);
         post.setBlocked(false);
         post.setTime(Objects.requireNonNullElse(TimeUtil.getTime(pubDate), LocalDateTime.now()));
+        log.debug("Saving new post (author id={}, title='{}'", authorId, title);
         int postId = postRepository.save(post).getId();
-
         return getById(postId);
     }
 
