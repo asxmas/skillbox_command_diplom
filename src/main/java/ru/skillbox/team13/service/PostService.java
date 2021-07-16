@@ -14,4 +14,8 @@ public interface PostService {
     DTOWrapper deleteById(int id);
 
     DTOWrapper recoverById(int id);
+
+    DTOWrapper getWallForUserId(int id, int offset, int itemPerPage);
+
+    DTOWrapper post(String title, String text, Integer id, Long pubDate);
 }

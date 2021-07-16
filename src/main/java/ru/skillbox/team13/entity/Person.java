@@ -40,6 +40,9 @@ public class Person extends Notified {
     @Column(name = "about")
     private String about;
 
+    @Column(name = "deleted")
+    private boolean deleted;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "city_id")
     private City city;

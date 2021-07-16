@@ -2,16 +2,15 @@ package ru.skillbox.team13.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import ru.skillbox.team13.entity.enums.PersonMessagePermission;
 import ru.skillbox.team13.util.TimeUtil;
 
 import java.time.LocalDateTime;
 
-@Getter
 @Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PersonDTO {
@@ -34,12 +33,16 @@ public class PersonDTO {
     private String phone;
     private String photo;
     private String about;
-    private CityDto city;
-    private CountryDto country;
+
+    @JsonProperty("city")
+    private CityDto cityDto;
+
+    @JsonProperty("country")
+    private CountryDto countryDto;
 
     @JsonProperty("messages_permission")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String messagesPermission;
+    private PersonMessagePermission messagesPermission;
 
     @JsonProperty("last_online_time")
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -47,7 +50,7 @@ public class PersonDTO {
 
     @JsonProperty("is_blocked")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Boolean isBlocked;
+    private boolean isBlocked;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String token;
@@ -64,8 +67,8 @@ public class PersonDTO {
         this.phone = phone;
         this.photo = photo;
         this.about = about;
-        this.city = new CityDto(cityId, cityTitle);
-        this.country = new CountryDto(countryId, countryTitle);
+        this.cityDto = new CityDto(cityId, cityTitle);
+        this.countryDto = new CountryDto(countryId, countryTitle);
     }
 
     public PersonDTO(int id) {
