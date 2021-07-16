@@ -9,10 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skillbox.team13.dto.DTOWrapper;
-import ru.skillbox.team13.dto.LoginDto;
-import ru.skillbox.team13.dto.PersonDTO;
-import ru.skillbox.team13.dto.UserDto;
+import ru.skillbox.team13.dto.*;
 import ru.skillbox.team13.entity.BlacklistedToken;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.User;
@@ -51,15 +48,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Boolean register(UserDto.Request.Register userDto) {
+    public DTOWrapper register(UserDto.Request.Register userDto) {
 
             //проверка наличия данного email в бд
             log.debug("Checking email '{}'...", userDto.getEmail());
             if (checkUserRegistration(userDto.getEmail()).isPresent())
-                throw new BadRequestException("user is already registered");
-            //при несовпадении двух переданных паролей бросаем исключение, которое отдает ответ с нужным статусом и ошибкой
+                throw new BadRequestException("Пользователь уже зарегистрирован");
+            //при несовпадении двух переданных паролей бросаем исключение
             if (!userDto.getFirstPassword().equals(userDto.getSecondPassword()))
-                throw new BadRequestException("passwords don't match");
+                throw new BadRequestException("Пароли не совпадают");
             //заполняем нового User имеющимися данными при регистрации
             //все поля по которым нет данных и могут быть null не заполняем
             Person person = new Person();
@@ -83,27 +80,27 @@ public class UserServiceImpl implements UserService {
             User registeredUser = userRepository.save(user);
             log.info("New user registered: '{}', type: {}, message permission: {}.",
                     registeredUser.getEmail(), registeredUser.getType().name(), person.getMessagesPermission().name());
-            return true;
+            return WrapperMapper.wrapMessage(new MessageDTO("ok"));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PersonDTO login(LoginDto loginDto) {
+    public DTOWrapper login(LoginDto loginDto) {
 
         try {
             String username = loginDto.getEmail();
             User user = userRepository.findByEmail(username).get();
             Person person = personRepository.getById(user.getPerson().getId());
             log.debug("Successful login: {}", loginDto.getEmail());
-            return PersonMapper.convertPersonToPersonDTOWithToken(person, jwtTokenProvider.createToken(username, TokenType.ORDINARY));
+            return WrapperMapper.wrap(PersonMapper.convertPersonToPersonDTOWithToken(person, jwtTokenProvider.createToken(username, TokenType.ORDINARY)), true);
         } catch (AuthenticationException e) {
-            throw new BadRequestException("Invalid username or password");
+            throw new BadRequestException("Неверный логин или пароль");
         }
     }
 
     @Override
     @Transactional
-    public Boolean logout(HttpServletRequest request) {
+    public DTOWrapper logout(HttpServletRequest request) {
         String username = "anonymous";
         try {
             username = getAuthorizedUser().getEmail();
@@ -120,7 +117,7 @@ public class UserServiceImpl implements UserService {
             SecurityContextHolder.clearContext();
             SecurityContextHolder.createEmptyContext();
         }
-        return true;
+        return WrapperMapper.wrapMessage(new MessageDTO("ok"));
     }
 
     //метод получения текущего авторизованного пользователя
@@ -153,7 +150,7 @@ public class UserServiceImpl implements UserService {
     //метод генерации ссылки и отправки по email кода для смены пароля
     @Override
     @Transactional
-    public Boolean codeGenerationAndEmail(String email, String origin){
+    public DTOWrapper codeGenerationAndEmail(String email, String origin){
         try {
             User user = checkUserRegistration(email).orElseThrow(() -> new BadRequestException("user not registered"));
             //генерируем токен для сброса пароля
@@ -166,9 +163,9 @@ public class UserServiceImpl implements UserService {
         catch (Exception e) {
             //при любой ошибке возвращаем false
             log.error("Failed to send code.");
-            return false;
+            throw new BadRequestException("Не удалось выслать ссылку");
         }
-        return true;
+        return WrapperMapper.wrapMessage(new MessageDTO("ok"));
     }
 
     @Override
@@ -178,26 +175,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Boolean setPassword(String token, String password) {
+    public DTOWrapper setPassword(String token, String password) {
 
         User user;
         if (jwtTokenProvider.validateToken(token)) {
             user = userRepository.findByName(jwtTokenProvider.getUsername(token)).get();
         } else {
             log.warn("Change password failed (expired token).");
-            return false;
+            throw new BadRequestException("Не удалось установить пароль");
         }
         user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
         putTokenToBlackList(token);
         log.info("Password successfully changed: {}", user.getEmail());
-        return true;
+        return WrapperMapper.wrapMessage(new MessageDTO("ok"));
     }
 
     @Override
     @Transactional
-    public Boolean setEmail(String email) {
-        if (checkUserRegistration(email).isPresent()) return false;
+    public DTOWrapper setEmail(String email) {
+        if (checkUserRegistration(email).isPresent()) throw new BadRequestException("Невозможно изменить пароль");
         User user = getAuthorizedUser();
         user.setEmail(email);
         Person person = user.getPerson();
@@ -205,14 +202,14 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         personRepository.save(person);
         log.info("Email successfully changed '{}' -> '{}'.", email, user.getEmail());
-        return true;
+        return WrapperMapper.wrapMessage(new MessageDTO("ok"));
     }
 
     @Override
     @Transactional
-    public Boolean setNotification(NotificationCode notificationCode, Boolean enabled) {
+    public DTOWrapper setNotification(NotificationCode notificationCode, Boolean enabled) {
         //TODO сохраняем настройки по конкретному типу оповещений для этого пользователя
-        return true;
+        return WrapperMapper.wrapMessage(new MessageDTO("ok"));
     }
 
     @Transactional

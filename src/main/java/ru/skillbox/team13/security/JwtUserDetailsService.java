@@ -22,7 +22,7 @@ public class JwtUserDetailsService implements UserDetailsService {
 
         User user = userRepository.findByEmail(username).orElse(userRepository.findByName(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User with username: " + username + " not found")));
-        log.info("IN loadUserByUsername - user with username: {} successfully loaded", username);
+//        log.info("IN loadUserByUsername - user with username: {} successfully loaded", username);
         return JwtUserFactory.create(user);
     }
 }

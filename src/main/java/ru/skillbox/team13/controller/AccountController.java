@@ -4,13 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.LoginDto;
-import ru.skillbox.team13.dto.SuccessDto;
 import ru.skillbox.team13.dto.UserDto;
-import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.service.UserService;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @RestController
@@ -21,34 +19,28 @@ public class AccountController {
     private final UserService userService;
 
     @PostMapping("register")
-    public ResponseEntity<SuccessDto> register(@RequestBody @Valid UserDto.Request.Register registerRequest){
-        if (userService.register(registerRequest)) {return ResponseEntity.ok(new SuccessDto());}
-        else throw new BadRequestException("registration fails");
+    public ResponseEntity<DTOWrapper> register(@RequestBody @Valid UserDto.Request.Register registerRequest){
+        return ResponseEntity.ok(userService.register(registerRequest));
     }
 
     @PutMapping("password/recovery")
-    public ResponseEntity<SuccessDto> recovery(@RequestBody @Valid LoginDto loginDto, @RequestHeader("origin") String origin){
-        if (userService.codeGenerationAndEmail(loginDto.getEmail(), origin)) {return ResponseEntity.ok(new SuccessDto());}
-        else throw new BadRequestException("user not registered");
+    public ResponseEntity<DTOWrapper> recovery(@RequestBody @Valid LoginDto loginDto, @RequestHeader("origin") String origin){
+        return ResponseEntity.ok(userService.codeGenerationAndEmail(loginDto.getEmail(), origin));
     }
 
     @PutMapping("password/set")
-    public ResponseEntity<SuccessDto> setPassword(@RequestBody @Valid LoginDto loginDto){
-        if (userService.setPassword(loginDto.getToken(), loginDto.getPassword())) { return ResponseEntity.ok(new SuccessDto()); }
-        else throw new BadRequestException("can't change password");
+    public ResponseEntity<DTOWrapper> setPassword(@RequestBody @Valid LoginDto loginDto){
+        return ResponseEntity.ok(userService.setPassword(loginDto.getToken(), loginDto.getPassword()));
     }
 
     @PutMapping("email")
-    public ResponseEntity<SuccessDto> setEmail(@RequestBody @Valid LoginDto loginDto){
-        if (userService.setEmail(loginDto.getEmail())) { return ResponseEntity.ok(new SuccessDto()); }
-        else throw new BadRequestException("can't change email");
+    public ResponseEntity<DTOWrapper> setEmail(@RequestBody @Valid LoginDto loginDto){
+        return ResponseEntity.ok(userService.setEmail(loginDto.getEmail()));
     }
 
     @PutMapping("notifications")
     @PreAuthorize("hasAuthority('user')")
-    public ResponseEntity<SuccessDto> setNotifications(@RequestBody LoginDto.Notification notificationDto){
-        if (userService.setNotification(notificationDto.getNotificationCode(), notificationDto.isEnable()))
-        { return ResponseEntity.ok(new SuccessDto()); }
-        else throw new BadRequestException("can't trigger notification");
+    public ResponseEntity<DTOWrapper> setNotifications(@RequestBody LoginDto.Notification notificationDto){
+        return ResponseEntity.ok(userService.setNotification(notificationDto.getNotificationCode(), notificationDto.isEnable()));
     }
 }

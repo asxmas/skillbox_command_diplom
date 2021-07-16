@@ -49,8 +49,6 @@ public class DialogServiceImpl implements DialogService {
         List<DialogDto> results = dialogPage.stream().map(
                 dialog2Person -> {
                     Person recipientPerson = recipientPerson(currentPerson, dialog2Person.getDialog());
-                    System.err.println(currentPerson.getId());
-                    System.err.println(recipientPerson.getId());
                 return DialogMapper.convertDialog2PersonToDialogDTO(dialog2Person, recipientPerson);
                 }).collect(Collectors.toList());
         return WrapperMapper.wrap(results, (int) dialogPage.getTotalElements(), offset, itemPerPage, true);
