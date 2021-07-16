@@ -1,9 +1,13 @@
 package ru.skillbox.team13.repository.QueryDSL;
 
+import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import ru.skillbox.team13.dto.CommentDto;
 import ru.skillbox.team13.entity.Comment;
@@ -32,6 +36,29 @@ public class CommentDAO {
         QPost post = QComment.comment.post;
         Predicate where = post.id.in(postIds);
         return find(where);
+    }
+
+    public Page<CommentDto> getCommentDtosForPostIds(int postId, Pageable pageable) {
+        QComment comment = QComment.comment;
+        QPost post = comment.post;
+        QComment parentComment = comment.parent;
+        QPerson author = comment.author;
+
+        QueryResults<CommentDto> qr = new JPAQuery<>(em)
+                .select(Projections.constructor(CommentDto.class, comment.id, post.id, parentComment.id,
+                        comment.commentText, comment.time, author.id, comment.isBlocked))
+                .from(comment)
+                .where(post.id.eq(postId))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetchResults();
+
+        return new PageImpl<>(qr.getResults(), pageable, qr.getTotal());
+    }
+
+    public CommentDto getCommentDtoForId(int commentId) {
+        Predicate where = QComment.comment.id.eq(commentId);
+        return find(where).get(0);
     }
 
     private List<CommentDto> find(Predicate where) {

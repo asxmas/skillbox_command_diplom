@@ -41,4 +41,12 @@ public class Comment extends Notified {
 
     @OneToMany(mappedBy = "postOrComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Like> likes;
+
+    public Comment(LocalDateTime time, Post post, Person author, String commentText, boolean isBlocked) {
+        this.time = time;
+        this.post = post;
+        this.author = author;
+        this.commentText = commentText;
+        this.isBlocked = isBlocked;
+    }
 }
