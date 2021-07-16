@@ -54,10 +54,10 @@ public class DialogController {
     @GetMapping("dialogs/{id}/messages")
     //получение сообщений диалога
     public ResponseEntity<DTOWrapper> getDialogMessages(@PathVariable("id") Integer dialogId,
-                                                        @RequestParam(required = false, defaultValue = "") String query,
+                                                        @RequestParam(required = false, defaultValue = "0") int fromMessageId,
                                                         @RequestParam(required = false, defaultValue = "0") int offset,
                                                         @RequestParam(required = false, defaultValue = "10") int itemPerPage) {
-        return ResponseEntity.ok(dialogService.getDialogMessages(dialogId, query, offset,itemPerPage));
+        return ResponseEntity.ok(dialogService.getDialogMessages(dialogId, fromMessageId, offset, itemPerPage));
     }
 
     @PutMapping("dialogs/{id}/users")

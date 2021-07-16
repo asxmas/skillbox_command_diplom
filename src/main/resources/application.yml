@@ -34,4 +34,4 @@ spring.mail:
 server:
   port: ${PORT:8080}
 
-server.base_url: https://team13.herokuapp.com
+server.base_url: ${BASE_URL:https://team13.herokuapp.com}

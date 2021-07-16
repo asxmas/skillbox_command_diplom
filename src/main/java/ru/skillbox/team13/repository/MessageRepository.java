@@ -15,6 +15,8 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
     @Query("delete from Message m where m.dialog.id = :dialogId")
     void deleteMessageByDialogId(int dialogId);
 
-    @Query("select m from Message m where m.dialog.id = :dialogId and lower(m.messageText) like %:query%")
-    Page<Message> findByDialog(Pageable pageable, String query, int dialogId);
+    @Query("select m from Message m where m.dialog.id = :dialogId and m.id <= :fromMessageId")
+    Page<Message> findByDialog(Pageable pageable, int fromMessageId, int dialogId);
+
+    Message findFirstByOrderByIdDesc();
 }

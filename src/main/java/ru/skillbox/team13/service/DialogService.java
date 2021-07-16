@@ -16,7 +16,7 @@ public interface DialogService {
 
     DTOWrapper sendMessage(int dialogId, String messageText);
 
-    DTOWrapper getDialogMessages(int dialogId, String query, int offset, int itemPerPage);
+    DTOWrapper getDialogMessages(int dialogId, int fromMessageId, int offset, int itemPerPage);
 
     DTOWrapper addUsersToDialog(int dialogId, ArrayList<Integer> userIds);
 

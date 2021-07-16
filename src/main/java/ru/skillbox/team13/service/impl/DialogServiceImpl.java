@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,6 @@ import ru.skillbox.team13.repository.MessageRepository;
 import ru.skillbox.team13.repository.PersonRepository;
 import ru.skillbox.team13.service.DialogService;
 
-import javax.persistence.EntityManagerFactory;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -44,10 +44,15 @@ public class DialogServiceImpl implements DialogService {
     public DTOWrapper getPersonDialogs(String query, int offset, int itemPerPage) {
 
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
-        Person person = userService.getAuthorizedUser().getPerson();
-        Page<Dialog2Person> dialogPage = dialog2PersonRepository.findPersonDialogs(pageable, query, person.getId());
-        List<DialogDto> results = dialogPage.stream().map(DialogMapper::convertDialog2PersonToDialogDTO).collect(Collectors.toList());
-        System.err.println(results);
+        Person currentPerson = userService.getAuthorizedUser().getPerson();
+        Page<Dialog2Person> dialogPage = dialog2PersonRepository.findPersonDialogs(pageable, query, currentPerson.getId());
+        List<DialogDto> results = dialogPage.stream().map(
+                dialog2Person -> {
+                    Person recipientPerson = recipientPerson(currentPerson, dialog2Person.getDialog());
+                    System.err.println(currentPerson.getId());
+                    System.err.println(recipientPerson.getId());
+                return DialogMapper.convertDialog2PersonToDialogDTO(dialog2Person, recipientPerson);
+                }).collect(Collectors.toList());
         return WrapperMapper.wrap(results, (int) dialogPage.getTotalElements(), offset, itemPerPage, true);
     }
 
@@ -100,9 +105,11 @@ public class DialogServiceImpl implements DialogService {
     @Modifying
     public DTOWrapper sendMessage(int dialogId, String messageText) {
 
+        //todo проверить по фронту и скорее всего убрать необходимость хранения получателя сообщения
         Person currentPerson = userService.getAuthorizedUser().getPerson();
         Dialog dialog = dialogRepository.findById(dialogId).get();
-        Message message = createMessage(dialog, currentPerson, messageText);
+        Person dstPerson = recipientPerson(currentPerson, dialog);
+        Message message = createMessage(dialog, currentPerson, dstPerson, messageText);
         dialog.setLastMessage(message);
         messageRepository.save(message);
         dialogRepository.save(dialog);
@@ -113,11 +120,15 @@ public class DialogServiceImpl implements DialogService {
 
     @Override
     @Transactional(readOnly = true)
-    public DTOWrapper getDialogMessages(int dialogId, String query, int offset, int itemPerPage) {
+    public DTOWrapper getDialogMessages(int dialogId, int fromMessageId, int offset, int itemPerPage) {
 
-        Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
-        Page<Message> messagePage = messageRepository.findByDialog(pageable, query, dialogId);
-        List<DialogMessageDto> results = messagePage.stream().map(DialogMapper::convertMessageToDialogMessageDTO).collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage, Sort.by("id").descending());
+        if (fromMessageId == 0) { fromMessageId = messageRepository.findFirstByOrderByIdDesc().getId(); }
+        Page<Message> messagePage = messageRepository.findByDialog(pageable, fromMessageId, dialogId);
+        int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
+        List<DialogMessageDto> results = messagePage.stream()
+            .map(message -> DialogMapper.convertMessageToDialogMessageDTO(message, currentPersonId == message.getAuthor().getId()))
+            .collect(Collectors.toList());
         return WrapperMapper.wrap(results, (int) messagePage.getTotalElements(), offset, itemPerPage, true);
     }
 
@@ -156,7 +167,7 @@ public class DialogServiceImpl implements DialogService {
     public DTOWrapper getInviteLink(int dialogId) {
 
         Dialog dialog = dialogRepository.findById(dialogId).get();
-        //сли у диалога уже есть ссылка-приглашение, то овозвращаем её
+        //сли у диалога уже есть ссылка-приглашение, то возвращаем её
         String inviteLink = dialog.getInviteLink();
         //если нет, то создаем и сохраняем новую
         if (dialog.getInviteLink() == null) {
@@ -194,14 +205,24 @@ public class DialogServiceImpl implements DialogService {
                          .collect(Collectors.toList()));
     }
 
-    private Message createMessage(Dialog dialog, Person currentPerson, String messageText){
-
+    private Message createMessage(Dialog dialog, Person srcPerson, Person dstPerson, String messageText){
+    //todo проверить - фронту в сообщении не нужен получатель, упростить метод - убрать dstPerson
+        ///
         return new Message()
                 .setTime(LocalDateTime.now())
-                .setAuthor(currentPerson)
-                .setRecipient(currentPerson)
+                .setAuthor(srcPerson)
+                .setRecipient(dstPerson)
                 .setMessageText(messageText)
                 .setReadStatus(MessageReadStatus.SENT)
                 .setDialog(dialog);
+    }
+
+    private Person recipientPerson(Person person, Dialog dialog) {
+
+        return dialog2PersonRepository.findDialog2PersonByDialog(dialog)
+                .stream()
+                .filter(d2p -> d2p.getPerson().getId() != person.getId())
+                .findAny().get()
+                .getPerson();
     }
 }
