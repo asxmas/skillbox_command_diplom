@@ -91,10 +91,10 @@ public class CommentMapper {
                 .collect(Collectors.toList());
     }
 
-    public static PostCommentDto mapToPostCommentDto(CommentToPostDto commentToPost) {
-        PostCommentDto postComment = PostCommentDto.builder()
-                .parentId(commentToPost.getParentId())
-                .commentText(commentToPost.getText())
-                .id(commentToPost.get)
-    }
+//    public static PostCommentDto mapToPostCommentDto(CommentToPostDto commentToPost) {
+//        PostCommentDto postComment = PostCommentDto.builder()
+//                .parentId(commentToPost.getParentId())
+//                .commentText(commentToPost.getText())
+//                .id(commentToPost.get);
+//    }
 }
