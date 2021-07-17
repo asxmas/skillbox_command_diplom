@@ -10,8 +10,13 @@ import ru.skillbox.team13.dto.CommentDto;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.dto.PostDto;
+import ru.skillbox.team13.entity.Person;
+import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
+import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.mapper.WrapperMapper;
+import ru.skillbox.team13.repository.PersonRepository;
+import ru.skillbox.team13.repository.PostRepository;
 import ru.skillbox.team13.repository.QueryDSL.CommentDAO;
 import ru.skillbox.team13.repository.QueryDSL.PersonDAO;
 import ru.skillbox.team13.repository.QueryDSL.PostDAO;
@@ -28,12 +33,14 @@ import static java.util.stream.Collectors.*;
 import static ru.skillbox.team13.util.PageUtil.getPageable;
 import static ru.skillbox.team13.util.TimeUtil.getTime;
 
-@Service
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
     private final PostDAO postDAO;
+    private final PostRepository postRepository; //todo move to PostDAO
+    private final PersonRepository personRepository; //todo move usage to PersonDAO
     private final PersonDAO personDAO;
     private final CommentDAO commentDAO;
     private final UserService userService;
@@ -117,28 +124,36 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     }
 
     @Override
-    public DTOWrapper getWallForUserId(int id, int offset, int itemPerPage) { //todo implement
-        //    public PersonDTO getPersonDTOById(int id) {
-        //        Person person = personRepository.getById(id);
-        //        return PersonMapper.convertPersonToPersonDTO(person);
-        //    }
-        return null;
+    public DTOWrapper getWallForUserId(int authorId, int offset, int itemPerPage) {
+        PersonDTO personDto = personDAO.getById(authorId);
+        Page<PostDto> userPosts = postDAO.getPostDtosByAuthorIdAndSubstring(List.of(authorId),
+                null, getPageable(offset, itemPerPage));
+
+        List<Integer> postIds = userPosts.getContent().stream().map(PostDto::getId).collect(toList());
+        List<CommentDto> commentDtos = commentDAO.getCommentDtosForPostIds(postIds);
+
+        List<PostDto> combined = combine(userPosts.getContent(), List.of(personDto), commentDtos);
+        log.debug("Loading wall for user id={} page {}, total {} posts and {} comments.",
+                authorId, offset / itemPerPage, combined.size(), commentDtos.size());
+
+        return WrapperMapper.wrap(combined, (int) userPosts.getTotalElements(), offset, itemPerPage, true);
     }
 
     @Override
     @Transactional
-    public DTOWrapper post(PostDto postDTO, Integer id, Long pubDate) { //todo implement
-        //    public void addPostToWall(int id, PostDto postDTO) {
-        //        Person person = personRepository.getById(id);
-        //        PersonDTO personDTO = PersonMapper.convertPersonToPersonDTO(person);
-        //        postDTO.setAuthor(personDTO);
-        //        Post post = postsService.addPost(postDTO, person);
-        //        Set<Post> personPosts = person.getPosts();
-        //        personPosts.add(post);
-        //        person.setPosts(personPosts);
-        //        personRepository.save(person);
-        //    }
-        return null;
+    public DTOWrapper post(String title, String text, Integer authorId, Long pubDate) {
+        Person author = personRepository.findById(authorId)
+                .orElseThrow(() -> new BadRequestException("No person for id=" + authorId + " is found."));
+        Post post = new Post();
+        post.setAuthor(author);
+        post.setTitle(title);
+        post.setPostText(text);
+        post.setDeleted(false);
+        post.setBlocked(false);
+        post.setTime(Objects.requireNonNullElse(TimeUtil.getTime(pubDate), LocalDateTime.now()));
+        log.debug("Saving new post (author id={}, title='{}'", authorId, title);
+        int postId = postRepository.save(post).getId();
+        return getById(postId);
     }
 
     private List<PostDto> combine(List<PostDto> posts, List<PersonDTO> persons, List<CommentDto> comments) {

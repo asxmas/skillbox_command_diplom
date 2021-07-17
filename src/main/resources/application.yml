@@ -33,5 +33,15 @@ spring.mail:
 
 server:
   port: ${PORT:8080}
+  base_url: https://team13.herokuapp.com
 
-server.base_url: https://team13.herokuapp.com
+logging:
+  level:
+    liquibase: INFO
+    org:
+      springframework: INFO
+      hibernate: INFO
+    ru:
+      skillbox: DEBUG
+  pattern:
+    console: "%date{dd.MM-HH:mm:ss.SSS} %highlight(%5level) [%thread] %logger{45}: %message %n"

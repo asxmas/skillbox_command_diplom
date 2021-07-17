@@ -36,8 +36,8 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
@@ -54,6 +54,7 @@ public class UserServiceImpl implements UserService {
     public Boolean register(UserDto.Request.Register userDto) {
 
             //проверка наличия данного email в бд
+            log.debug("Checking email '{}'...", userDto.getEmail());
             if (checkUserRegistration(userDto.getEmail()).isPresent())
                 throw new BadRequestException("user is already registered");
             //при несовпадении двух переданных паролей бросаем исключение, которое отдает ответ с нужным статусом и ошибкой
@@ -78,8 +79,10 @@ public class UserServiceImpl implements UserService {
             user.setPerson(personRepository.save(person));
             user.setConfirmationCode(userDto.getCode());
             user.setApproved(true);////НЕТ ДАННЫХ, NOT NULL
+            log.debug("Saving user and person data...");
             User registeredUser = userRepository.save(user);
-            log.info("IN register - user: {} successfully registered", registeredUser.getEmail());
+            log.info("New user registered: '{}', type: {}, message permission: {}.",
+                    registeredUser.getEmail(), registeredUser.getType().name(), person.getMessagesPermission().name());
             return true;
     }
 
@@ -91,7 +94,7 @@ public class UserServiceImpl implements UserService {
             String username = loginDto.getEmail();
             User user = userRepository.findByEmail(username).get();
             Person person = personRepository.getById(user.getPerson().getId());
-            log.info("IN login - user: {} successfully login", loginDto.getEmail());
+            log.debug("Successful login: {}", loginDto.getEmail());
             return PersonMapper.convertPersonToPersonDTOWithToken(person, jwtTokenProvider.createToken(username, TokenType.ORDINARY));
         } catch (AuthenticationException e) {
             throw new BadRequestException("Invalid username or password");
@@ -107,11 +110,11 @@ public class UserServiceImpl implements UserService {
             String token = jwtTokenProvider.resolveToken(request);
             if (token != null) {
                     putTokenToBlackList(token);
-                    log.info("IN logout - user: {} successfully logout", username);
+                    log.debug("Successful logout: {}", username);
             }
         }
         catch (JwtException | UnauthorizedException e) {
-            log.info("IN logout - user: {} successfully logout", username);
+            log.debug("Successful logout: {}", username);
         }
         finally {
             SecurityContextHolder.clearContext();
@@ -140,7 +143,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void blackListExpiredTokensClear(){
         blacklistedTokenRepo.deleteExpiredTokens();
-        log.info("Scheduled task complete - IN blackListExpiredTokensClear: expired tokens deleted");
+        log.debug("Scheduled task complete: expired tokens deleted");
     }
 
     private Optional<User> checkUserRegistration(String email) {
@@ -162,7 +165,7 @@ public class UserServiceImpl implements UserService {
         }
         catch (Exception e) {
             //при любой ошибке возвращаем false
-            log.info("IN codeGenerationAndEmail - can't send code");
+            log.error("Failed to send code.");
             return false;
         }
         return true;
@@ -178,15 +181,16 @@ public class UserServiceImpl implements UserService {
     public Boolean setPassword(String token, String password) {
 
         User user;
-        if (jwtTokenProvider.validateToken(token)) { user = userRepository.findByName(jwtTokenProvider.getUsername(token)).get(); }
-        else {
-            log.info("IN setPassword - password was't changed, JWT Expired");
+        if (jwtTokenProvider.validateToken(token)) {
+            user = userRepository.findByName(jwtTokenProvider.getUsername(token)).get();
+        } else {
+            log.warn("Change password failed (expired token).");
             return false;
         }
         user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
         putTokenToBlackList(token);
-        log.info("IN setPassword - password of {} has changed ", user.getEmail());
+        log.info("Password successfully changed: {}", user.getEmail());
         return true;
     }
 
@@ -200,7 +204,7 @@ public class UserServiceImpl implements UserService {
         person.setEmail(email);
         userRepository.save(user);
         personRepository.save(person);
-        log.info("IN setEmail - email of {} has changed to {} ", email, user.getEmail());
+        log.info("Email successfully changed '{}' -> '{}'.", email, user.getEmail());
         return true;
     }
 
@@ -236,7 +240,7 @@ public class UserServiceImpl implements UserService {
         User user;
         if (jwtTokenProvider.validateToken(token)) { user = userRepository.findByName(jwtTokenProvider.getUsername(token)).get(); }
         else {
-            log.info("IN setPassword - password was't changed, JWT Expired");
+            log.warn("Change password failed (expired token).");
             return null;
         }
         //ссылка будет работать на один переход - отправляем токен в blacklist
@@ -244,6 +248,7 @@ public class UserServiceImpl implements UserService {
         //сбрасываем пароль
         user.setPassword(UUID.randomUUID().toString());
         userRepository.save(user);
+        log.info("Password successfully reset: {}.", user.getEmail());
         return jwtTokenProvider.createToken(user.getEmail(), TokenType.RECOVERY);
     }
 
