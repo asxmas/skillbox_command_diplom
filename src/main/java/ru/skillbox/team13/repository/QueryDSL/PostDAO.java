@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.entity.Post;
+import ru.skillbox.team13.entity.QLike;
+import ru.skillbox.team13.entity.QPerson;
 import ru.skillbox.team13.entity.QPost;
 import ru.skillbox.team13.exception.BadRequestException;
 
@@ -60,7 +62,8 @@ public class PostDAO {
     public PostDto getSingleDtoById(int id) {
         Predicate where = QPost.post.id.eq(id).and(QPost.post.deleted.isFalse());
         Page<PostDto> page = executeDtoQuery(where, PageRequest.of(0, 1));
-        if (page.getTotalElements() == 0) throw new BadRequestException("Post request '" + where + "' returns 0 results.");
+        if (page.getTotalElements() == 0)
+            throw new BadRequestException("Post request '" + where + "' returns 0 results.");
         return page.getContent().get(0);
     }
 
@@ -97,5 +100,36 @@ public class PostDAO {
             throw new BadRequestException("Post id=" + id + "does not exist or was deleted.");
         }
         post.setDeleted(delete);
+    }
+
+    public Page<PostDto> getPostDtos(
+            int personId, List<Integer> authorIds, String substr, Pageable pageable) {
+        QPost post = QPost.post;
+        QPerson author = post.author;
+        QLike like = QLike.like;
+
+        Predicate where = post.author.id.in(authorIds).and(post.deleted.isFalse());
+        BooleanBuilder whereBool = new BooleanBuilder(where);
+        if (nonNull(substr) && !substr.isBlank()) {
+            whereBool.and(post.title.containsIgnoreCase(substr)
+                    .or(post.postText.containsIgnoreCase(substr)));
+        }
+
+        JPAQuery<PostDto> query = new JPAQuery<>(em);
+        QueryResults<PostDto> results = query.select(Projections.constructor(PostDto.class,
+                post.id, post.time, author.id, author.firstName, author.lastName, author.photo, author.lastOnlineTime,
+                post.title, post.postText, post.isBlocked, post.likes.size(),
+                like.person.id                                          //liked by this person
+                        .when(personId).then(true)
+                        .otherwise(false)))
+                .from(post)
+                .leftJoin(post.likes, like)
+                .where(where)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(post.time.desc())
+                .fetchResults();
+
+        return new PageImpl<>(results.getResults(), pageable, results.getTotal());
     }
 }

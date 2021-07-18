@@ -107,7 +107,7 @@ public class CommentTest {
         assertEquals(1, commentDTOS.size());
         assertEquals("comment 1 to post 1", commentDTOS.get(0).getText());
         assertNull(commentDTOS.get(0).getParentId());
-        assertEquals(authorId, commentDTOS.get(0).getAuthorId());
+        assertEquals(authorId, commentDTOS.get(0).getAuthorID());
         assertEquals(postId, commentDTOS.get(0).getPostId());
     }
 
@@ -120,8 +120,8 @@ public class CommentTest {
         assertEquals(2, commentDTOS.size());
         assertEquals("comment 2 to post 2", commentDTOS.get(0).getText());
         assertEquals("comment 3 to post 2", commentDTOS.get(1).getText());
-        assertEquals(authorId, commentDTOS.get(0).getAuthorId());
-        assertEquals(authorId, commentDTOS.get(1).getAuthorId());
+        assertEquals(authorId, commentDTOS.get(0).getAuthorID());
+        assertEquals(authorId, commentDTOS.get(1).getAuthorID());
         assertEquals(postId, commentDTOS.get(0).getPostId());
         assertEquals(postId, commentDTOS.get(1).getPostId());
     }

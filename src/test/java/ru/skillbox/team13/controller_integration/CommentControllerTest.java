@@ -28,6 +28,7 @@ import javax.persistence.EntityManagerFactory;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.skillbox.team13.test_util.DomainObjectFactory.*;
@@ -96,9 +97,18 @@ public class CommentControllerTest {
     }
 
     @Test
-    void getCommentsSimple() {
+    void getCommentsSimpleAndCheckFields() {
         List<CommentDto> comments = requestService.getAsCommentDtoList(get(url), false);
         assertEquals(20, comments.size());
+        CommentDto singleComment = comments.get(0);
+        assertNotNull(singleComment.getText());
+        assertNotNull(singleComment.getPostId());
+        assertNotNull(singleComment.getParentId());
+        assertNotNull(singleComment.getTime());
+        assertNotNull(singleComment.getAuthor());
+        assertNotNull(singleComment.getBlocked());
+        assertNotNull(singleComment.getComments());
+        assertNotNull(singleComment.getLikedByMe());
     }
 
     @Test

@@ -99,7 +99,7 @@ public class FeedsControllerTest {
                 }
 
                 while (r.nextBoolean()) {
-                    Like l = DomainObjectFactory.makeLike(person, post);
+                    Like l = DomainObjectFactory.likePost(person, post);
                     em.persist(l);
                 }
             }
@@ -140,8 +140,8 @@ public class FeedsControllerTest {
     @WithMockUser(username = "main@mail")
     void testChronologicalOrder() {
         List<PostDto> feed = requestService.getAsPostsDtoList(get(url), false);
-        long latestPostTimestamp = feed.get(0).getTimestamp();
-        long earlierPostTimestamp = feed.get(feed.size() - 1).getTimestamp();
+        long latestPostTimestamp = feed.get(0).getTime();
+        long earlierPostTimestamp = feed.get(feed.size() - 1).getTime();
         assertTrue(latestPostTimestamp > earlierPostTimestamp);
     }
 

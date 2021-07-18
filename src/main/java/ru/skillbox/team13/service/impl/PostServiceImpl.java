@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.CommentDto;
 import ru.skillbox.team13.dto.DTOWrapper;
-import ru.skillbox.team13.dto.PersonDTO;
+import ru.skillbox.team13.dto.PersonCompactDto;
 import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
@@ -50,15 +50,15 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
         int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
 
-        List<PersonDTO> personDTOS = personDAO.fetchFriendDtos(currentPersonId, FriendshipStatusCode.FRIEND);
+        List<Integer> authorIds = personDAO.getFriendsIds(currentPersonId, FriendshipStatusCode.FRIEND);
 
-        List<Integer> authorIds = personDTOS.stream().map(PersonDTO::getId).collect(toList());
-        Page<PostDto> postDtoPage = postDAO.getPostDtosByAuthorIdAndSubstring(authorIds, substr, getPageable(offset, itemPerpage));
+        Page<PostDto> postDtoPage = postDAO.getPostDtos(
+                currentPersonId, authorIds, substr, getPageable(offset, itemPerpage));
 
         List<Integer> postIds = postDtoPage.getContent().stream().map(PostDto::getId).collect(toList());
-        List<CommentDto> commentDtos = commentDAO.getCommentDtosForPostIds(postIds);
+        List<CommentDto> commentDtos = getCommentsWithAuthors(currentPersonId, postIds);
 
-        List<PostDto> combined = combine(postDtoPage.getContent(), personDTOS, commentDtos);
+        List<PostDto> combined = combine(postDtoPage.getContent(), commentDtos);
         log.debug("Loading feed page {}, total {} posts and {} comments.", offset / itemPerpage, combined.size(), commentDtos.size());
 
         return WrapperMapper.wrap(combined, (int) postDtoPage.getTotalElements(), offset, itemPerpage, true);
@@ -66,13 +66,15 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
     @Override
     public DTOWrapper find(String text, Long timestampFrom, Long timestampTo, int offset, int itemPerPage) {
+        int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
+
         Page<PostDto> page = postDAO.getPostsDtosByTimeAndSubstring(text, getTime(timestampFrom), getTime(timestampTo),
                 getPageable(offset, itemPerPage));
 
         List<Integer> personIds = page.getContent().stream().map(p -> p.getAuthor().getId()).collect(toList());
-        List<PersonDTO> personDtos = personDAO.getById(personIds);
+        List<PersonCompactDto> personDtos = personDAO.getCompactById(personIds);
 
-        List<CommentDto> commentDtos = commentDAO.getCommentDtosForPostIds(personIds);
+        List<CommentDto> commentDtos = getCommentsWithAuthors(currentPersonId, personIds);
 
         List<PostDto> combined = combine(page.getContent(), personDtos, commentDtos);
         log.debug("Loading search page {}, total {} posts and {} comments.", offset / itemPerPage, combined.size(), commentDtos.size());
@@ -82,10 +84,12 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
     @Override
     public DTOWrapper getById(int id) {
+        int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
+
         PostDto postDto = postDAO.getSingleDtoById(id);
         int authorId = postDto.getAuthor().getId();
-        PersonDTO personDTO = personDAO.getById(authorId);
-        List<CommentDto> commentDtos = commentDAO.getCommentDtosForPostIds(id);
+        PersonCompactDto personDTO = personDAO.getCompactById(authorId);
+        List<CommentDto> commentDtos = getCommentsWithAuthors(currentPersonId, Collections.singletonList(id));
         combine(postDto, personDTO, commentDtos);
         log.debug("Loading post id={}, with {} comments.", id, commentDtos.size());
 
@@ -125,12 +129,14 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
     @Override
     public DTOWrapper getWallForUserId(int authorId, int offset, int itemPerPage) {
-        PersonDTO personDto = personDAO.getById(authorId);
+        int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
+
+        PersonCompactDto personDto = personDAO.getCompactById(authorId);
         Page<PostDto> userPosts = postDAO.getPostDtosByAuthorIdAndSubstring(List.of(authorId),
                 null, getPageable(offset, itemPerPage));
 
         List<Integer> postIds = userPosts.getContent().stream().map(PostDto::getId).collect(toList());
-        List<CommentDto> commentDtos = commentDAO.getCommentDtosForPostIds(postIds);
+        List<CommentDto> commentDtos = getCommentsWithAuthors(currentPersonId, postIds);
 
         List<PostDto> combined = combine(userPosts.getContent(), List.of(personDto), commentDtos);
         log.debug("Loading wall for user id={} page {}, total {} posts and {} comments.",
@@ -156,8 +162,27 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         return getById(postId);
     }
 
-    private List<PostDto> combine(List<PostDto> posts, List<PersonDTO> persons, List<CommentDto> comments) {
-        Map<Integer, PersonDTO> personMap = persons.stream().collect(toMap(PersonDTO::getId, p -> p));
+    private List<CommentDto> getCommentsWithAuthors(int thisPersonId, List<Integer> postIds) {
+        return commentDAO.getCommentDtosWithCompactAuthorsForPostIds(thisPersonId, postIds);
+    }
+
+    private List<PostDto> combine(List<PostDto> posts, List<CommentDto> comments) {
+        //parent id == key. null key - top level comments
+        Map<Integer, List<CommentDto>> allComments = comments.stream().collect(groupingBy(CommentDto::getParentId));
+
+        Map<Integer, List<CommentDto>> topLvlComments = allComments.get(null).stream().collect(groupingBy(CommentDto::getPostId));
+
+        for (CommentDto comment : comments) {
+            comment.getComments().addAll(allComments.get(comment.getId()));
+        }
+        for (PostDto post : posts) {
+            post.getComments().addAll(topLvlComments.get(post.getId()));
+        }
+        return posts;
+    }
+
+    private List<PostDto> combine(List<PostDto> posts, List<PersonCompactDto> persons, List<CommentDto> comments) {
+        Map<Integer, PersonCompactDto> personMap = persons.stream().collect(toMap(PersonCompactDto::getId, p -> p));
         Map<Integer, List<CommentDto>> commentMap = comments.stream().collect(groupingBy(CommentDto::getPostId));
 
         for (PostDto p : posts) {
@@ -167,7 +192,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         return posts;
     }
 
-    private void combine(PostDto post, PersonDTO person, List<CommentDto> comments) {
+    private void combine(PostDto post, PersonCompactDto person, List<CommentDto> comments) {
         post.setAuthor(person);
         post.setComments(comments);
     }

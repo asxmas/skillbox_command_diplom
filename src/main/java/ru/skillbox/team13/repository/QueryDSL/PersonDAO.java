@@ -5,6 +5,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import ru.skillbox.team13.dto.PersonCompactDto;
 import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.entity.*;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
@@ -12,6 +13,7 @@ import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 @PersistenceContext
@@ -40,9 +42,61 @@ public class PersonDAO {
                         .and(friendship.code.eq(fsc))).fetch();
     }
 
+    public List<PersonCompactDto> fetchFriendCompactDtos(int srcPersonID, FriendshipStatusCode fsc) {
+        QFriendship friendship = QFriendship.friendship;
+        QPerson person = QPerson.person;
+
+        JPAQuery<Person> query = new JPAQuery<>(em);
+
+        return query.select(Projections.constructor(PersonCompactDto.class,
+                person.id, person.firstName, person.lastName, person.photo, person.lastOnlineTime))
+                .from(friendship)
+                .innerJoin(friendship.destinationPerson, person)
+                .where(friendship.sourcePerson.id.eq(srcPersonID).and(friendship.code.eq(fsc))).fetch();
+    }
+
+    public List<Integer> getFriendsIds(int srcPersonID, FriendshipStatusCode fsc) {
+        QFriendship friendship = QFriendship.friendship;
+        QPerson person = QPerson.person;
+
+        JPAQuery<Person> query = new JPAQuery<>(em);
+
+        List<PersonCompactDto> dtos =  query.select(Projections.constructor(PersonCompactDto.class, person.id))
+                .from(friendship)
+                .innerJoin(friendship.destinationPerson, person)
+                .where(friendship.sourcePerson.id.eq(srcPersonID).and(friendship.code.eq(fsc))).fetch();
+        return dtos.stream().map(PersonCompactDto::getId).collect(Collectors.toList());
+    }
+
     public List<PersonDTO> getById(List<Integer> ids) {
         Predicate where = QPerson.person.id.in(ids);
         return find(where);
+    }
+
+    public List<PersonCompactDto> getCompactById(List<Integer> ids) {
+        Predicate where = QPerson.person.id.in(ids);
+        QPerson person = QPerson.person;
+
+        JPAQuery<Person> query = new JPAQuery<>(em);
+
+        return query.select(Projections.constructor(PersonCompactDto.class,
+                person.id, person.firstName, person.lastName, person.photo, person.lastOnlineTime))
+                .from(person)
+                .where(where)
+                .fetch();
+    }
+
+    public PersonCompactDto getCompactById(int authorId) {
+        Predicate where = QPerson.person.id.eq(authorId);
+        QPerson person = QPerson.person;
+
+        JPAQuery<Person> query = new JPAQuery<>(em);
+
+        return query.select(Projections.constructor(PersonCompactDto.class,
+                person.id, person.firstName, person.lastName, person.photo, person.lastOnlineTime))
+                .from(person)
+                .where(where)
+                .fetchOne();
     }
 
     public PersonDTO getById(int authorId) {

@@ -10,10 +10,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import ru.skillbox.team13.dto.CommentDto;
-import ru.skillbox.team13.entity.Comment;
-import ru.skillbox.team13.entity.QComment;
-import ru.skillbox.team13.entity.QPerson;
-import ru.skillbox.team13.entity.QPost;
+import ru.skillbox.team13.entity.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -38,6 +35,28 @@ public class CommentDAO {
         QPost post = comment.post;
         Predicate where = post.id.in(postIds).and(comment.deleted.isFalse());
         return find(where);
+    }
+
+    public List<CommentDto> getCommentDtosWithCompactAuthorsForPostIds(int thisPersonId, List<Integer> postIds) {
+        QComment comment = QComment.comment;
+        QPost post = comment.post;
+        QPerson author = comment.author;
+        QLike like = QLike.like;
+
+        Predicate where = post.id.in(postIds).and(comment.deleted.isFalse());
+
+        JPAQuery<Comment> query = new JPAQuery<>(em);
+
+        return query.select(Projections.constructor(CommentDto.class,
+                comment.id, comment.commentText, post.id, comment.parent.id, comment.time,
+                author.id, author.firstName, author.lastName, author.photo, author.lastOnlineTime, comment.isBlocked,
+                like.person.id                                         //liked by this person
+                        .when(thisPersonId).then(true)
+                        .otherwise(false)))
+                .from(comment)
+                .leftJoin(comment.likes, like)
+                .where(where)
+                .fetch();
     }
 
     public Page<CommentDto> getCommentDtosForPostIds(int postId, Pageable pageable) {
