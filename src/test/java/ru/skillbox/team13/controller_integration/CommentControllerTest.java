@@ -28,8 +28,8 @@ import javax.persistence.EntityManagerFactory;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.skillbox.team13.test_util.DomainObjectFactory.*;
 
 @SpringBootTest
@@ -61,6 +61,8 @@ public class CommentControllerTest {
     Person mainPerson;
     String url;
 
+    int tenthCommentId;
+
     @BeforeAll
     void prepare() {
         EntityManager em = emf.createEntityManager();
@@ -76,6 +78,7 @@ public class CommentControllerTest {
         for (int i = 0; i < 50; i++) {
             Comment comment = makeComment(mainPerson, post);
             em.persist(comment);
+            if (i == 9) tenthCommentId = comment.getId();
         }
 
         User user = makeUser("main@mail", mainPerson);
@@ -122,5 +125,50 @@ public class CommentControllerTest {
                 .contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsString(payload)), true);
 
         assertEquals("Hello", commentDto.getText());
+    }
+
+    @Test
+    @WithMockUser(username = "main@mail")
+    void testPostCommentToComment() throws JsonProcessingException {
+        AddCommentDto payload = new AddCommentDto();
+        payload.setCommentText("Comment to comment #10");
+        payload.setParentId(tenthCommentId);
+
+        CommentDto commentDto = requestService.getAsCommentDto(post(url)
+                .contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsString(payload)), true);
+
+        assertEquals("Comment to comment #10", commentDto.getText());
+        assertEquals(tenthCommentId, commentDto.getParentId());
+    }
+
+    @Test
+    @WithMockUser(username = "main@mail")
+    void testEditComment() throws JsonProcessingException {
+        AddCommentDto payload = new AddCommentDto();
+        payload.setCommentText("Edited comment #10");
+
+        CommentDto commentDto = requestService.getAsCommentDto(put(url + "/" + tenthCommentId)
+                .contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsString(payload)), true);
+
+        assertEquals("Edited comment #10", commentDto.getText());
+    }
+
+    @Test
+    @WithMockUser(username = "main@mail")
+    void testDeleteRestore() {
+        int total = requestService.getAsCommentDtoList(get(url).param("itemPerPage", String.valueOf(100)), false).size();
+        assertEquals(50, total);
+
+        //deleting
+        requestService.doRequest(delete(url + "/" + tenthCommentId), status().isOk(), true);
+
+        total = requestService.getAsCommentDtoList(get(url).param("itemPerPage", String.valueOf(100)), false).size();
+        assertEquals(49, total);
+
+        //restoring
+        requestService.doRequest(put(url + "/" + tenthCommentId + "/recover"), status().isOk(), true);
+
+        total = requestService.getAsCommentDtoList(get(url).param("itemPerPage", String.valueOf(100)), false).size();
+        assertEquals(50, total);
     }
 }

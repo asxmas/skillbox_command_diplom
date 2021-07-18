@@ -27,14 +27,16 @@ public class CommentDAO {
     private final EntityManager em;
 
     public List<CommentDto> getCommentDtosForPostIds(Integer postId) {
-        QPost post = QComment.comment.post;
-        Predicate where = post.id.eq(postId);
+        QComment comment = QComment.comment;
+        QPost post = comment.post;
+        Predicate where = post.id.eq(postId).and(comment.deleted.isFalse());
         return find(where);
     }
 
     public List<CommentDto> getCommentDtosForPostIds(List<Integer> postIds) {
-        QPost post = QComment.comment.post;
-        Predicate where = post.id.in(postIds);
+        QComment comment = QComment.comment;
+        QPost post = comment.post;
+        Predicate where = post.id.in(postIds).and(comment.deleted.isFalse());
         return find(where);
     }
 
@@ -48,7 +50,7 @@ public class CommentDAO {
                 .select(Projections.constructor(CommentDto.class, comment.id, post.id, parentComment.id,
                         comment.commentText, comment.time, author.id, comment.isBlocked))
                 .from(comment)
-                .where(post.id.eq(postId))
+                .where(post.id.eq(postId).and(comment.deleted.isFalse()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetchResults();
@@ -57,7 +59,8 @@ public class CommentDAO {
     }
 
     public CommentDto getCommentDtoForId(int commentId) {
-        Predicate where = QComment.comment.id.eq(commentId);
+        QComment comment = QComment.comment;
+        Predicate where = comment.id.eq(commentId).and(comment.deleted.isFalse());
         return find(where).get(0);
     }
 

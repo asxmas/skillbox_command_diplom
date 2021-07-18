@@ -36,6 +36,9 @@ public class Comment extends Notified {
     @Column(name = "is_blocked", nullable = false)
     private boolean isBlocked;
 
+    @Column(name = "deleted")
+    private boolean deleted;
+
     @OneToMany(mappedBy = "parent")
     private Set<Comment> childComments;
 
