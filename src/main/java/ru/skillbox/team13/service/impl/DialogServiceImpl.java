@@ -1,6 +1,7 @@
 package ru.skillbox.team13.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,9 +27,13 @@ import ru.skillbox.team13.repository.PersonRepository;
 import ru.skillbox.team13.service.DialogService;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DialogServiceImpl implements DialogService {
@@ -45,7 +50,7 @@ public class DialogServiceImpl implements DialogService {
 
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage);
         Person currentPerson = userService.getAuthorizedUser().getPerson();
-        Page<Dialog2Person> dialogPage = dialog2PersonRepository.findPersonDialogs(pageable, query, currentPerson.getId());
+        Page<Dialog2Person> dialogPage = dialog2PersonRepository.findPersonDialogs(pageable, currentPerson.getId());
         List<DialogDto> results = dialogPage.stream().map(
                 dialog2Person -> {
                     Person recipientPerson = recipientPerson(currentPerson, dialog2Person.getDialog());
@@ -111,22 +116,26 @@ public class DialogServiceImpl implements DialogService {
         dialog.setLastMessage(message);
         messageRepository.save(message);
         dialogRepository.save(dialog);
-        incrementUnread(dialog, currentPerson);
+        setUnread(dialog, currentPerson);
         //todo сообщение должно попасть в нотификешен
         return WrapperMapper.wrap(DialogMapper.convertMessageToDialogMessageDTO(message), true);
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public DTOWrapper getDialogMessages(int dialogId, int fromMessageId, int offset, int itemPerPage) {
 
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage, Sort.by("id").descending());
+        Dialog dialog = dialogRepository.getById(dialogId);
         if (fromMessageId == 0) { fromMessageId = messageRepository.findFirstByOrderByIdDesc().getId(); }
         Page<Message> messagePage = messageRepository.findByDialog(pageable, fromMessageId, dialogId);
-        int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
+        Person currentPerson = userService.getAuthorizedUser().getPerson();
         List<DialogMessageDto> results = messagePage.stream()
-            .map(message -> DialogMapper.convertMessageToDialogMessageDTO(message, currentPersonId == message.getAuthor().getId()))
+            .map(message -> DialogMapper.convertMessageToDialogMessageDTO(message, currentPerson.getId() == message.getAuthor().getId()))
             .collect(Collectors.toList());
+        //все выданные фронту сообщения считаю прочтенными, если их выдали получателю, необходима доработка фронта
+        messageRepository.setStatusForGroup(MessageReadStatus.READ, currentPerson.getId(), messagePage.stream().map(m -> m.getId()).collect(Collectors.toList()));
+        setUnread(dialog, recipientPerson(currentPerson, dialog));
         return WrapperMapper.wrap(results, (int) messagePage.getTotalElements(), offset, itemPerPage, true);
     }
 
@@ -191,21 +200,19 @@ public class DialogServiceImpl implements DialogService {
         return WrapperMapper.wrap(Map.of("user_ids", List.of(person.getId())), true);
     }
 
-    private void incrementUnread(Dialog dialog, Person currentPerson){
+    private void setUnread(Dialog dialog, Person currentPerson){
 
-        List<Dialog2Person> dialog2Person = dialog2PersonRepository.findDialog2PersonByDialog(dialog);
-        dialog2PersonRepository.saveAll(
-            dialog2Person.stream()
-                         .filter(d2p -> d2p.getPerson() != currentPerson)
-                         .map(d2p -> {
-                                d2p.setUnreadCount(d2p.getUnreadCount() + 1);
-                                return d2p;})
-                         .collect(Collectors.toList()));
+        Dialog2Person dialog2Person = dialog2PersonRepository.findByDialogAndPerson(dialog, recipientPerson(currentPerson, dialog));
+        dialog2Person.setUnreadCount(messageRepository.countMessageByReadStatusEqualsAndDialogAndAuthor(
+                                                        MessageReadStatus.SENT,
+                                                        dialog,
+                                                        currentPerson));
+        dialog2PersonRepository.save(dialog2Person);
     }
 
+
     private Message createMessage(Dialog dialog, Person srcPerson, Person dstPerson, String messageText){
-    //todo проверить - фронту в сообщении не нужен получатель, упростить метод - убрать dstPerson
-        ///
+
         return new Message()
                 .setTime(LocalDateTime.now())
                 .setAuthor(srcPerson)

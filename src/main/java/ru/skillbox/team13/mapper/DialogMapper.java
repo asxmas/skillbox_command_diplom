@@ -33,8 +33,14 @@ public class DialogMapper {
 
     public static DialogDto convertDialog2PersonToDialogDTO(Dialog2Person dialog2Person, Person recipient) {
 
-        DialogMessageDto dialogMessageDto = convertMessageToDialogMessageDTO(dialog2Person.getDialog().getLastMessage(),
-                dialog2Person.getDialog().getLastMessage().getAuthor().getId() == dialog2Person.getPerson().getId());
+        DialogMessageDto dialogMessageDto;
+        if (dialog2Person.getDialog().getLastMessage() != null) {
+            dialogMessageDto = convertMessageToDialogMessageDTO(dialog2Person.getDialog().getLastMessage(),
+                    dialog2Person.getDialog().getLastMessage().getAuthor().getId() == dialog2Person.getPerson().getId());
+        }
+        else {
+            dialogMessageDto = DialogMessageDto.builder().build();
+        }
         dialogMessageDto.setRecipient(PersonMapper.convertPersonToPersonDTO(recipient));
         return DialogDto.builder()
                 .id(dialog2Person.getDialog().getId())
