@@ -50,10 +50,13 @@ public class PersonDTO {
 
     @JsonProperty("is_blocked")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private boolean isBlocked;
+    private Boolean isBlocked;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String token;
+
+    @JsonProperty("is_friend") //todo !!!
+    Boolean friend;
 
     public PersonDTO(int id, String firstName, String lastName, LocalDateTime registrationDate, LocalDateTime birthDate,
                      String email, String phone, String photo, String about, int cityId, String cityTitle,

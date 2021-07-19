@@ -1,6 +1,7 @@
 package ru.skillbox.team13.test_util;
 
 import ru.skillbox.team13.entity.*;
+import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
 import ru.skillbox.team13.entity.enums.PersonMessagePermission;
 import ru.skillbox.team13.entity.enums.UserType;
 
@@ -100,11 +101,27 @@ public class DomainObjectFactory {
     }
 
 
-    public static Like makeLike(Person liker, Notified postOrComment) {
+    public static Like makeLike(Person liker, Notified notified) {
+        if (notified instanceof Comment) {
+            return likeComment(liker, (Comment) notified);
+        } else if (notified instanceof Post) {
+            return likePost(liker, (Post) notified);
+        } else throw new RuntimeException();
+    }
+
+    public static Like likePost(Person liker, Post post) {
         Like like = new Like();
         like.setTime(LocalDateTime.now());
         like.setPerson(liker);
-        like.setPostOrComment(postOrComment);
+        like.setPost(post);
+        return like;
+    }
+
+    public static Like likeComment(Person liker, Comment comment) {
+        Like like = new Like();
+        like.setTime(LocalDateTime.now());
+        like.setPerson(liker);
+        like.setComment(comment);
         return like;
     }
 
@@ -136,5 +153,9 @@ public class DomainObjectFactory {
 
     private static char getRandomChar(boolean isCapital) {
         return (char) (RANDOM.nextInt(CHARACTER_COUNT) + (isCapital ? A : a));
+    }
+
+    public static Friendship makeFriendship(Person src, Person dst, FriendshipStatusCode code) {
+        return new Friendship(LocalDateTime.now(), genString(10), code, src, dst);
     }
 }

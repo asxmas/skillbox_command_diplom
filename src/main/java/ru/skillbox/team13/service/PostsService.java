@@ -17,6 +17,7 @@ import java.util.Set;
 
 @RequiredArgsConstructor
 @Service
+@Deprecated
 public class PostsService {
     private final RepoPost repoPost;
     private final CommentService commentService;
@@ -52,10 +53,10 @@ public class PostsService {
         post.setTitle(postDTO.getTitle());
     }
 
-    public Set<PostDto> getSetPostsByAuthorId(Integer id)   {
-        List<Post> postsByAuthor = repoPost.getPostsByAuthorId(PageRequest.of(0,10),id);
-        return PostMapper.convertSetPostToSetPostDTO(Set.copyOf(postsByAuthor));
-    }
+//    public Set<PostDto> getSetPostsByAuthorId(Integer id)   {
+//        List<Post> postsByAuthor = repoPost.getPostsByAuthorId(PageRequest.of(0,10),id);
+//        return PostMapper.convertSetPostToSetPostDTO(Set.copyOf(postsByAuthor));
+//    }
 
     @Modifying
     public void setInactiveAuthor() {

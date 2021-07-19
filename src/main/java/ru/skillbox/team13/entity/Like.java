@@ -26,6 +26,12 @@ public class Like {
     private Person person;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_comment_id", nullable = false)
-    private Notified postOrComment;
+    @JoinColumn(name = "post_id", nullable = true)
+    private Post post;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "comment_id", nullable = true)
+    private Comment comment;
+
+
 }

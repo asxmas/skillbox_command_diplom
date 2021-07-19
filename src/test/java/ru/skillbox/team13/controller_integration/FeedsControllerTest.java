@@ -70,7 +70,7 @@ public class FeedsControllerTest {
 
             boolean isFriend = r.nextBoolean();
             if (isFriend) {
-                Friendship friendship = new Friendship(LocalDateTime.now(), "", FriendshipStatusCode.FRIEND, mainPerson, person);
+                Friendship friendship = DomainObjectFactory.makeFriendship(mainPerson, person, FriendshipStatusCode.FRIEND);
                 em.persist(friendship);
             }
 
@@ -89,6 +89,7 @@ public class FeedsControllerTest {
                     post.setPostText(sb.toString());
                 }
 
+                //earliest post 1 day ago, latest - now
                 post.setTime(LocalDateTime.now().minus(r.nextInt(1440), ChronoUnit.MINUTES));
                 em.persist(post);
                 if (isFriend) friendsPosts++;
@@ -99,7 +100,7 @@ public class FeedsControllerTest {
                 }
 
                 while (r.nextBoolean()) {
-                    Like l = DomainObjectFactory.makeLike(person, post);
+                    Like l = DomainObjectFactory.likePost(person, post);
                     em.persist(l);
                 }
             }
@@ -140,8 +141,8 @@ public class FeedsControllerTest {
     @WithMockUser(username = "main@mail")
     void testChronologicalOrder() {
         List<PostDto> feed = requestService.getAsPostsDtoList(get(url), false);
-        long latestPostTimestamp = feed.get(0).getTimestamp();
-        long earlierPostTimestamp = feed.get(feed.size() - 1).getTimestamp();
+        long latestPostTimestamp = feed.get(0).getTime();
+        long earlierPostTimestamp = feed.get(feed.size() - 1).getTime();
         assertTrue(latestPostTimestamp > earlierPostTimestamp);
     }
 

@@ -112,7 +112,7 @@ public class LikeControllerTest {
 
         Like like = new Like();
         like.setPerson(person);
-        like.setPostOrComment(post);
+        like.setPost(post);
         like.setTime(LocalDateTime.now());
         likeRepo.save(like);
 
@@ -165,7 +165,7 @@ public class LikeControllerTest {
 
         Like like = new Like();
         like.setPerson(person);
-        like.setPostOrComment(comment);
+        like.setComment(comment);
         like.setTime(LocalDateTime.now());
         likeRepo.save(like);
 
@@ -188,7 +188,7 @@ public class LikeControllerTest {
         Post post = postRepo.findById(postId).get();
         Like like = new Like();
         like.setPerson(person);
-        like.setPostOrComment(post);
+        like.setPost(post);
         like.setTime(LocalDateTime.now());
         likeRepo.save(like);
 

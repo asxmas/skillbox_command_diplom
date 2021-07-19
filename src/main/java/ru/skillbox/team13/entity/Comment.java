@@ -36,9 +36,20 @@ public class Comment extends Notified {
     @Column(name = "is_blocked", nullable = false)
     private boolean isBlocked;
 
+    @Column(name = "deleted")
+    private boolean deleted;
+
     @OneToMany(mappedBy = "parent")
     private Set<Comment> childComments;
 
-    @OneToMany(mappedBy = "postOrComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "comment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Like> likes;
+
+    public Comment(LocalDateTime time, Post post, Person author, String commentText, boolean isBlocked) {
+        this.time = time;
+        this.post = post;
+        this.author = author;
+        this.commentText = commentText;
+        this.isBlocked = isBlocked;
+    }
 }
