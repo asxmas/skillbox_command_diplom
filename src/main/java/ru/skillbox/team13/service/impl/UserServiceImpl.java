@@ -150,14 +150,14 @@ public class UserServiceImpl implements UserService {
     //метод генерации ссылки и отправки по email кода для смены пароля
     @Override
     @Transactional
-    public DTOWrapper codeGenerationAndEmail(String email, String origin){
+    public DTOWrapper passwordResetEmail(String email, HttpServletRequest request){
         try {
             User user = checkUserRegistration(email).orElseThrow(() -> new BadRequestException("user not registered"));
             //генерируем токен для сброса пароля
             String link = jwtTokenProvider.createToken(user.getEmail(), TokenType.MAIL_LINK);
             //отправляем ссылку по email
             mailServiceImpl.sendMessage(email, "Password reset link to Team13",
-                    "<p><a href=\"" + origin + "/api/v1/account/password/reset?link=" +
+                    "<p><a href=\"" + request.getScheme() + "://" + request.getHeader("host") + "/api/v1/account/password/reset?link=" +
                             link + "\">Нажмите на ссылку для сброса пароля в Team13</a></p>");
         }
         catch (Exception e) {
@@ -194,7 +194,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public DTOWrapper setEmail(String email) {
-        if (checkUserRegistration(email).isPresent()) throw new BadRequestException("Невозможно изменить пароль");
+        if (checkUserRegistration(email).isPresent()) throw new BadRequestException("Невозможно изменить e-mail");
         User user = getAuthorizedUser();
         user.setEmail(email);
         Person person = user.getPerson();

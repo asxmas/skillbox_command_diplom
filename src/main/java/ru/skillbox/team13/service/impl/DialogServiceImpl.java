@@ -108,7 +108,6 @@ public class DialogServiceImpl implements DialogService {
     @Modifying
     public DTOWrapper sendMessage(int dialogId, String messageText) {
 
-        //todo проверить по фронту и скорее всего убрать необходимость хранения получателя сообщения
         Person currentPerson = userService.getAuthorizedUser().getPerson();
         Dialog dialog = dialogRepository.findById(dialogId).get();
         Person dstPerson = recipientPerson(currentPerson, dialog);

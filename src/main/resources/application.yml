@@ -34,7 +34,8 @@ spring.mail:
 server:
   port: ${PORT:8080}
 
-server.base_url: ${BASE_URL:https://team13.herokuapp.com}
+#для heroku установить значение https://team13.herokuapp.com - сервер на котором развернут фронт
+server.base_url: ${BASE_URL:http://localhost:8081}
 
 logging:
   level:

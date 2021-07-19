@@ -21,7 +21,7 @@ public interface UserService {
 
     User getAuthorizedUser();
 
-    DTOWrapper codeGenerationAndEmail(String email, String origin);
+    DTOWrapper passwordResetEmail(String email, HttpServletRequest request);
 
     Person getInactivePerson();
 

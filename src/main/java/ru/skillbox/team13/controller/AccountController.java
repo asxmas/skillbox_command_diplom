@@ -9,6 +9,7 @@ import ru.skillbox.team13.dto.LoginDto;
 import ru.skillbox.team13.dto.UserDto;
 import ru.skillbox.team13.service.UserService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @RestController
@@ -24,8 +25,8 @@ public class AccountController {
     }
 
     @PutMapping("password/recovery")
-    public ResponseEntity<DTOWrapper> recovery(@RequestBody @Valid LoginDto loginDto, @RequestHeader("origin") String origin){
-        return ResponseEntity.ok(userService.codeGenerationAndEmail(loginDto.getEmail(), origin));
+    public ResponseEntity<DTOWrapper> recovery(@RequestBody @Valid LoginDto loginDto, HttpServletRequest request){
+        return ResponseEntity.ok(userService.passwordResetEmail(loginDto.getEmail(), request));
     }
 
     @PutMapping("password/set")
