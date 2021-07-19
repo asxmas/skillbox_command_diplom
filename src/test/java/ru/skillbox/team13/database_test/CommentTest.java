@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.CommentDto;
 import ru.skillbox.team13.entity.Comment;
@@ -155,8 +154,7 @@ public class CommentTest {
 
     @Test
     void getCommentsWithPageable() {
-        Pageable p = PageUtil.getPageable(100, 20);
-        Page<CommentDto> page = commentDAO.getCommentDtosForPostIds(posts.get(3).getId(), p);
+        Page<CommentDto> page = commentDAO.getCommentDTOs(0, posts.get(3).getId(), PageUtil.getPageable(100, 20));
         assertEquals(200, page.getTotalElements());
         assertEquals(20, page.getContent().size());
     }

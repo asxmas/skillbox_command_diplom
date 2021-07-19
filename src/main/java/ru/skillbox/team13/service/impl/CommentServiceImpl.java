@@ -21,7 +21,10 @@ import ru.skillbox.team13.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static ru.skillbox.team13.util.PageUtil.getPageable;
@@ -39,10 +42,14 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public DTOWrapper getComments(int postId, int offset, int itemPerPage) {
-        Page<CommentDto> page = commentDAO.getCommentDtosForPostIds(postId, getPageable(offset, itemPerPage));
+        int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
+
+        Page<CommentDto> page = commentDAO.getCommentDTOs(currentPersonId, postId, getPageable(offset, itemPerPage));
         log.debug("Loading {} page of comments for post id={}, total {}.",
                 offset / itemPerPage, postId, page.getTotalElements());
-        return WrapperMapper.wrap(page.getContent(), (int) (page.getTotalElements()), offset, itemPerPage, true);
+
+        List<CommentDto> combinedComments = combineComments(page.getContent());
+        return WrapperMapper.wrap(combinedComments, (int) (page.getTotalElements()), offset, itemPerPage, true);
     }
 
     @Override
@@ -58,8 +65,33 @@ public class CommentServiceImpl implements CommentService {
         }
         int commentId = commentRepository.save(comment).getId();
 
-        CommentDto commentDto = commentDAO.getCommentDtoForId(commentId);
-        return WrapperMapper.wrap(commentDto, true);
+        return WrapperMapper.wrap(getCommentDto(commentId), true);
+    }
+
+    private CommentDto getCommentDto(int commentId) {
+        int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
+        List<CommentDto> raw = commentDAO.getCommentDTO(currentPersonId, commentId);
+        return combineComments(raw).get(0);
+    }
+
+    private List<CommentDto> combineComments(List<CommentDto> raw) {  //todo merge with similar in post service
+        Map<Boolean, List<CommentDto>> filtered = raw.stream()
+                .collect(Collectors.partitioningBy(commentDto -> Objects.isNull(commentDto.getParentId())));
+
+        List<CommentDto> topLevel = filtered.get(true);
+        List<CommentDto> others = filtered.get(false);
+
+        Map<Integer, List<CommentDto>> lowerLevelComments = others.stream().collect(Collectors.groupingBy(CommentDto::getParentId));
+
+        for (CommentDto comment : raw) {
+            if (lowerLevelComments.containsKey(comment.getId())) {
+                comment.getComments().addAll(lowerLevelComments.get(comment.getId()));
+            }
+        }
+
+        if (topLevel.size() == 0) {
+            return others;
+        } else return topLevel;  //todo ugly :(
     }
 
     @Override
@@ -73,8 +105,7 @@ public class CommentServiceImpl implements CommentService {
 
         commentRepository.save(comment);
 
-        CommentDto commentDto = commentDAO.getCommentDtoForId(commentId);
-        return WrapperMapper.wrap(commentDto, true);
+        return WrapperMapper.wrap(getCommentDto(commentId), true);
     }
 
     @Override
@@ -93,8 +124,7 @@ public class CommentServiceImpl implements CommentService {
         log.debug("Restoring comment id={}.", commentId);
         commentRepository.save(comment);
 
-        CommentDto commentDto = commentDAO.getCommentDtoForId(commentId);
-        return WrapperMapper.wrap(Collections.singletonList(commentDto), true);
+        return WrapperMapper.wrap(Collections.singletonList(getCommentDto(commentId)), true);
     }
 
     private Comment createComment(int postId, String text) {

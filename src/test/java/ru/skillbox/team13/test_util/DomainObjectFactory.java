@@ -1,6 +1,7 @@
 package ru.skillbox.team13.test_util;
 
 import ru.skillbox.team13.entity.*;
+import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
 import ru.skillbox.team13.entity.enums.PersonMessagePermission;
 import ru.skillbox.team13.entity.enums.UserType;
 
@@ -152,5 +153,9 @@ public class DomainObjectFactory {
 
     private static char getRandomChar(boolean isCapital) {
         return (char) (RANDOM.nextInt(CHARACTER_COUNT) + (isCapital ? A : a));
+    }
+
+    public static Friendship makeFriendship(Person src, Person dst, FriendshipStatusCode code) {
+        return new Friendship(LocalDateTime.now(), genString(10), code, src, dst);
     }
 }

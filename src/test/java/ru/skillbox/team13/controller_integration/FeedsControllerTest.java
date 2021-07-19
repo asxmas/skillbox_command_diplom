@@ -70,7 +70,7 @@ public class FeedsControllerTest {
 
             boolean isFriend = r.nextBoolean();
             if (isFriend) {
-                Friendship friendship = new Friendship(LocalDateTime.now(), "", FriendshipStatusCode.FRIEND, mainPerson, person);
+                Friendship friendship = DomainObjectFactory.makeFriendship(mainPerson, person, FriendshipStatusCode.FRIEND);
                 em.persist(friendship);
             }
 
@@ -89,6 +89,7 @@ public class FeedsControllerTest {
                     post.setPostText(sb.toString());
                 }
 
+                //earliest post 1 day ago, latest - now
                 post.setTime(LocalDateTime.now().minus(r.nextInt(1440), ChronoUnit.MINUTES));
                 em.persist(post);
                 if (isFriend) friendsPosts++;

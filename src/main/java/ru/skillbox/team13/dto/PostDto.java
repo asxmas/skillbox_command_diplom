@@ -1,8 +1,10 @@
 package ru.skillbox.team13.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+import ru.skillbox.team13.entity.enums.WallPostType;
 import ru.skillbox.team13.util.TimeUtil;
 
 import java.time.LocalDateTime;
@@ -41,6 +43,9 @@ public class PostDto {
 
     private List<CommentDto> comments;
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private WallPostType type;
+
     public PostDto(int id, LocalDateTime time, int authorID, String firstName, String lastName, String photo,
                    LocalDateTime lastOnline, String title, String text, Boolean blocked, Integer likes, Boolean likedByMe) {
         this.id = id;
@@ -54,5 +59,6 @@ public class PostDto {
         this.tags = new ArrayList<>();
         this.likedByMe = likedByMe;
         this.comments = new ArrayList<>();
+        this.type = WallPostType.POSTED; //todo temporary
     }
 }

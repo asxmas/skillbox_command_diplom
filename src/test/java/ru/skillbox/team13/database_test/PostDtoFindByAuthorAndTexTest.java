@@ -87,57 +87,57 @@ public class PostDtoFindByAuthorAndTexTest {
 
     @Test
     void fetchNullSubstr() {
-        Page<PostDto> page = postDAO.getPostDtosByAuthorIdAndSubstring(authorsIds, null, PageRequest.of(0, 100));
+        Page<PostDto> page = postDAO.getPostDTOs(0, authorsIds, null, PageRequest.of(0, 100));
         assertEquals(6, page.getTotalElements());
         assertEquals(0, page.getContent().get(5).getLikes());
         assertEquals(10, page.getContent().stream().max(Comparator.comparing(PostDto::getLikes)).get().getLikes());
         assertNotNull(page.getContent().get(0).getAuthor());
         assertTrue(page.getContent().get(0).getAuthor().getId() != 0);
-        assertNull(page.getContent().get(0).getComments());
+        assertEquals(0, page.getContent().get(0).getComments().size());
     }
 
     @Test
     void fetchEmptySubstrAuthors() {
-        Page<PostDto> page = postDAO.getPostDtosByAuthorIdAndSubstring(authorsIds, "", PageRequest.of(1, 2));
+        Page<PostDto> page = postDAO.getPostDTOs(0, authorsIds, "", PageRequest.of(1, 2));
         assertEquals(6, page.getTotalElements());
         assertEquals(2, page.getContent().size());
     }
 
     @Test
     void fetchWithSubstrAuthors() {
-        Page<PostDto> page = postDAO.getPostDtosByAuthorIdAndSubstring(authorsIds, "substring", PageRequest.of(0, 100));
+        Page<PostDto> page = postDAO.getPostDTOs(0, authorsIds, "substring", PageRequest.of(0, 100));
         assertEquals(3, page.getTotalElements());
     }
 
     @Test
     void countLikesAuthors() {
-        Page<PostDto> page = postDAO.getPostDtosByAuthorIdAndSubstring(authorsIds, null, PageRequest.of(0, 100));
+        Page<PostDto> page = postDAO.getPostDTOs(0, authorsIds, null, PageRequest.of(0, 100));
         PostDto dto = page.getContent().stream().max(Comparator.comparing(PostDto::getLikes)).get();
         assertEquals(10, dto.getLikes());
     }
 
     @Test
     void findBySubstring() {
-        Page<PostDto> page = postDAO.getPostsDtosByTimeAndSubstring("substring", null, null, PageRequest.of(0, 100));
+        Page<PostDto> page = postDAO.getPostDTOs(0, "substring", null, null, PageRequest.of(0, 100));
         assertEquals(3, page.getTotalElements());
     }
 
     @Test
     void findBySubstringEmpty() {
-        Page<PostDto> page = postDAO.getPostsDtosByTimeAndSubstring("", null, null, PageRequest.of(0, 100));
+        Page<PostDto> page = postDAO.getPostDTOs(0, "", null, null, PageRequest.of(0, 100));
         assertEquals(6, page.getTotalElements());
     }
 
     @Test
     void findBybyTime() {
-        Page<PostDto> page = postDAO.getPostsDtosByTimeAndSubstring(null, LocalDateTime.now().minusMinutes(1),
+        Page<PostDto> page = postDAO.getPostDTOs(0, null, LocalDateTime.now().minusMinutes(1),
                 LocalDateTime.now().plusMinutes(1), PageRequest.of(0, 100));
         assertEquals(4, page.getTotalElements());
     }
 
     @Test
     void findBybyOneTime() {
-        Page<PostDto> page = postDAO.getPostsDtosByTimeAndSubstring("substring", null,
+        Page<PostDto> page = postDAO.getPostDTOs(0, "substring", null,
                 LocalDateTime.now().plusMinutes(1), PageRequest.of(0, 100));
         assertEquals(2, page.getTotalElements());
     }
@@ -145,13 +145,13 @@ public class PostDtoFindByAuthorAndTexTest {
     @Test
     void testGetById() {
         Random random = new Random();
-        PostDto postDto = postDAO.getSingleDtoById(postIds.get(random.nextInt(postIds.size())));
+        PostDto postDto = postDAO.getPostDTO(0, postIds.get(random.nextInt(postIds.size())));
         assertNotNull(postDto.getAuthor());
         assertNotNull(postDto.getText());
     }
 
     @Test
     void testGetWrongId() {
-        assertThrows(BadRequestException.class, () -> postDAO.getSingleDtoById(100500));
+        assertThrows(BadRequestException.class, () -> postDAO.getPostDTO(0, 100500));
     }
 }

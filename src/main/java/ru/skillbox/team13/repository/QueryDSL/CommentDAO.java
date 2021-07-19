@@ -23,6 +23,7 @@ public class CommentDAO {
 
     private final EntityManager em;
 
+    @Deprecated
     public List<CommentDto> getCommentDtosForPostIds(Integer postId) {
         QComment comment = QComment.comment;
         QPost post = comment.post;
@@ -30,6 +31,7 @@ public class CommentDAO {
         return find(where);
     }
 
+    @Deprecated
     public List<CommentDto> getCommentDtosForPostIds(List<Integer> postIds) {
         QComment comment = QComment.comment;
         QPost post = comment.post;
@@ -37,7 +39,7 @@ public class CommentDAO {
         return find(where);
     }
 
-    public List<CommentDto> getCommentDtosWithCompactAuthorsForPostIds(int thisPersonId, List<Integer> postIds) {
+    public List<CommentDto> getCommentDTOs(int viewerId, List<Integer> postIds) {
         QComment comment = QComment.comment;
         QPost post = comment.post;
         QPerson author = comment.author;
@@ -51,7 +53,7 @@ public class CommentDAO {
                 comment.id, comment.commentText, post.id, comment.parent.id, comment.time,
                 author.id, author.firstName, author.lastName, author.photo, author.lastOnlineTime, comment.isBlocked,
                 like.person.id                                         //liked by this person
-                        .when(thisPersonId).then(true)
+                        .when(viewerId).then(true)
                         .otherwise(false)))
                 .from(comment)
                 .leftJoin(comment.likes, like)
@@ -59,6 +61,55 @@ public class CommentDAO {
                 .fetch();
     }
 
+    public List<CommentDto> getCommentDTO(int viewerId, int commentId) {
+        QComment comment = QComment.comment;
+        QPost post = comment.post;
+        QPerson author = comment.author;
+        QLike like = QLike.like;
+
+        Predicate where = comment.deleted.isFalse().and(comment.id.eq(commentId).or(comment.parent.id.eq(commentId)));
+
+        JPAQuery<Comment> query = new JPAQuery<>(em);
+
+        return query.select(Projections.constructor(CommentDto.class,
+                comment.id, comment.commentText, post.id, comment.parent.id, comment.time,
+                author.id, author.firstName, author.lastName, author.photo, author.lastOnlineTime, comment.isBlocked,
+                like.person.id                                         //liked by this person
+                        .when(viewerId).then(true)
+                        .otherwise(false)))
+                .from(comment)
+                .leftJoin(comment.likes, like)
+                .where(where)
+                .fetch();
+    }
+
+    public Page<CommentDto> getCommentDTOs(int viewerId, int postId, Pageable pageable) {
+        QComment comment = QComment.comment;
+        QPost post = comment.post;
+        QPerson author = comment.author;
+        QLike like = QLike.like;
+
+        Predicate where = post.id.eq(postId).and(comment.deleted.isFalse());
+
+        JPAQuery<Comment> query = new JPAQuery<>(em);
+
+        QueryResults<CommentDto> qr = query.select(Projections.constructor(CommentDto.class,
+                comment.id, comment.commentText, post.id, comment.parent.id, comment.time,
+                author.id, author.firstName, author.lastName, author.photo, author.lastOnlineTime, comment.isBlocked,
+                like.person.id                                         //liked by this person
+                        .when(viewerId).then(true)
+                        .otherwise(false)))
+                .from(comment)
+                .leftJoin(comment.likes, like)
+                .where(where)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetchResults();
+
+        return new PageImpl<>(qr.getResults(), pageable, qr.getTotal());
+    }
+
+    @Deprecated
     public Page<CommentDto> getCommentDtosForPostIds(int postId, Pageable pageable) {
         QComment comment = QComment.comment;
         QPost post = comment.post;
@@ -77,12 +128,14 @@ public class CommentDAO {
         return new PageImpl<>(qr.getResults(), pageable, qr.getTotal());
     }
 
+    @Deprecated
     public CommentDto getCommentDtoForId(int commentId) {
         QComment comment = QComment.comment;
         Predicate where = comment.id.eq(commentId).and(comment.deleted.isFalse());
         return find(where).get(0);
     }
 
+    @Deprecated
     private List<CommentDto> find(Predicate where) {
         QComment comment = QComment.comment;
         QPerson author = comment.author;

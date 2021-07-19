@@ -9,7 +9,6 @@ import ru.skillbox.team13.util.TimeUtil;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -26,7 +25,7 @@ public class CommentDto {
 
     @JsonProperty("parent_id")
     @JsonInclude(JsonInclude.Include.NON_NULL) //todo maybe always should be present
-    private int parentId;
+    private Integer parentId;
 
     private Long time;
 
