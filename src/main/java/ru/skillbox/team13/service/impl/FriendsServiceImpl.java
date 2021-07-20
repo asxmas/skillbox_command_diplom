@@ -196,7 +196,7 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
     private Friendship createNewFriendship(Integer src, Integer dst, FriendshipStatusCode code) {
         Person srcPerson = personRepository.findById(src).get(); //todo exception handling
         Person dstPerson = personRepository.findById(dst).get();
-        return new Friendship(LocalDateTime.now(), "", FriendshipStatusCode.REQUEST, srcPerson, dstPerson);
+        return new Friendship(LocalDateTime.now(), "", code, srcPerson, dstPerson);
     }
 
     private Friendship getRequestedFriendship(Integer src, Integer dst) {

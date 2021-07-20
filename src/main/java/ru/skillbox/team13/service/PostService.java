@@ -1,5 +1,6 @@
 package ru.skillbox.team13.service;
 
+import org.springframework.data.jpa.repository.Modifying;
 import ru.skillbox.team13.dto.DTOWrapper;
 
 public interface PostService {
@@ -18,4 +19,6 @@ public interface PostService {
     DTOWrapper getWallForUserId(int id, int offset, int itemPerPage);
 
     DTOWrapper post(String title, String text, Integer id, Long pubDate);
+
+    void setInactiveAuthor();
 }

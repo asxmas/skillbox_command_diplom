@@ -16,13 +16,6 @@ public class TimeUtil {
 
         return ldt.toInstant(ZONE_OFFSET).toEpochMilli();
     }
-    public static LocalDateTime toLocalDateTime (long number)   {
-        return LocalDateTime.ofInstant
-                (Instant.ofEpochMilli(number), TimeZone.getDefault().toZoneId());
-    }
-    public static LocalDateTime toLocalDateTime (Timestamp timestamp)   {
-        return timestamp.toLocalDateTime();
-    }
 
 
     public static LocalDateTime getTime(Long timestamp) {

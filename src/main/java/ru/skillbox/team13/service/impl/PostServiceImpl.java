@@ -3,12 +3,14 @@ package ru.skillbox.team13.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.*;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
+import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
 import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.mapper.WrapperMapper;
@@ -17,6 +19,7 @@ import ru.skillbox.team13.repository.PostRepository;
 import ru.skillbox.team13.repository.QueryDSL.CommentDAO;
 import ru.skillbox.team13.repository.QueryDSL.PersonDAO;
 import ru.skillbox.team13.repository.QueryDSL.PostDAO;
+import ru.skillbox.team13.repository.RepoPost;
 import ru.skillbox.team13.service.UserService;
 import ru.skillbox.team13.util.CommentUtil;
 import ru.skillbox.team13.util.TimeUtil;
@@ -43,6 +46,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     private final PersonDAO personDAO;
     private final CommentDAO commentDAO;
     private final UserService userService;
+    private final RepoPost repoPost; //todo check and refactor
 
     @Override
     public DTOWrapper getFeed(String substr, int offset, int itemPerpage) {
@@ -172,5 +176,18 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         }
 
         return posts;
+    }
+
+    @Modifying
+    @Override
+    public void setInactiveAuthor() {
+        User currentUser = userService.getAuthorizedUser();
+        Person currentPerson = currentUser.getPerson();
+        Person inactiveAuthor = userService.getInactivePerson();
+        List<Post> posts = repoPost.getPostsByAuthorId(PageRequest.of(0,10), currentPerson.getId());
+        for (Post post : posts) {
+            post.setAuthor(inactiveAuthor);
+        }
+        repoPost.saveAllAndFlush(posts);
     }
 }
