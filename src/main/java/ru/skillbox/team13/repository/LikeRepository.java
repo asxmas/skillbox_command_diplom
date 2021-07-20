@@ -10,13 +10,13 @@ import ru.skillbox.team13.entity.projection.Liker;
 import java.util.List;
 
 public interface LikeRepository extends JpaRepository<Like, Integer> {
-    @Query("select l.person.id as likerId from Like l where l.postOrComment.id = :itemId")
+    @Query("select l.person.id as likerId from Like l where l.post.id = :itemId or l.comment.id = :itemId")
     List<Liker> findLikersProjectionsForItemId(int itemId);
 
-    @Query("select count(l) from Like l  where l.person = :person and l.postOrComment.id = :id")
-    Integer countByLikerAndItemId(Person person, int id);
+    @Query("select count(l) from Like l  where l.person = :person and (l.post.id = :itemId or l.comment.id = :itemId)")
+    Integer countByLikerAndItemId(Person person, int itemId);
 
     @Modifying
-    @Query("delete from Like l where l.person = :person and l.postOrComment.id = :id")
-    void deleteByLikerAndId(Person person, int id);
+    @Query("delete from Like l where l.person = :person and (l.post.id = :itemId or l.comment.id = :itemId)")
+    void deleteByLikerAndId(Person person, int itemId);
 }

@@ -1,41 +1,64 @@
 package ru.skillbox.team13.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+import ru.skillbox.team13.entity.enums.WallPostType;
 import ru.skillbox.team13.util.TimeUtil;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostDto {
 
     private int id;
-    private long timestamp;
-    private PersonDTO author;
+
+    private Long time;
+
+    @JsonIgnore //internal use only
+    private int authorID;
+
+    private PersonCompactDto author;
+
     private String title;
 
     @JsonProperty("post_text")
     private String text;
 
     @JsonProperty("is_blocked")
-    private boolean isBlocked;
+    private Boolean blocked;
 
-    private int likes;
+    private Integer likes;
+
+    private List<String> tags; //todo maybe TagDTO
+
+    @JsonProperty("my_like")
+    private Boolean likedByMe;
 
     private List<CommentDto> comments;
 
-    public PostDto(int id, LocalDateTime ldt, int authorId, String title, String text, boolean isBlocked, int likes) {
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private WallPostType type;
+
+    public PostDto(int id, LocalDateTime time, int authorID, String firstName, String lastName, String photo,
+                   LocalDateTime lastOnline, String title, String text, Boolean blocked, Integer likes, Boolean likedByMe) {
         this.id = id;
-        this.timestamp = TimeUtil.getTimestamp(ldt);
-        this.author = new PersonDTO(authorId);
+        this.time = TimeUtil.getTimestamp(time);
+        this.authorID = authorID;
+        this.author = new PersonCompactDto(authorID, firstName, lastName, photo, TimeUtil.getTimestamp(lastOnline));
         this.title = title;
         this.text = text;
-        this.isBlocked = isBlocked;
+        this.blocked = blocked;
         this.likes = likes;
+        this.tags = new ArrayList<>();
+        this.likedByMe = likedByMe;
+        this.comments = new ArrayList<>();
+        this.type = WallPostType.POSTED; //todo temporary
     }
 }

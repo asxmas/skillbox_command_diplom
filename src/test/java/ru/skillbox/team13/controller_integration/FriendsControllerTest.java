@@ -3,6 +3,7 @@ package ru.skillbox.team13.controller_integration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -59,6 +60,9 @@ public class FriendsControllerTest {
     UserRepository userRepo;
 
     @Autowired
+    private FriendshipRepository friendshipRepository;
+
+    @Autowired
     ObjectMapper om;
 
     @Autowired
@@ -107,6 +111,13 @@ public class FriendsControllerTest {
 
         jimId = personRepository.save(person2).getId();
         timId = personRepository.save(person3).getId();
+    }
+
+    @AfterAll
+    void destroy() {
+        friendshipRepository.deleteAll();
+        userRepo.deleteAll();
+        personRepository.deleteAll();
     }
 
     @Test
