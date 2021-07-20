@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.CommentDto;
 import ru.skillbox.team13.entity.Comment;
 import ru.skillbox.team13.entity.Person;
@@ -30,7 +29,7 @@ import static ru.skillbox.team13.test_util.DomainObjectFactory.*;
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class CommentTest {
+public class CommentDAOTest {
 
     @Autowired
     EntityManagerFactory emf;
@@ -51,6 +50,11 @@ public class CommentTest {
     List<Post> posts = new ArrayList<>();
 
     Person person;
+    Comment comment1;
+    Comment comment2;
+    Comment comment3;
+    Comment comment4;
+    Comment comment5;
 
     @BeforeAll
     void prepare() {
@@ -67,11 +71,11 @@ public class CommentTest {
             posts.add(post);
         }
 
-        Comment comment1 = makeComment("comment 1 to post 1", person, posts.get(0));
-        Comment comment2 = makeComment("comment 2 to post 2", person, posts.get(1));
-        Comment comment3 = makeComment("comment 3 to post 2", person, posts.get(1));
-        Comment comment4 = makeComment("comment 4 to post 3 parent", person, posts.get(2));
-        Comment comment5 = makeComment("comment 5 to post 3 child", person, posts.get(2));
+        comment1 = makeComment("comment 1 to post 1", person, posts.get(0));
+        comment2 = makeComment("comment 2 to post 2", person, posts.get(1));
+        comment3 = makeComment("comment 3 to post 2", person, posts.get(1));
+        comment4 = makeComment("comment 4 to post 3 parent", person, posts.get(2));
+        comment5 = makeComment("comment 5 to post 3 child", person, posts.get(2));
 
         em.persist(comment1);
         em.persist(comment2);
@@ -98,58 +102,56 @@ public class CommentTest {
     }
 
     @Test
-    @Transactional
-    void getSingleCommentForSinglePost() {
-        int postId = posts.get(0).getId();
-        List<CommentDto> commentDTOS = commentDAO.getCommentDtosForPostIds(postId);
-
-        assertEquals(1, commentDTOS.size());
-        assertEquals("comment 1 to post 1", commentDTOS.get(0).getText());
-        assertNull(commentDTOS.get(0).getParentId());
-        assertEquals(authorId, commentDTOS.get(0).getAuthorID());
-        assertEquals(postId, commentDTOS.get(0).getPostId());
-    }
-
-    @Test
-    @Transactional
-    void getMultipleCommentsForSinglePost() {
-        int postId = posts.get(1).getId();
-        List<CommentDto> commentDTOS = commentDAO.getCommentDtosForPostIds(postId);
-
-        assertEquals(2, commentDTOS.size());
-        assertEquals("comment 2 to post 2", commentDTOS.get(0).getText());
-        assertEquals("comment 3 to post 2", commentDTOS.get(1).getText());
-        assertEquals(authorId, commentDTOS.get(0).getAuthorID());
-        assertEquals(authorId, commentDTOS.get(1).getAuthorID());
-        assertEquals(postId, commentDTOS.get(0).getPostId());
-        assertEquals(postId, commentDTOS.get(1).getPostId());
-    }
-
-    @Test
-    @Transactional
     void getCommentsForMultiplePosts() {
-        int postId1 = posts.get(0).getId();
-        int postId2 = posts.get(1).getId();
-        List<CommentDto> commentDTOS = commentDAO.getCommentDtosForPostIds(List.of(postId1, postId2));
+        List<Integer> ids = List.of(posts.get(0).getId(), posts.get(1).getId(), posts.get(2).getId());
+        List<CommentDto> commentDtos = commentDAO.getCommentDTOs(0, ids);
 
-        assertEquals(3, commentDTOS.size());
+        assertEquals(5, commentDtos.size());
     }
 
     @Test
-    @Transactional
-    void getParentChildComments() {
-        int pId = posts.get(2).getId();
-        List<CommentDto> commentDTOS = commentDAO.getCommentDtosForPostIds(pId);
+    void getManyCommentsForOnePost() {
+        List<CommentDto> commentDtos = commentDAO.getCommentDTOs(0, List.of(posts.get(3).getId()));
+        assertEquals(200, commentDtos.size());
+    }
 
-        CommentDto parent = commentDTOS.get(0);
-        CommentDto child = commentDTOS.get(1);
+    @Test
+    void getMultipleCommentsWrongIDs() {
+        List<CommentDto> commentDtos = commentDAO.getCommentDTOs(0, List.of(1000, 3000, 5000));
+        assertTrue(commentDtos.isEmpty());
+    }
 
-        assertEquals(2, commentDTOS.size());
-        assertEquals("comment 4 to post 3 parent", parent.getText());
-        assertEquals("comment 5 to post 3 child", child.getText());
-        assertNull(parent.getParentId());
-        assertNotNull(child.getParentId());
-        assertEquals(parent.getId(), child.getParentId());
+    @Test
+    void getSingleCommentSimple() {
+        int id = comment1.getId();
+        List<CommentDto> c = commentDAO.getCommentDTO(0, id);
+        assertEquals(1, c.size());
+    }
+
+    @Test
+    void getSingleCommentWChildren() {
+        int id = comment4.getId();
+        List<CommentDto> c = commentDAO.getCommentDTO(0, id);
+        assertEquals(2, c.size());
+        assertNull(c.get(0).getParentId());
+        assertNotNull(c.get(1).getParentId());
+        assertTrue(c.get(1).getComments().isEmpty());
+        assertEquals(c.get(0).getPostId(), c.get(1).getPostId());
+    }
+
+    @Test
+    void getSingleChildComment() {
+        int id = comment5.getId();
+        List<CommentDto> c = commentDAO.getCommentDTO(0, id);
+        assertEquals(1, c.size());
+        assertEquals("comment 5 to post 3 child", c.get(0).getText());
+        assertNotNull(c.get(0).getParentId());
+    }
+
+    @Test
+    void getSingleCommentWrongID() {
+        List<CommentDto> c = commentDAO.getCommentDTO(0, 100500);
+        assertTrue(c.isEmpty());
     }
 
     @Test
