@@ -83,7 +83,6 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     public DTOWrapper getWallForUserId(int authorId, int offset, int itemPerPage) {
         int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
 
-        PersonCompactDto personDto = personDAO.getCompactById(authorId);
         Page<PostDto> userPosts = postDAO.getPostDTOs(currentPersonId, List.of(authorId),
                 null, getPageable(offset, itemPerPage));
 
