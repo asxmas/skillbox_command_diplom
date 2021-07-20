@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.*;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.skillbox.team13.dto.CommentDto;
 import ru.skillbox.team13.dto.DTOWrapper;
+import ru.skillbox.team13.dto.MessageDTO;
 import ru.skillbox.team13.dto.PostDto;
 
 import java.nio.charset.StandardCharsets;
@@ -73,5 +74,11 @@ public class RequestService {
     public CommentDto getAsCommentDto(RequestBuilder req, boolean doPrint) {
         String data = getDataAsString(req, doPrint);
         return om.readValue(data, CommentDto.class);
+    }
+
+    @SneakyThrows
+    public MessageDTO getAsMessageDTO(RequestBuilder req, boolean doPrint) {
+        String data = getDataAsString(req, doPrint);
+        return om.readValue(data, MessageDTO.class);
     }
 }

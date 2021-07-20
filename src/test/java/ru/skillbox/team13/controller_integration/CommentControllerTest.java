@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import ru.skillbox.team13.dto.AddCommentDto;
 import ru.skillbox.team13.dto.CommentDto;
+import ru.skillbox.team13.dto.MessageDTO;
 import ru.skillbox.team13.entity.Comment;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
@@ -27,8 +28,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.skillbox.team13.test_util.DomainObjectFactory.*;
@@ -134,10 +134,10 @@ public class CommentControllerTest {
         AddCommentDto payload = new AddCommentDto();
         payload.setCommentText("Hello");
 
-        CommentDto commentDto = requestService.getAsCommentDto(post(url)
+        MessageDTO messageDTO = requestService.getAsMessageDTO(post(url)
                 .contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsString(payload)), true);
 
-        assertEquals("Hello", commentDto.getText());
+        assertTrue(messageDTO.getMessage().contains("Hello"));
     }
 
     @Test
@@ -147,11 +147,10 @@ public class CommentControllerTest {
         payload.setCommentText("Comment to comment #10");
         payload.setParentId(tenthCommentId);
 
-        CommentDto commentDto = requestService.getAsCommentDto(post(url)
+        MessageDTO messageDTO = requestService.getAsMessageDTO(post(url)
                 .contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsString(payload)), true);
 
-        assertEquals("Comment to comment #10", commentDto.getText());
-        assertEquals(tenthCommentId, commentDto.getParentId());
+        assertTrue(messageDTO.getMessage().contains("Comment to comment #10"));
     }
 
     @Test
@@ -160,10 +159,9 @@ public class CommentControllerTest {
         AddCommentDto payload = new AddCommentDto();
         payload.setCommentText("Edited comment #10");
 
-        CommentDto commentDto = requestService.getAsCommentDto(put(url + "/" + tenthCommentId)
+        MessageDTO message = requestService.getAsMessageDTO(put(url + "/" + tenthCommentId)
                 .contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsString(payload)), true);
-
-        assertEquals("Edited comment #10", commentDto.getText());
+        assertTrue(message.getMessage().contains("Edited comment #10"));
     }
 
     @Test
