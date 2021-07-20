@@ -6,10 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skillbox.team13.dto.CommentDto;
-import ru.skillbox.team13.dto.DTOWrapper;
-import ru.skillbox.team13.dto.PersonCompactDto;
-import ru.skillbox.team13.dto.PostDto;
+import ru.skillbox.team13.dto.*;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
@@ -21,14 +18,17 @@ import ru.skillbox.team13.repository.QueryDSL.CommentDAO;
 import ru.skillbox.team13.repository.QueryDSL.PersonDAO;
 import ru.skillbox.team13.repository.QueryDSL.PostDAO;
 import ru.skillbox.team13.service.UserService;
+import ru.skillbox.team13.util.CommentUtil;
 import ru.skillbox.team13.util.TimeUtil;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.isNull;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 import static ru.skillbox.team13.util.PageUtil.getPageable;
 import static ru.skillbox.team13.util.TimeUtil.getTime;
 
@@ -69,9 +69,9 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         Page<PostDto> page = postDAO.getPostDTOs(currentPersonId, text, getTime(timestampFrom), getTime(timestampTo),
                 getPageable(offset, itemPerPage));
 
-        List<Integer> personIds = page.getContent().stream().map(p -> p.getAuthor().getId()).collect(toList());
+        List<Integer> postIds = page.getContent().stream().map(PostDto::getId).collect(toList());
 
-        List<CommentDto> commentDtos = commentDAO.getCommentDTOs(currentPersonId, personIds);
+        List<CommentDto> commentDtos = commentDAO.getCommentDTOs(currentPersonId, postIds);
 
         List<PostDto> combined = combine(page.getContent(), commentDtos);
         log.debug("Loading search page {}, total {} posts and {} comments.", offset / itemPerPage, combined.size(), commentDtos.size());
@@ -117,7 +117,8 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         postDAO.edit(id, ldt, title, text);
         log.debug("Editing post id={} with date={}, title={} and text length={}", id, ldt, title, text);
 
-        return getById(id);
+//        return getById(id);
+        return WrapperMapper.wrapMessage(new MessageDTO("OK id=" + id + " title=" + title + " text=" + text));
     }
 
     @Override
@@ -127,7 +128,8 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         postDAO.delete(id, true);
         log.debug("Deleting post id={}", id);
 
-        return WrapperMapper.wrap(Map.of("id", id), true);
+//        return getById(postId);
+        return WrapperMapper.wrapMessage(new MessageDTO("OK id=" + id));
     }
 
     @Override
@@ -137,7 +139,8 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         postDAO.delete(id, false);
         log.debug("Un-deleting post id={}", id);
 
-        return getById(id);
+//        return getById(postId);
+        return WrapperMapper.wrapMessage(new MessageDTO("OK id=" + id));
     }
 
     @Override
@@ -154,54 +157,21 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         post.setTime(Objects.requireNonNullElse(TimeUtil.getTime(pubDate), LocalDateTime.now()));
         log.debug("Saving new post (author id={}, title='{}'", authorId, title);
         int postId = postRepository.save(post).getId();
-        return getById(postId);
+//        return getById(postId);
+        return WrapperMapper.wrapMessage(new MessageDTO("OK id=" + postId + " title=" + title + " text=" + text));
     }
 
     private List<PostDto> combine(List<PostDto> posts, List<CommentDto> comments) {
-        //if parentId==null it is a top level comment
+        List<CommentDto> sortedComments = CommentUtil.twoLevelCommentSort(comments);
 
-        //map with 2 collections: with 'null parent' (top level) and all others (sub-comments)
-        Map<Boolean, List<CommentDto>> filteredComments = comments.stream()
-                .collect(Collectors.partitioningBy(commentDto -> isNull(commentDto.getParentId())));
+        Map<Integer, PostDto> postDtoMap = posts.stream().collect(Collectors.toMap(PostDto::getId, p -> p));
 
-        Map<Integer, List<CommentDto>> topLvlComments = filteredComments
-                .get(true).stream()
-                .collect(groupingBy(CommentDto::getPostId));
-
-        Map<Integer, List<CommentDto>> subComments = filteredComments.
-                get(false).stream()
-                .collect(groupingBy(CommentDto::getParentId));
-
-        for (CommentDto comment : comments) {
-            if (subComments.containsKey(comment.getId())) {
-                comment.getComments().addAll(subComments.get(comment.getId()));
-            }
-        }
-
-        for (PostDto post : posts) {
-            if (topLvlComments.containsKey(post.getId())) {
-                post.getComments().addAll(topLvlComments.get(post.getId()));
+        for (CommentDto comment : sortedComments) {
+            if (postDtoMap.containsKey(comment.getPostId())) { //this check may be unnecessary
+                postDtoMap.get(comment.getPostId()).getComments().add(comment);
             }
         }
 
         return posts;
-    }
-
-    @Deprecated
-    private List<PostDto> combine(List<PostDto> posts, List<PersonCompactDto> persons, List<CommentDto> comments) {
-        Map<Integer, PersonCompactDto> personMap = persons.stream().collect(toMap(PersonCompactDto::getId, p -> p));
-        Map<Integer, List<CommentDto>> commentMap = comments.stream().collect(groupingBy(CommentDto::getPostId));
-
-        for (PostDto p : posts) {
-            p.setAuthor(personMap.get(p.getAuthor().getId()));
-            p.setComments(Objects.requireNonNullElse(commentMap.get(p.getId()), Collections.emptyList()));
-        }
-        return posts;
-    }
-
-    @Deprecated
-    private void combine(PostDto post, PersonCompactDto person, List<CommentDto> comments) {
-        post.setAuthor(person);
-        post.setComments(comments);
     }
 }

@@ -31,7 +31,7 @@ import static ru.skillbox.team13.test_util.DomainObjectFactory.*;
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class PostDtoFindByAuthorAndTexTest {
+public class PostDAOTest {
 
     @Autowired
     EntityManagerFactory emf;
