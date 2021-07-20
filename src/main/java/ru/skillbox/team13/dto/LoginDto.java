@@ -16,11 +16,4 @@ public class LoginDto {
     private @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+.+.[A-Za-z]+") String email;
     private @Size(min=2, max=50) String password;
 
-    @Getter
-    public static class Notification {
-
-        @JsonProperty("notification_type")
-        private NotificationCode notificationCode;
-        private boolean enable;
-    }
 }

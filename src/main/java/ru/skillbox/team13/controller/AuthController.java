@@ -1,9 +1,7 @@
 package ru.skillbox.team13.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -12,13 +10,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.skillbox.team13.dto.LoginDto;
-import ru.skillbox.team13.dto.UserDto;
-import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.dto.SuccessDto;
+import ru.skillbox.team13.exception.BadRequestException;
+import ru.skillbox.team13.dto.SubscribeNotificationDto;
 import ru.skillbox.team13.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor

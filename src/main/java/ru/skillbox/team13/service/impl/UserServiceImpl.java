@@ -9,12 +9,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skillbox.team13.dto.DTOWrapper;
-import ru.skillbox.team13.dto.LoginDto;
-import ru.skillbox.team13.dto.PersonDTO;
-import ru.skillbox.team13.dto.UserDto;
+import ru.skillbox.team13.dto.*;
 import ru.skillbox.team13.entity.BlacklistedToken;
 import ru.skillbox.team13.entity.Person;
+import ru.skillbox.team13.entity.Subscription;
 import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.entity.enums.NotificationCode;
 import ru.skillbox.team13.entity.enums.PersonMessagePermission;
@@ -25,6 +23,7 @@ import ru.skillbox.team13.mapper.PersonMapper;
 import ru.skillbox.team13.mapper.WrapperMapper;
 import ru.skillbox.team13.repository.BlacklistedTokenRepository;
 import ru.skillbox.team13.repository.PersonRepository;
+import ru.skillbox.team13.repository.SubscriptionRepository;
 import ru.skillbox.team13.repository.UserRepository;
 import ru.skillbox.team13.security.Jwt.JwtTokenProvider;
 import ru.skillbox.team13.security.TokenType;
@@ -48,6 +47,7 @@ public class UserServiceImpl implements UserService {
     private final JwtTokenProvider jwtTokenProvider;
     private final BlacklistedTokenRepository blacklistedTokenRepo;
     private final MailServiceImpl mailServiceImpl;
+    private final SubscriptionRepository subscriptionRepository;
 
     @Override
     @Transactional
@@ -210,9 +210,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Boolean setNotification(NotificationCode notificationCode, Boolean enabled) {
-        //TODO сохраняем настройки по конкретному типу оповещений для этого пользователя
-        return true;
+    public DTOWrapper  setNotification(SubscribeResponseDto subscribeType) {
+        User user = getAuthorizedUser();
+        Subscription subscription = new Subscription();
+        if(subscribeType.isEnable() && !user.getPerson().getSubscriptions().contains(subscribeType.getType())) {
+            subscription.setPerson(user.getPerson());
+            subscription.setType(subscribeType.getType());
+            subscriptionRepository.save(subscription);
+            return WrapperMapper.wrap(new MessageDTO("ok"), false);
+        }
+        if(!subscribeType.isEnable() && user.getPerson().getSubscriptions().contains(subscribeType.getType())) {
+            subscription.setPerson(user.getPerson());
+            subscription.setType(subscribeType.getType());
+            subscriptionRepository.delete(subscription);
+            return WrapperMapper.wrap(new MessageDTO("ok"), false);
+        }
+        return null;
     }
 
     @Transactional
