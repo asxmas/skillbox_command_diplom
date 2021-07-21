@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.*;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
+import ru.skillbox.team13.entity.Tag;
 import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
 import ru.skillbox.team13.exception.BadRequestException;
@@ -20,15 +21,13 @@ import ru.skillbox.team13.repository.QueryDSL.CommentDAO;
 import ru.skillbox.team13.repository.QueryDSL.PersonDAO;
 import ru.skillbox.team13.repository.QueryDSL.PostDAO;
 import ru.skillbox.team13.repository.RepoPost;
+import ru.skillbox.team13.repository.TagRepository;
 import ru.skillbox.team13.service.UserService;
 import ru.skillbox.team13.util.CommentUtil;
 import ru.skillbox.team13.util.TimeUtil;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -47,6 +46,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     private final CommentDAO commentDAO;
     private final UserService userService;
     private final RepoPost repoPost; //todo check and refactor
+    private final TagRepository tagRepository;
 
     @Override
     public DTOWrapper getFeed(String substr, int offset, int itemPerpage) {
@@ -148,7 +148,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
     @Override
     @Transactional
-    public DTOWrapper post(String title, String text, Integer authorId, Long pubDate) {
+    public DTOWrapper post(String title, String text, List<String> tagNames, Integer authorId, Long pubDate) {
         Person author = personRepository.findById(authorId)
                 .orElseThrow(() -> new BadRequestException("No person for id=" + authorId + " is found."));
         Post post = new Post();
@@ -158,10 +158,32 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         post.setDeleted(false);
         post.setBlocked(false);
         post.setTime(Objects.requireNonNullElse(TimeUtil.getTime(pubDate), LocalDateTime.now()));
-        log.debug("Saving new post (author id={}, title='{}'", authorId, title);
+
+        if (!tagNames.isEmpty()) {
+            Set<Tag> tags = processTags(tagNames, post);
+            post.setTags(tags);
+        }
+        log.debug("Saving new post (author id={}, title='{}', tags ={})", authorId, title, tagNames);
         int postId = postRepository.save(post).getId();
+
 //        return getById(postId);
         return WrapperMapper.wrapMessage(new MessageDTO("OK id=" + postId + " title=" + title + " text=" + text));
+    }
+
+    private Set<Tag> processTags(List<String> tagNames, Post post) {
+        Set<Tag> tags = tagRepository.findAllByTagIn(tagNames);
+
+        if (tags.isEmpty()) {
+            tags = tagNames.stream().map(Tag::new).collect(Collectors.toSet());
+        } else {
+            Map<String, Tag> nameTagMap = tags.stream().collect(Collectors.toMap(Tag::getTag, t -> t));
+            log.debug("Found existing tags: {}", nameTagMap.keySet());
+            List<Tag> newTags = tagNames.stream().filter(tagName -> !nameTagMap.containsKey(tagName))
+                    .map(Tag::new).collect(toList());
+            tags.addAll(newTags);
+        }
+        tagRepository.saveAll(tags);
+        return tags;
     }
 
     private List<PostDto> combine(List<PostDto> posts, List<CommentDto> comments) {
@@ -184,7 +206,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         User currentUser = userService.getAuthorizedUser();
         Person currentPerson = currentUser.getPerson();
         Person inactiveAuthor = userService.getInactivePerson();
-        List<Post> posts = repoPost.getPostsByAuthorId(PageRequest.of(0,10), currentPerson.getId());
+        List<Post> posts = repoPost.getPostsByAuthorId(PageRequest.of(0, 10), currentPerson.getId());
         for (Post post : posts) {
             post.setAuthor(inactiveAuthor);
         }
