@@ -9,7 +9,9 @@ import ru.skillbox.team13.util.TimeUtil;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -36,7 +38,7 @@ public class PostDto {
 
     private Integer likes;
 
-    private List<String> tags; //todo maybe TagDTO
+    private Set<String> tags;
 
     @JsonProperty("my_like")
     private Boolean likedByMe;
@@ -56,7 +58,7 @@ public class PostDto {
         this.text = text;
         this.blocked = blocked;
         this.likes = likes;
-        this.tags = new ArrayList<>();
+        this.tags = new HashSet<>();
         this.likedByMe = likedByMe;
         this.comments = new ArrayList<>();
         this.type = WallPostType.POSTED; //todo temporary

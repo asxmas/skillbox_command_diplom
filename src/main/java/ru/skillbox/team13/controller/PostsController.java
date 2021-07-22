@@ -8,6 +8,9 @@ import ru.skillbox.team13.dto.AddPostDto;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.service.PostService;
 
+import java.util.Arrays;
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/post")
@@ -38,8 +41,8 @@ public class PostsController {
                                         @RequestBody AddPostDto payload) {
         String title = payload.getTitle();
         String text = payload.getPostText();
-        //todo pass tags!!
-        return new ResponseEntity<>(postService.edit(id, pubDate, title, text), HttpStatus.OK);
+        List<String> tags = Arrays.asList(payload.getTags());
+        return new ResponseEntity<>(postService.edit(id, pubDate, title, tags, text), HttpStatus.OK);
     }
 
     @DeleteMapping("{id}")

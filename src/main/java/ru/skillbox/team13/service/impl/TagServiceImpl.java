@@ -9,14 +9,19 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.TagDto;
 import ru.skillbox.team13.entity.Tag;
+import ru.skillbox.team13.entity.projection.TagProjection;
 import ru.skillbox.team13.mapper.TagMapper;
 import ru.skillbox.team13.mapper.WrapperMapper;
 import ru.skillbox.team13.repository.TagRepository;
 import ru.skillbox.team13.service.TagService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
@@ -63,6 +68,31 @@ public class TagServiceImpl implements TagService {
             tagRepository.deleteById(id);
         }
         return Optional.of("ok");
+    }
+
+    @Override
+    public Set<Tag> getTagsByName(List<String> tagNames) {
+        Set<Tag> tags = tagRepository.findAllByTagIn(tagNames);
+
+        if (tags.isEmpty()) {
+            tags = tagNames.stream().map(Tag::new).collect(Collectors.toSet());
+        } else {
+            Map<String, Tag> nameTagMap = tags.stream().collect(Collectors.toMap(Tag::getTag, t -> t));
+            log.debug("Found existing tags: {}", nameTagMap.keySet());
+            List<Tag> newTags = tagNames.stream().filter(tagName -> !nameTagMap.containsKey(tagName))
+                    .map(Tag::new).collect(toList());
+            tags.addAll(newTags);
+        }
+        return tags;
+    }
+
+    @Override
+    public Map<Integer, Set<String>> getPostIdTagsMap(List<Integer> postIds) {
+        Set<TagProjection> tags = tagRepository.findAllByPostsIn(postIds);
+
+        log.debug("Found {} tag entries for {} posts.", tags.size(), postIds.size());
+        return tags.stream().collect(Collectors.groupingBy
+                (TagProjection::getPostId, Collectors.mapping(TagProjection::getName, Collectors.toSet())));
     }
 
     private int countByName(String tag) {

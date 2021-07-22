@@ -7,7 +7,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skillbox.team13.dto.*;
+import ru.skillbox.team13.dto.CommentDto;
+import ru.skillbox.team13.dto.DTOWrapper;
+import ru.skillbox.team13.dto.MessageDTO;
+import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
 import ru.skillbox.team13.entity.Tag;
@@ -21,7 +24,7 @@ import ru.skillbox.team13.repository.QueryDSL.CommentDAO;
 import ru.skillbox.team13.repository.QueryDSL.PersonDAO;
 import ru.skillbox.team13.repository.QueryDSL.PostDAO;
 import ru.skillbox.team13.repository.RepoPost;
-import ru.skillbox.team13.repository.TagRepository;
+import ru.skillbox.team13.service.TagService;
 import ru.skillbox.team13.service.UserService;
 import ru.skillbox.team13.util.CommentUtil;
 import ru.skillbox.team13.util.TimeUtil;
@@ -46,7 +49,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     private final CommentDAO commentDAO;
     private final UserService userService;
     private final RepoPost repoPost; //todo check and refactor
-    private final TagRepository tagRepository;
+    private final TagService tagService;
 
     @Override
     public DTOWrapper getFeed(String substr, int offset, int itemPerpage) {
@@ -60,7 +63,9 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         List<Integer> postIds = postDtoPage.getContent().stream().map(PostDto::getId).collect(toList());
         List<CommentDto> commentDtos = commentDAO.getCommentDTOs(currentPersonId, postIds);
 
-        List<PostDto> combined = combine(postDtoPage.getContent(), commentDtos);
+        Map<Integer, Set<String>> tagMap = tagService.getPostIdTagsMap(postIds);
+
+        List<PostDto> combined = combine(postDtoPage.getContent(), commentDtos, tagMap);
         log.debug("Loading feed page {}, total {} posts and {} comments.", offset / itemPerpage, combined.size(), commentDtos.size());
 
         return WrapperMapper.wrap(combined, (int) postDtoPage.getTotalElements(), offset, itemPerpage, true);
@@ -77,7 +82,9 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
         List<CommentDto> commentDtos = commentDAO.getCommentDTOs(currentPersonId, postIds);
 
-        List<PostDto> combined = combine(page.getContent(), commentDtos);
+        Map<Integer, Set<String>> tagMap = tagService.getPostIdTagsMap(postIds);
+
+        List<PostDto> combined = combine(page.getContent(), commentDtos, tagMap);
         log.debug("Loading search page {}, total {} posts and {} comments.", offset / itemPerPage, combined.size(), commentDtos.size());
 
         return WrapperMapper.wrap(combined, (int) page.getTotalElements(), offset, itemPerPage, true);
@@ -93,7 +100,9 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         List<Integer> postIds = userPosts.getContent().stream().map(PostDto::getId).collect(toList());
         List<CommentDto> commentDtos = commentDAO.getCommentDTOs(currentPersonId, postIds);
 
-        List<PostDto> combined = combine(userPosts.getContent(), commentDtos);
+        Map<Integer, Set<String>> tagMap = tagService.getPostIdTagsMap(postIds);
+
+        List<PostDto> combined = combine(userPosts.getContent(), commentDtos, tagMap);
         log.debug("Loading wall for user id={} page {}, total {} posts and {} comments.",
                 authorId, offset / itemPerPage, combined.size(), commentDtos.size());
 
@@ -106,7 +115,8 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
         PostDto postDto = postDAO.getPostDTO(currentPersonId, id);
         List<CommentDto> commentDtos = commentDAO.getCommentDTOs(currentPersonId, Collections.singletonList(id));
-        combine(List.of(postDto), commentDtos);
+        Map<Integer, Set<String>> tagMap = tagService.getPostIdTagsMap(Collections.singletonList(id));
+        combine(List.of(postDto), commentDtos, tagMap);
         log.debug("Loading post id={}, with {} comments.", id, commentDtos.size());
 
         return WrapperMapper.wrap(postDto, true);
@@ -115,9 +125,12 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     @Override
     @Modifying
     @Transactional
-    public DTOWrapper edit(int id, Long pubDate, String title, String text) {
+    public DTOWrapper edit(int id, Long pubDate, String title, List<String> tagNames, String text) {
         LocalDateTime ldt = TimeUtil.getTime(pubDate);
-        postDAO.edit(id, ldt, title, text);
+
+        Set<Tag> tags = tagNames.isEmpty() ? new HashSet<>() : tagService.getTagsByName(tagNames);
+
+        postDAO.edit(id, ldt, title, text, tags);
         log.debug("Editing post id={} with date={}, title={} and text length={}", id, ldt, title, text);
 
 //        return getById(id);
@@ -160,7 +173,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         post.setTime(Objects.requireNonNullElse(TimeUtil.getTime(pubDate), LocalDateTime.now()));
 
         if (!tagNames.isEmpty()) {
-            Set<Tag> tags = processTags(tagNames, post);
+            Set<Tag> tags = tagService.getTagsByName(tagNames);
             post.setTags(tags);
         }
         log.debug("Saving new post (author id={}, title='{}', tags ={})", authorId, title, tagNames);
@@ -170,23 +183,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         return WrapperMapper.wrapMessage(new MessageDTO("OK id=" + postId + " title=" + title + " text=" + text));
     }
 
-    private Set<Tag> processTags(List<String> tagNames, Post post) {
-        Set<Tag> tags = tagRepository.findAllByTagIn(tagNames);
-
-        if (tags.isEmpty()) {
-            tags = tagNames.stream().map(Tag::new).collect(Collectors.toSet());
-        } else {
-            Map<String, Tag> nameTagMap = tags.stream().collect(Collectors.toMap(Tag::getTag, t -> t));
-            log.debug("Found existing tags: {}", nameTagMap.keySet());
-            List<Tag> newTags = tagNames.stream().filter(tagName -> !nameTagMap.containsKey(tagName))
-                    .map(Tag::new).collect(toList());
-            tags.addAll(newTags);
-        }
-        tagRepository.saveAll(tags);
-        return tags;
-    }
-
-    private List<PostDto> combine(List<PostDto> posts, List<CommentDto> comments) {
+    private List<PostDto> combine(List<PostDto> posts, List<CommentDto> comments, Map<Integer, Set<String>> postIdTagMap) {
         List<CommentDto> sortedComments = CommentUtil.twoLevelCommentSort(comments);
 
         Map<Integer, PostDto> postDtoMap = posts.stream().collect(Collectors.toMap(PostDto::getId, p -> p));
@@ -194,6 +191,12 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         for (CommentDto comment : sortedComments) {
             if (postDtoMap.containsKey(comment.getPostId())) { //this check may be unnecessary
                 postDtoMap.get(comment.getPostId()).getComments().add(comment);
+            }
+        }
+
+        for (PostDto post : posts) {
+            if (postIdTagMap.containsKey(post.getId())) {
+                post.setTags(postIdTagMap.get(post.getId()));
             }
         }
 

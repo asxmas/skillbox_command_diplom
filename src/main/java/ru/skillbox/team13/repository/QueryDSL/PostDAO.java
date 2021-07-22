@@ -11,10 +11,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import ru.skillbox.team13.dto.PostDto;
-import ru.skillbox.team13.entity.Post;
-import ru.skillbox.team13.entity.QLike;
-import ru.skillbox.team13.entity.QPerson;
-import ru.skillbox.team13.entity.QPost;
+import ru.skillbox.team13.entity.*;
 import ru.skillbox.team13.exception.BadRequestException;
 
 import javax.persistence.EntityManager;
@@ -22,6 +19,7 @@ import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -121,7 +119,7 @@ public class PostDAO {
         return dto;
     }
 
-    public void edit(int id, LocalDateTime time, String title, String text) {
+    public void edit(int id, LocalDateTime time, String title, String text, Set<Tag> tags) {
         Post post = em.find(Post.class, id);
         if (isNull(post) || post.isDeleted()) {
             throw new BadRequestException("Post id=" + id + "does not exist or was deleted.");
@@ -132,6 +130,7 @@ public class PostDAO {
         }
         post.setTitle(title);
         post.setPostText(text);
+        post.setTags(tags);
     }
 
     public void delete(int id, boolean delete) {
