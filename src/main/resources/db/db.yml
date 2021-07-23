@@ -33,3 +33,5 @@ databaseChangeLog:
       file: db/changelogs/11-patch/add-deleted-user.sql
   - include:
       file: db/changelogs/12-comment-deleted/comment-column-deleted.sql
+  - include:
+      file: db/changelogs/12-comment-deleted/like-patch.sql

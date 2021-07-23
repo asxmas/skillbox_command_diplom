@@ -18,7 +18,7 @@ public class DefaultController {
     @Value("${server.base_url}")
     private String baseUrl;
 
-    @GetMapping("/")
+    @GetMapping("/login")
     public String index(){
         return "index.html";
     }
@@ -26,30 +26,23 @@ public class DefaultController {
     @GetMapping("/api/v1/account/password/reset")
     public String passwordReset(@RequestParam("link") String token, HttpServletRequest request){
 
-        String recoveryToken = userService.resetPasswordAndGetToken(token);
+        String recoveryToken = userService.resetAndGetToken(token);
         if (recoveryToken == null) return "redirect:" +  baseUrl + "/forgot-expired";
         return "redirect:" + baseUrl + "/change-password/" + recoveryToken;
     }
 
-    //to do сделать универсальными методы получения ссылки на ресет пароля, смену пароля, смену мэйла
-    @GetMapping("/api/v1/account/password/shift")
-    public String passwordShift(@RequestParam("link") String token, HttpServletRequest request){
+    @GetMapping("/api/v1/account/register/confirm")
+    public String registerConfirm(@RequestParam("link") String token){
 
-//        String recoveryToken = userService.resetPasswordAndGetToken(token);
-//        if (recoveryToken == null) return "redirect:" +  baseUrl + "/forgot-expired";
-//        return "redirect:" + baseUrl + "/change-password/" + recoveryToken;
-        return null;
+        if (!userService.registerConfirm(token)) return "redirect:" +  baseUrl + "/forgot-expired";
+        return "redirect:" + baseUrl + "/registration-success";
     }
 
-    //to do сделать универсальными методы получения ссылки на ресет пароля, смену пароля, смену мэйла
     @GetMapping("/api/v1/account/email/shift")
-    public String emailShift(@RequestParam("link") String token, HttpServletRequest request){
+    public String emailShift(@RequestParam("link") String token){
 
-//        String recoveryToken = userService.resetPasswordAndGetToken(token);
-//        if (recoveryToken == null) return "redirect:" +  baseUrl + "/forgot-expired";
-//        return "redirect:" + baseUrl + "/change-password/" + recoveryToken;
-        return null;
+        Boolean isEmailShifted = userService.setEmail(token);
+        if (!isEmailShifted) return "redirect:" +  baseUrl + "/forgot-expired";
+        return "redirect:" + baseUrl + "/change-email-success";
     }
-
-
 }

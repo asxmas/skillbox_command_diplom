@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public DTOWrapper register(UserDto.Request.Register userDto) {
+    public DTOWrapper register(UserDto.Request.Register userDto, HttpServletRequest request) {
 
             //проверка наличия данного email в бд
             log.debug("Checking email '{}'...", userDto.getEmail());
@@ -75,22 +75,24 @@ public class UserServiceImpl implements UserService {
             user.setType(UserType.USER);//НЕТ ДАННЫХ, NOT NULL
             user.setPerson(personRepository.save(person));
             user.setConfirmationCode(userDto.getCode());
-            user.setApproved(true);////НЕТ ДАННЫХ, NOT NULL
+            user.setApproved(false);//требует подтверждения переходом по ссылке из почты
             log.debug("Saving user and person data...");
             User registeredUser = userRepository.save(user);
-            log.info("New user registered: '{}', type: {}, message permission: {}.",
+            log.info("New user registered: '{}', type: {}, message permission: {}, not approval.",
                     registeredUser.getEmail(), registeredUser.getType().name(), person.getMessagesPermission().name());
-            return WrapperMapper.wrapMessage(new MessageDTO("ok"));
+            return universalAccountMailLink(userDto.getEmail(), "register/confirm", request);
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public DTOWrapper login(LoginDto loginDto) {
 
         try {
             String username = loginDto.getEmail();
             User user = userRepository.findByEmail(username).get();
             Person person = personRepository.getById(user.getPerson().getId());
+            user.setName(loginDto.getEmail());
+            userRepository.save(user);
             log.debug("Successful login: {}", loginDto.getEmail());
             return WrapperMapper.wrap(PersonMapper.convertPersonToPersonDTOWithToken(person, jwtTokenProvider.createToken(username, TokenType.ORDINARY)), true);
         } catch (AuthenticationException e) {
@@ -144,24 +146,42 @@ public class UserServiceImpl implements UserService {
     }
 
     private Optional<User> checkUserRegistration(String email) {
-        return userRepository.findByEmail(email);
+        return userRepository.findByEmailNoApproval(email);
     }
 
-    //метод генерации ссылки и отправки по email кода для смены пароля
+    //метод генерации и отправки по email ссылки для сброса пароля (смены email, )
     @Override
     @Transactional
-    public DTOWrapper passwordResetEmail(String email, HttpServletRequest request){
+    public DTOWrapper universalAccountMailLink(String email, String route, HttpServletRequest request){
+
         try {
-            User user = checkUserRegistration(email).orElseThrow(() -> new BadRequestException("user not registered"));
-            //генерируем токен для сброса пароля
-            String link = jwtTokenProvider.createToken(user.getEmail(), TokenType.MAIL_LINK);
+            Optional<User> optionalUser = checkUserRegistration(email);
+            String description = null;
+            String link = jwtTokenProvider.createToken(email, TokenType.MAIL_LINK);
+            switch (route){
+                case "password/reset" -> {
+                    if (optionalUser.isEmpty()) {throw new BadRequestException("Такой пользователь не зарегистрирован");}
+                    description = "Нажмите на ссылку для сброса пароля в Team13";
+                }
+                case "register/confirm" -> {
+                    description = "Нажмите на ссылку для подтверждения регистрации Team13";
+                }
+                case "email/shift" -> {
+                    if (optionalUser.isPresent()) {throw new BadRequestException("Такой пользователь уже зарегистрирован");}
+                    description = "Нажмите на ссылку для подтверждения email в Team13";
+                    User user = getAuthorizedUser();
+                    user.setConfirmationCode(link);
+                    userRepository.save(user);
+                }
+            }
+
             //отправляем ссылку по email
-            mailServiceImpl.sendMessage(email, "Password reset link to Team13",
-                    "<p><a href=\"" + request.getScheme() + "://" + request.getHeader("host") + "/api/v1/account/password/reset?link=" +
-                            link + "\">Нажмите на ссылку для сброса пароля в Team13</a></p>");
+            mailServiceImpl.sendMessage(email, "Link to changes in your Team13 account",
+                    "<p><a href=\"" + request.getScheme() + "://" + request.getHeader("host") + "/api/v1/account/" + route + "?link=" +
+                            link + "\">" + description + "</a></p>");
         }
         catch (Exception e) {
-            //при любой ошибке возвращаем false
+            //при любой ошибке возвращаем отрицательный ответ
             log.error("Failed to send code.");
             throw new BadRequestException("Не удалось выслать ссылку");
         }
@@ -193,16 +213,29 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public DTOWrapper setEmail(String email) {
-        if (checkUserRegistration(email).isPresent()) throw new BadRequestException("Невозможно изменить e-mail");
-        User user = getAuthorizedUser();
-        user.setEmail(email);
+    public Boolean setEmail(String token) {
+
+        User user;
+        String newEmail = jwtTokenProvider.getUsername(token);
+        if (jwtTokenProvider.validateToken(token) &&
+                checkUserRegistration(newEmail).isEmpty()) {
+            user = userRepository.findByConfirmationCode(token).get();
+        } else {
+            log.warn("Email change failed (expired token).");
+            return false;
+        }
+
+        putTokenToBlackList(token);
+        String oldEmail = user.getEmail();
+        user.setEmail(newEmail);
         Person person = user.getPerson();
-        person.setEmail(email);
+        person.setEmail(newEmail);
+        user.setConfirmationCode(null);
         userRepository.save(user);
         personRepository.save(person);
-        log.info("Email successfully changed '{}' -> '{}'.", email, user.getEmail());
-        return WrapperMapper.wrapMessage(new MessageDTO("ok"));
+
+        log.info("Email successfully changed '{}' -> '{}'.", oldEmail, user.getEmail());
+        return true;
     }
 
     @Override
@@ -219,21 +252,40 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public String resetPasswordAndGetToken(String token) {
+    public String resetAndGetToken(String token) {
+
         //получаем user'a из токена
         User user;
         if (jwtTokenProvider.validateToken(token)) { user = userRepository.findByName(jwtTokenProvider.getUsername(token)).get(); }
         else {
-            log.warn("Change password failed (expired token).");
+            log.warn("Password reset failed (expired token).");
             return null;
         }
-        //ссылка будет работать на один переход - отправляем токен в blacklist
-        putTokenToBlackList(token);
         //сбрасываем пароль
         user.setPassword(UUID.randomUUID().toString());
+        //ссылка будет работать на один переход - отправляем токен в blacklist
+        putTokenToBlackList(token);
+
         userRepository.save(user);
-        log.info("Password successfully reset: {}.", user.getEmail());
+        log.info("Password reset successfully: {}.", user.getEmail());
         return jwtTokenProvider.createToken(user.getEmail(), TokenType.RECOVERY);
+    }
+
+    @Override
+    public Boolean registerConfirm(String token) {
+
+        User user;
+        if (jwtTokenProvider.validateToken(token)) {
+            user = userRepository.findByEmailNoApproval(jwtTokenProvider.getUsername(token)).get();
+        } else {
+            log.warn("Registration confirm failed (expired token).");
+            return false;
+        }
+        putTokenToBlackList(token);
+        user.setApproved(true);
+        userRepository.save(user);
+        log.info("Registration confirm success {}", user.getEmail());
+        return true;
     }
 
     private void putTokenToBlackList(String token) {

@@ -23,16 +23,16 @@ public class RestExceptionHandler {
         return new ResponseEntity<>(e.getResponse(), HttpStatus.BAD_REQUEST);
     }
 
-//    @ExceptionHandler
-//    protected ResponseEntity<ErrorDto> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException e) {
-//        return new ResponseEntity<>(new ErrorDto("Unauthorized"), HttpStatus.UNAUTHORIZED);
-//    }
-//
-//    @ExceptionHandler(UnauthorizedException.class)
-//    public ResponseEntity<ErrorDto> handleUnauthorizedException(UnauthorizedException e) {
-//        log.error(e.getResponse().getErrorDescription());
-//        return new ResponseEntity<>(e.getResponse(), HttpStatus.UNAUTHORIZED);
-//    }
+    @ExceptionHandler
+    protected ResponseEntity<ErrorDto> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException e) {
+        return new ResponseEntity<>(new ErrorDto("Unauthorized"), HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorDto> handleUnauthorizedException(UnauthorizedException e) {
+        log.error(e.getResponse().getErrorDescription());
+        return new ResponseEntity<>(e.getResponse(), HttpStatus.UNAUTHORIZED);
+    }
 
 
     //обработка исключений валидации полей DTO

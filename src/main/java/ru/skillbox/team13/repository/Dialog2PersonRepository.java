@@ -31,4 +31,4 @@ public interface Dialog2PersonRepository extends JpaRepository<Dialog2Person, In
     Dialog2Person findByDialogAndPerson(Dialog dialog, Person person);
 
     void deleteAllByDialogIdAndPersonIdIsIn(int dialogId, ArrayList<Integer> personIds);
-}
+ }

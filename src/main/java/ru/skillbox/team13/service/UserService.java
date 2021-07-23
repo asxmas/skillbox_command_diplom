@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 
 public interface UserService {
 
-    DTOWrapper register(UserDto.Request.Register userDto);
+    DTOWrapper register(UserDto.Request.Register userDto, HttpServletRequest request);
 
     DTOWrapper login(LoginDto loginDto);
 
@@ -21,15 +21,17 @@ public interface UserService {
 
     User getAuthorizedUser();
 
-    DTOWrapper passwordResetEmail(String email, HttpServletRequest request);
-
-    Person getInactivePerson();
+    DTOWrapper universalAccountMailLink(String email, String route, HttpServletRequest request);
 
     DTOWrapper setPassword(String token, String password);
 
-    DTOWrapper setEmail(String email);
+    Boolean setEmail(String token);
 
     DTOWrapper setNotification(NotificationCode notificationcode, Boolean enabled);
 
-    String resetPasswordAndGetToken(String link);
+    Person getInactivePerson();
+
+    String resetAndGetToken(String link);
+
+    Boolean registerConfirm(String link);
 }

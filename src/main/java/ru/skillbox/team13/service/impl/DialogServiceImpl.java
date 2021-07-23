@@ -27,10 +27,7 @@ import ru.skillbox.team13.repository.PersonRepository;
 import ru.skillbox.team13.service.DialogService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -64,10 +61,10 @@ public class DialogServiceImpl implements DialogService {
     @Modifying
     public DTOWrapper createDialog(ArrayList<Integer> userIds) {
 
-        int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
         Dialog dialog = new Dialog();
         int dialogId = dialogRepository.saveAndFlush(dialog).getId();
         //добавление текущего пользователя в диалог
+        int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
         if (!userIds.contains(currentPersonId)) userIds.add(currentPersonId);
         List<Person> personList = personRepository.findAllById(userIds);
         List<Dialog2Person> dialog2PersonList = personList.stream().map(person -> new Dialog2Person()
@@ -126,7 +123,15 @@ public class DialogServiceImpl implements DialogService {
 
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage, Sort.by("id").descending());
         Dialog dialog = dialogRepository.getById(dialogId);
-        if (fromMessageId == 0) { fromMessageId = messageRepository.findFirstByOrderByIdDesc().getId(); }
+        if (fromMessageId == 0) {
+            try {
+                fromMessageId = messageRepository.findFirstByOrderByIdDesc().getId();
+            }
+            catch (NullPointerException e){
+                //в новом диалоге нет сообщений
+                return WrapperMapper.wrap(Collections.emptyList(), 0, offset, itemPerPage, true);
+            }
+        }
         Page<Message> messagePage = messageRepository.findByDialog(pageable, fromMessageId, dialogId);
         Person currentPerson = userService.getAuthorizedUser().getPerson();
         List<DialogMessageDto> results = messagePage.stream()
