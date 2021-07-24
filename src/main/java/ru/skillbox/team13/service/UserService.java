@@ -25,15 +25,11 @@ public interface UserService {
 
     Boolean setEmail(String token);
 
-    DTOWrapper setNotification(NotificationCode notificationcode, Boolean enabled);
-
     Person getInactivePerson();
 
     String resetAndGetToken(String link);
 
     DTOWrapper setNotification(SubscribeResponseDto subscribeType);
-
-    String resetPasswordAndGetToken(String link);
 
     Boolean registerConfirm(String link);
 }
