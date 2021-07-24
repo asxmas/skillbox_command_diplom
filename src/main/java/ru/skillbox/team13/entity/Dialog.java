@@ -25,10 +25,13 @@ public class Dialog {
     @JoinColumn(name = "last_message_id")
     private Message lastMessage;
 
+    @Column(name="invite_link")
+    private String inviteLink;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "dialog", cascade = CascadeType.ALL)
     private List<Message> messages;
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinTable(name = "dialog2person",
             joinColumns = @JoinColumn(name = "dialog_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "person_id", nullable = false))

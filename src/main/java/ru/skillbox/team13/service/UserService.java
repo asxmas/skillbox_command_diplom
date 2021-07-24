@@ -2,9 +2,6 @@ package ru.skillbox.team13.service;
 
 
 import ru.skillbox.team13.dto.*;
-import ru.skillbox.team13.dto.LoginDto;
-import ru.skillbox.team13.dto.PersonDTO;
-import ru.skillbox.team13.dto.UserDto;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.entity.enums.NotificationCode;
@@ -14,23 +11,29 @@ import java.util.List;
 
 public interface UserService {
 
-    Boolean register(UserDto.Request.Register userDto);
+    DTOWrapper register(UserDto.Request.Register userDto, HttpServletRequest request);
 
-    PersonDTO login(LoginDto loginDto);
+    DTOWrapper login(LoginDto loginDto);
 
-    Boolean logout(HttpServletRequest request);
+    DTOWrapper logout(HttpServletRequest request);
 
     User getAuthorizedUser();
 
-    Boolean codeGenerationAndEmail(String email, String origin);
+    DTOWrapper universalAccountMailLink(String email, String route, HttpServletRequest request);
+
+    DTOWrapper setPassword(String token, String password);
+
+    Boolean setEmail(String token);
+
+    DTOWrapper setNotification(NotificationCode notificationcode, Boolean enabled);
 
     Person getInactivePerson();
 
-    Boolean setPassword(String token, String password);
-
-    Boolean setEmail(String email);
+    String resetAndGetToken(String link);
 
     DTOWrapper setNotification(SubscribeResponseDto subscribeType);
 
     String resetPasswordAndGetToken(String link);
+
+    Boolean registerConfirm(String link);
 }

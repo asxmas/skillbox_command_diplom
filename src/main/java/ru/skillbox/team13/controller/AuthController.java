@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.LoginDto;
-import ru.skillbox.team13.dto.SuccessDto;
+import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.dto.SubscribeNotificationDto;
 import ru.skillbox.team13.service.UserService;
@@ -26,19 +27,18 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
 
     @PostMapping("auth/login")
-    public ResponseEntity<SuccessDto> login(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<DTOWrapper> login(@RequestBody LoginDto loginDto) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
         }
         catch (AuthenticationException e) {
-            throw new BadRequestException("Invalid username or password");
+            throw new BadRequestException("Неверный логин или пароль");
         }
-        return ResponseEntity.ok(new SuccessDto(userService.login(loginDto)));
+        return ResponseEntity.ok(userService.login(loginDto));
     }
 
     @PostMapping("auth/logout")
-    public ResponseEntity<SuccessDto> logout(HttpServletRequest request) {
-        if (userService.logout(request)) {return ResponseEntity.ok(new SuccessDto());}
-        else throw new BadRequestException("Logout fails");
+    public ResponseEntity<DTOWrapper> logout(HttpServletRequest request) {
+        return ResponseEntity.ok(userService.logout(request));
     }
 }

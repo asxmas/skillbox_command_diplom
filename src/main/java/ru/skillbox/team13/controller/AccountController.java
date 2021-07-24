@@ -20,27 +20,31 @@ public class AccountController {
     private final UserService userService;
 
     @PostMapping("register")
-    public ResponseEntity<SuccessDto> register(@RequestBody @Valid UserDto.Request.Register registerRequest){
-        if (userService.register(registerRequest)) {return ResponseEntity.ok(new SuccessDto());}
-        else throw new BadRequestException("registration fails");
+    public ResponseEntity<DTOWrapper> register(@RequestBody @Valid UserDto.Request.Register registerRequest, HttpServletRequest request){
+        return ResponseEntity.ok(userService.register(registerRequest, request));
     }
 
+    //отправка ссылки на сброс пароля
     @PutMapping("password/recovery")
-    public ResponseEntity<SuccessDto> recovery(@RequestBody @Valid LoginDto loginDto, @RequestHeader("origin") String origin){
-        if (userService.codeGenerationAndEmail(loginDto.getEmail(), origin)) {return ResponseEntity.ok(new SuccessDto());}
-        else throw new BadRequestException("user not registered");
+    public ResponseEntity<DTOWrapper> recovery(@RequestBody @Valid LoginDto loginDto, HttpServletRequest request){
+        return ResponseEntity.ok(userService.universalAccountMailLink(loginDto.getEmail(), "password/reset", request));
+    }
+
+    //отправка ссылки на запланированную смену пароля
+    @PutMapping("password/shift")
+    public ResponseEntity<DTOWrapper> shiftPassword(@RequestBody @Valid LoginDto loginDto, HttpServletRequest request){
+        return ResponseEntity.ok(userService.universalAccountMailLink(loginDto.getEmail(), "password/shift", request));
+    }
+
+    //отправка ссылки на запланированную смену почты
+    @PutMapping("email/shift")
+    public ResponseEntity<DTOWrapper> shiftEmail(@RequestBody @Valid LoginDto loginDto, HttpServletRequest request){
+        return ResponseEntity.ok(userService.universalAccountMailLink(loginDto.getEmail(), "email/shift", request));
     }
 
     @PutMapping("password/set")
-    public ResponseEntity<SuccessDto> setPassword(@RequestBody @Valid LoginDto loginDto){
-        if (userService.setPassword(loginDto.getToken(), loginDto.getPassword())) { return ResponseEntity.ok(new SuccessDto()); }
-        else throw new BadRequestException("can't change password");
-    }
-
-    @PutMapping("email")
-    public ResponseEntity<SuccessDto> setEmail(@RequestBody @Valid LoginDto loginDto){
-        if (userService.setEmail(loginDto.getEmail())) { return ResponseEntity.ok(new SuccessDto()); }
-        else throw new BadRequestException("can't change email");
+    public ResponseEntity<DTOWrapper> setPassword(@RequestBody @Valid LoginDto loginDto){
+        return ResponseEntity.ok(userService.setPassword(loginDto.getToken(), loginDto.getPassword()));
     }
 
     @PutMapping("notifications")

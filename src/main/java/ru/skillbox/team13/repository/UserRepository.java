@@ -9,9 +9,13 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-    @Query("SELECT u FROM User u WHERE u.email = :email")
+    @Query("select u from User u where u.email = :email and u.isApproved = true")
     Optional<User> findByEmail(String email);
 
+    @Query("select u from User u where u.email = :email")
+    Optional<User> findByEmailNoApproval(String email);
+
+    @Query("select u from User u where u.name = :name and u.isApproved = true")
     Optional<User> findByName(String name);
 
     Optional<User> findByConfirmationCode(String token);
