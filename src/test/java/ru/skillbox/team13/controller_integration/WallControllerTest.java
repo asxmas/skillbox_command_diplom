@@ -17,6 +17,7 @@ import ru.skillbox.team13.dto.MessageDTO;
 import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
+import ru.skillbox.team13.entity.Tag;
 import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.repository.PostRepository;
 import ru.skillbox.team13.test_util.DomainObjectFactory;
@@ -28,6 +29,7 @@ import javax.persistence.EntityManagerFactory;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -64,10 +66,21 @@ public class WallControllerTest {
         User user = DomainObjectFactory.makeUser("author@email", author);
         em.persist(user);
 
+        Tag t1 = new Tag("test1");
+        Tag t2 = new Tag("test2");
+        Tag t3 = new Tag("test3");
+        em.persist(t1);
+        em.persist(t2);
+        em.persist(t3);
+
         url = "http://localhost:8080/api/v1/users/" + author.getId() + "/wall";
         Post post1 = DomainObjectFactory.makePost(author);
         Post post2 = DomainObjectFactory.makePost(author);
         Post post3 = DomainObjectFactory.makePost(author);
+
+        post1.setTags(Set.of(t1));
+        post2.setTags(Set.of(t2, t3));
+
         em.persist(post1);
         em.persist(post2);
         em.persist(post3);
@@ -92,20 +105,36 @@ public class WallControllerTest {
     @WithMockUser(username = "author@email")
     void testGetWall() {
         List<PostDto> posts = requestService.getAsPostsDtoList(get(url), true);
-
+        assertEquals(1, posts.get(2).getTags().size());
+        assertEquals(2, posts.get(1).getTags().size());
+        assertEquals(0, posts.get(0).getTags().size());
         assertEquals(3, posts.size());
-//        assertEquals("author@email", posts.get(0).getAuthor().getEmail());
     }
 
     @Test
     @Transactional
     @WithMockUser(username = "author@email")
     void testPost() throws JsonProcessingException {
-        AddPostDto post = new AddPostDto("Rootin' tootin'", "Cowboy shootin'", new String[1]);
+        AddPostDto post = new AddPostDto("Rootin' tootin'", "Cowboy shootin'",
+                new String[]{"test tag 1", "test tag 2"});
         String json = om.writeValueAsString(post);
         MessageDTO message = requestService.getAsMessageDTO(post(url).contentType(MediaType.APPLICATION_JSON)
-                .content(json), true);
-        assertTrue(message.getMessage().contains("Rootin' tootin'"));
+                .content(json), false);
+
+        int id;
+        try {
+            id = Integer.parseInt(message.getMessage().substring(6, 8));
+        } catch (NumberFormatException e) {
+            id = Integer.parseInt(message.getMessage().substring(6, 7));
+        }
+
+        String postUrl = "http://localhost:8080/api/v1/post/" + id;
+        PostDto dto = requestService.getAsPostDto(get(postUrl), true);
+
+        assertEquals("Rootin' tootin'", dto.getTitle());
+        assertEquals("Cowboy shootin'", dto.getText());
+        assertTrue(dto.getTags().contains("test tag 1"));
+        assertTrue(dto.getTags().contains("test tag 2"));
     }
 
     @Test
