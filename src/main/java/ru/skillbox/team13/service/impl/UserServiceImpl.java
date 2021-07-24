@@ -3,6 +3,7 @@ package ru.skillbox.team13.service.impl;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,9 +33,8 @@ import ru.skillbox.team13.service.UserService;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -51,15 +51,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    @Modifying
     public DTOWrapper register(UserDto.Request.Register userDto, HttpServletRequest request) {
 
             //проверка наличия данного email в бд
             log.debug("Checking email '{}'...", userDto.getEmail());
             if (checkUserRegistration(userDto.getEmail()).isPresent())
                 throw new BadRequestException("Пользователь уже зарегистрирован");
-            //при несовпадении двух переданных паролей бросаем исключение
-            if (!userDto.getFirstPassword().equals(userDto.getSecondPassword()))
-                throw new BadRequestException("Пароли не совпадают");
             //заполняем нового User имеющимися данными при регистрации
             //все поля по которым нет данных и могут быть null не заполняем
             Person person = new Person();
@@ -244,21 +242,17 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public DTOWrapper  setNotification(SubscribeResponseDto subscribeType) {
-        User user = getAuthorizedUser();
-        Subscription subscription = new Subscription();
-        if(subscribeType.isEnable() && !user.getPerson().getSubscriptions().contains(subscribeType.getType())) {
-            subscription.setPerson(user.getPerson());
-            subscription.setType(subscribeType.getType());
+
+        Person currentPerson = getAuthorizedUser().getPerson();
+        Optional<Subscription> optionalSubscription = subscriptionRepository.findByTypeEqualsAndPerson(subscribeType.getType(), currentPerson);
+        if (!subscribeType.isEnable() && optionalSubscription.isPresent()) { subscriptionRepository.delete(optionalSubscription.get()); }
+        if (subscribeType.isEnable() && optionalSubscription.isEmpty()) {
+            Subscription subscription = new Subscription()
+                    .setPerson(currentPerson)
+                    .setType(subscribeType.getType());
             subscriptionRepository.save(subscription);
-            return WrapperMapper.wrap(new MessageDTO("ok"), false);
         }
-        if(!subscribeType.isEnable() && user.getPerson().getSubscriptions().contains(subscribeType.getType())) {
-            subscription.setPerson(user.getPerson());
-            subscription.setType(subscribeType.getType());
-            subscriptionRepository.delete(subscription);
-            return WrapperMapper.wrap(new MessageDTO("ok"), false);
-        }
-        return null;
+        return WrapperMapper.wrap(new MessageDTO("ok"), true);
     }
 
     @Transactional
@@ -302,6 +296,19 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         log.info("Registration confirm success {}", user.getEmail());
         return true;
+    }
+
+    @Override
+    public DTOWrapper getNotifications() {
+
+        int currentPersonId = getAuthorizedUser().getPerson().getId();
+        List<NotificationCode> subscriptionList = subscriptionRepository.findAllTypesByPersonId(currentPersonId);
+        List<SubscribeResponseDto> results = Arrays.stream(NotificationCode.values())
+                .map(type -> { if (subscriptionList.contains(type))
+                                    {return new SubscribeResponseDto(type, true);}
+                               else {return new SubscribeResponseDto(type, false);}})
+                .collect(Collectors.toList());
+        return WrapperMapper.wrap(results, true);
     }
 
     private void putTokenToBlackList(String token) {

@@ -6,6 +6,7 @@ import ru.skillbox.team13.entity.Dialog2Person;
 import ru.skillbox.team13.entity.Message;
 import ru.skillbox.team13.entity.Person;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 
 public class DialogMapper {
@@ -22,7 +23,7 @@ public class DialogMapper {
     }
 
     public static DialogMessageDto convertMessageToDialogMessageDTO(Message message, Boolean isSentByMe) {
-        return DialogMessageDto.builder()
+                return DialogMessageDto.builder()
                 .id(message.getId())
                 .time(message.getTime().toInstant(OffsetDateTime.now().getOffset()).toEpochMilli())
                 .messageText(message.getMessageText())

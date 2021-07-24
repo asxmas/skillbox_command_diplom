@@ -48,10 +48,12 @@ public class AccountController {
     }
 
     @PutMapping("notifications")
-    @PreAuthorize("hasAuthority('user')")
     public ResponseEntity<DTOWrapper> setNotifications(@RequestBody SubscribeResponseDto subscribeType){
-        if (!userService.setNotification(subscribeType).equals(null)) {
-            return new ResponseEntity<>(userService.setNotification(subscribeType), HttpStatus.OK);
-        } else throw new BadRequestException("can't trigger notification");
+        return ResponseEntity.ok(userService.setNotification(subscribeType));
+    }
+
+    @GetMapping("notifications")
+    public ResponseEntity<DTOWrapper> getNotifications(){
+        return ResponseEntity.ok(userService.getNotifications());
     }
 }

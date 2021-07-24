@@ -31,5 +31,7 @@ public interface UserService {
 
     DTOWrapper setNotification(SubscribeResponseDto subscribeType);
 
+    DTOWrapper getNotifications();
+
     Boolean registerConfirm(String link);
 }

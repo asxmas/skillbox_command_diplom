@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import ru.skillbox.team13.entity.enums.NotificationCode;
 
 import javax.persistence.*;
@@ -12,6 +13,7 @@ import javax.persistence.*;
 @Setter
 @Entity
 @NoArgsConstructor
+@Accessors(chain = true)
 @Table(name = "subscription")
 public class Subscription {
 
