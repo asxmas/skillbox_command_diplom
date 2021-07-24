@@ -21,7 +21,7 @@ public class MailServiceImpl implements MailService {
         //сообщение в формате html
         MimeMessage htmlMessage = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(htmlMessage);
-        helper.setFrom("noreply@stream-team13.com");
+        helper.setFrom("noreply@team13.com");
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(text,true);
