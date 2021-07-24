@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.CommentDto;
 import ru.skillbox.team13.dto.DTOWrapper;
+import ru.skillbox.team13.dto.MessageDTO;
 import ru.skillbox.team13.entity.Comment;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
@@ -18,13 +19,11 @@ import ru.skillbox.team13.repository.PostRepository;
 import ru.skillbox.team13.repository.QueryDSL.CommentDAO;
 import ru.skillbox.team13.service.CommentService;
 import ru.skillbox.team13.service.UserService;
+import ru.skillbox.team13.util.CommentUtil;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static ru.skillbox.team13.util.PageUtil.getPageable;
@@ -48,7 +47,7 @@ public class CommentServiceImpl implements CommentService {
         log.debug("Loading {} page of comments for post id={}, total {}.",
                 offset / itemPerPage, postId, page.getTotalElements());
 
-        List<CommentDto> combinedComments = combineComments(page.getContent());
+        List<CommentDto> combinedComments = CommentUtil.twoLevelCommentSort(page.getContent());
         return WrapperMapper.wrap(combinedComments, (int) (page.getTotalElements()), offset, itemPerPage, true);
     }
 
@@ -65,33 +64,14 @@ public class CommentServiceImpl implements CommentService {
         }
         int commentId = commentRepository.save(comment).getId();
 
-        return WrapperMapper.wrap(getCommentDto(commentId), true);
+//      return WrapperMapper.wrap(getCommentDto(commentId), true);  //unnecessary DB load
+        return WrapperMapper.wrapMessage(new MessageDTO("OK id="+commentId + " text=" + text));
     }
 
     private CommentDto getCommentDto(int commentId) {
         int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
         List<CommentDto> raw = commentDAO.getCommentDTO(currentPersonId, commentId);
-        return combineComments(raw).get(0);
-    }
-
-    private List<CommentDto> combineComments(List<CommentDto> raw) {  //todo merge with similar in post service
-        Map<Boolean, List<CommentDto>> filtered = raw.stream()
-                .collect(Collectors.partitioningBy(commentDto -> Objects.isNull(commentDto.getParentId())));
-
-        List<CommentDto> topLevel = filtered.get(true);
-        List<CommentDto> others = filtered.get(false);
-
-        Map<Integer, List<CommentDto>> lowerLevelComments = others.stream().collect(Collectors.groupingBy(CommentDto::getParentId));
-
-        for (CommentDto comment : raw) {
-            if (lowerLevelComments.containsKey(comment.getId())) {
-                comment.getComments().addAll(lowerLevelComments.get(comment.getId()));
-            }
-        }
-
-        if (topLevel.size() == 0) {
-            return others;
-        } else return topLevel;  //todo ugly :(
+        return CommentUtil.twoLevelCommentSort(raw).get(0);
     }
 
     @Override
@@ -105,7 +85,8 @@ public class CommentServiceImpl implements CommentService {
 
         commentRepository.save(comment);
 
-        return WrapperMapper.wrap(getCommentDto(commentId), true);
+//      return WrapperMapper.wrap(getCommentDto(commentId), true); //unnecessary DB load
+        return WrapperMapper.wrapMessage(new MessageDTO("OK id="+commentId + " text=" + commentText));
     }
 
     @Override
@@ -124,7 +105,8 @@ public class CommentServiceImpl implements CommentService {
         log.debug("Restoring comment id={}.", commentId);
         commentRepository.save(comment);
 
-        return WrapperMapper.wrap(Collections.singletonList(getCommentDto(commentId)), true);
+//      return WrapperMapper.wrap(Collections.singletonList(getCommentDto(commentId)), true); unnecessary DB load
+        return WrapperMapper.wrapMessage(new MessageDTO("OK id="+commentId + " text=" + comment.getCommentText()));
     }
 
     private Comment createComment(int postId, String text) {

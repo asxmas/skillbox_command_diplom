@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.AddPostDto;
+import ru.skillbox.team13.dto.MessageDTO;
 import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
@@ -29,6 +30,7 @@ import java.time.Month;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -101,10 +103,9 @@ public class WallControllerTest {
     void testPost() throws JsonProcessingException {
         AddPostDto post = new AddPostDto("Rootin' tootin'", "Cowboy shootin'", new String[1]);
         String json = om.writeValueAsString(post);
-        PostDto postDto = requestService.getAsPostDto(post(url).contentType(MediaType.APPLICATION_JSON)
+        MessageDTO message = requestService.getAsMessageDTO(post(url).contentType(MediaType.APPLICATION_JSON)
                 .content(json), true);
-        assertEquals("Rootin' tootin'", postDto.getTitle());
-//        assertEquals("author@email", postDto.getAuthor().getEmail());
+        assertTrue(message.getMessage().contains("Rootin' tootin'"));
     }
 
     @Test
@@ -115,11 +116,10 @@ public class WallControllerTest {
         String json = om.writeValueAsString(post);
         LocalDateTime date = LocalDateTime.of(2035, Month.DECEMBER, 31, 23, 55);
         long timestamp = TimeUtil.getTimestamp(date);
-        PostDto postDto = requestService.getAsPostDto(post(url)
+        MessageDTO message = requestService.getAsMessageDTO(post(url)
                 .param("publish_date", String.valueOf(timestamp))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json), true);
-        assertEquals("bang bang", postDto.getTitle());
-        assertEquals(timestamp, postDto.getTime());
+        assertTrue(message.getMessage().contains("bang bang"));
     }
 }

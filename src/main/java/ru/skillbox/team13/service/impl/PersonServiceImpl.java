@@ -25,7 +25,7 @@ public class PersonServiceImpl implements PersonService {
     private final UserService userService;
     private final CitiesRepository citiesRepository;
     private final CountryRepository countryRepository;
-    private final PostsService postsService; //todo refactor
+    private final PostService postsService; //todo refactor
     private final CityServiceRepo cityServiceRepo; //todo refactor
     private final CountryServiceRepo countryServiceRepo; //todo refactor
 

@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.skillbox.team13.dto.AddPostDto;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.service.PostService;
-
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,8 +35,11 @@ public class PostsController {
 //Редактирование публикации по ID
     ResponseEntity<DTOWrapper> editPost(@PathVariable int id,
                                         @RequestParam(name = "publish_date", required = false) Long pubDate, //todo wtf??
-                                        @RequestBody Map<String, String> payload) {
-        return new ResponseEntity<>(postService.edit(id, pubDate, payload.get("title"), payload.get("post_text")), HttpStatus.OK);
+                                        @RequestBody AddPostDto payload) {
+        String title = payload.getTitle();
+        String text = payload.getPostText();
+        //todo pass tags!!
+        return new ResponseEntity<>(postService.edit(id, pubDate, title, text), HttpStatus.OK);
     }
 
     @DeleteMapping("{id}")

@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.LoginDto;
 import ru.skillbox.team13.exception.BadRequestException;
+import ru.skillbox.team13.exception.BadRequestException;
+import ru.skillbox.team13.dto.SubscribeNotificationDto;
 import ru.skillbox.team13.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
