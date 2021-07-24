@@ -6,6 +6,7 @@ import ru.skillbox.team13.entity.enums.PersonMessagePermission;
 import ru.skillbox.team13.entity.enums.UserType;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -58,6 +59,7 @@ public class DomainObjectFactory {
         post.setTitle(title);
         post.setPostText(text);
         post.setBlocked(false);
+        post.setTags(new HashSet<>());
         return post;
     }
 

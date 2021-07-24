@@ -7,9 +7,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skillbox.team13.dto.*;
+import ru.skillbox.team13.dto.CommentDto;
+import ru.skillbox.team13.dto.DTOWrapper;
+import ru.skillbox.team13.dto.MessageDTO;
+import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
+import ru.skillbox.team13.entity.Tag;
 import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
 import ru.skillbox.team13.exception.BadRequestException;
@@ -20,15 +24,13 @@ import ru.skillbox.team13.repository.QueryDSL.CommentDAO;
 import ru.skillbox.team13.repository.QueryDSL.PersonDAO;
 import ru.skillbox.team13.repository.QueryDSL.PostDAO;
 import ru.skillbox.team13.repository.RepoPost;
+import ru.skillbox.team13.service.TagService;
 import ru.skillbox.team13.service.UserService;
 import ru.skillbox.team13.util.CommentUtil;
 import ru.skillbox.team13.util.TimeUtil;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -47,6 +49,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     private final CommentDAO commentDAO;
     private final UserService userService;
     private final RepoPost repoPost; //todo check and refactor
+    private final TagService tagService;
 
     @Override
     public DTOWrapper getFeed(String substr, int offset, int itemPerpage) {
@@ -60,7 +63,9 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         List<Integer> postIds = postDtoPage.getContent().stream().map(PostDto::getId).collect(toList());
         List<CommentDto> commentDtos = commentDAO.getCommentDTOs(currentPersonId, postIds);
 
-        List<PostDto> combined = combine(postDtoPage.getContent(), commentDtos);
+        Map<Integer, Set<String>> tagMap = tagService.getPostIdTagsMap(postIds);
+
+        List<PostDto> combined = combine(postDtoPage.getContent(), commentDtos, tagMap);
         log.debug("Loading feed page {}, total {} posts and {} comments.", offset / itemPerpage, combined.size(), commentDtos.size());
 
         return WrapperMapper.wrap(combined, (int) postDtoPage.getTotalElements(), offset, itemPerpage, true);
@@ -77,7 +82,9 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
         List<CommentDto> commentDtos = commentDAO.getCommentDTOs(currentPersonId, postIds);
 
-        List<PostDto> combined = combine(page.getContent(), commentDtos);
+        Map<Integer, Set<String>> tagMap = tagService.getPostIdTagsMap(postIds);
+
+        List<PostDto> combined = combine(page.getContent(), commentDtos, tagMap);
         log.debug("Loading search page {}, total {} posts and {} comments.", offset / itemPerPage, combined.size(), commentDtos.size());
 
         return WrapperMapper.wrap(combined, (int) page.getTotalElements(), offset, itemPerPage, true);
@@ -93,7 +100,9 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         List<Integer> postIds = userPosts.getContent().stream().map(PostDto::getId).collect(toList());
         List<CommentDto> commentDtos = commentDAO.getCommentDTOs(currentPersonId, postIds);
 
-        List<PostDto> combined = combine(userPosts.getContent(), commentDtos);
+        Map<Integer, Set<String>> tagMap = tagService.getPostIdTagsMap(postIds);
+
+        List<PostDto> combined = combine(userPosts.getContent(), commentDtos, tagMap);
         log.debug("Loading wall for user id={} page {}, total {} posts and {} comments.",
                 authorId, offset / itemPerPage, combined.size(), commentDtos.size());
 
@@ -106,7 +115,8 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
         PostDto postDto = postDAO.getPostDTO(currentPersonId, id);
         List<CommentDto> commentDtos = commentDAO.getCommentDTOs(currentPersonId, Collections.singletonList(id));
-        combine(List.of(postDto), commentDtos);
+        Map<Integer, Set<String>> tagMap = tagService.getPostIdTagsMap(Collections.singletonList(id));
+        combine(List.of(postDto), commentDtos, tagMap);
         log.debug("Loading post id={}, with {} comments.", id, commentDtos.size());
 
         return WrapperMapper.wrap(postDto, true);
@@ -115,9 +125,12 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     @Override
     @Modifying
     @Transactional
-    public DTOWrapper edit(int id, Long pubDate, String title, String text) {
+    public DTOWrapper edit(int id, Long pubDate, String title, List<String> tagNames, String text) {
         LocalDateTime ldt = TimeUtil.getTime(pubDate);
-        postDAO.edit(id, ldt, title, text);
+
+        Set<Tag> tags = tagNames.isEmpty() ? new HashSet<>() : tagService.getTagsByName(tagNames);
+
+        postDAO.edit(id, ldt, title, text, tags);
         log.debug("Editing post id={} with date={}, title={} and text length={}", id, ldt, title, text);
 
 //        return getById(id);
@@ -148,7 +161,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
     @Override
     @Transactional
-    public DTOWrapper post(String title, String text, Integer authorId, Long pubDate) {
+    public DTOWrapper post(String title, String text, List<String> tagNames, Integer authorId, Long pubDate) {
         Person author = personRepository.findById(authorId)
                 .orElseThrow(() -> new BadRequestException("No person for id=" + authorId + " is found."));
         Post post = new Post();
@@ -158,13 +171,19 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         post.setDeleted(false);
         post.setBlocked(false);
         post.setTime(Objects.requireNonNullElse(TimeUtil.getTime(pubDate), LocalDateTime.now()));
-        log.debug("Saving new post (author id={}, title='{}'", authorId, title);
+
+        if (!tagNames.isEmpty()) {
+            Set<Tag> tags = tagService.getTagsByName(tagNames);
+            post.setTags(tags);
+        }
+        log.debug("Saving new post (author id={}, title='{}', tags ={})", authorId, title, tagNames);
         int postId = postRepository.save(post).getId();
+
 //        return getById(postId);
         return WrapperMapper.wrapMessage(new MessageDTO("OK id=" + postId + " title=" + title + " text=" + text));
     }
 
-    private List<PostDto> combine(List<PostDto> posts, List<CommentDto> comments) {
+    private List<PostDto> combine(List<PostDto> posts, List<CommentDto> comments, Map<Integer, Set<String>> postIdTagMap) {
         List<CommentDto> sortedComments = CommentUtil.twoLevelCommentSort(comments);
 
         Map<Integer, PostDto> postDtoMap = posts.stream().collect(Collectors.toMap(PostDto::getId, p -> p));
@@ -172,6 +191,12 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         for (CommentDto comment : sortedComments) {
             if (postDtoMap.containsKey(comment.getPostId())) { //this check may be unnecessary
                 postDtoMap.get(comment.getPostId()).getComments().add(comment);
+            }
+        }
+
+        for (PostDto post : posts) {
+            if (postIdTagMap.containsKey(post.getId())) {
+                post.setTags(postIdTagMap.get(post.getId()));
             }
         }
 
@@ -184,7 +209,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         User currentUser = userService.getAuthorizedUser();
         Person currentPerson = currentUser.getPerson();
         Person inactiveAuthor = userService.getInactivePerson();
-        List<Post> posts = repoPost.getPostsByAuthorId(PageRequest.of(0,10), currentPerson.getId());
+        List<Post> posts = repoPost.getPostsByAuthorId(PageRequest.of(0, 10), currentPerson.getId());
         for (Post post : posts) {
             post.setAuthor(inactiveAuthor);
         }

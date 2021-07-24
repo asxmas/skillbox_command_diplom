@@ -1,7 +1,8 @@
 package ru.skillbox.team13.service;
 
-import org.springframework.data.jpa.repository.Modifying;
 import ru.skillbox.team13.dto.DTOWrapper;
+
+import java.util.List;
 
 public interface PostService {
     DTOWrapper find(String text, Long timestampFrom, Long timestampTo, int offset, int itemPerPage);
@@ -10,7 +11,7 @@ public interface PostService {
 
     DTOWrapper getById(int id);
 
-    DTOWrapper edit(int id, Long pubDate, String title, String text);
+    DTOWrapper edit(int id, Long pubDate, String title, List<String> tagNames, String text);
 
     DTOWrapper deleteById(int id);
 
@@ -18,7 +19,7 @@ public interface PostService {
 
     DTOWrapper getWallForUserId(int id, int offset, int itemPerPage);
 
-    DTOWrapper post(String title, String text, Integer id, Long pubDate);
+    DTOWrapper post(String title, String text, List<String> tags, Integer id, Long pubDate);
 
     void setInactiveAuthor();
 }

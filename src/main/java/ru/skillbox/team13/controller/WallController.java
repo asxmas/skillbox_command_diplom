@@ -7,6 +7,9 @@ import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.AddPostDto;
 import ru.skillbox.team13.service.PostService;
 
+import java.util.Arrays;
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users/{id}/wall")
@@ -29,7 +32,7 @@ public class WallController {
                                                  @RequestBody AddPostDto payload) {
         String title = payload.getTitle();
         String text = payload.getPostText();
-        //todo pass tags!!
-        return ResponseEntity.ok(postService.post(title, text, id, pubDate));
+        List<String> tags = Arrays.asList(payload.getTags());
+        return ResponseEntity.ok(postService.post(title, text, tags, id, pubDate));
     }
 }
