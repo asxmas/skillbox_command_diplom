@@ -5,4 +5,6 @@ import ru.skillbox.team13.entity.Dialog;
 
 public interface DialogRepository extends JpaRepository<Dialog, Integer> {
 
+    Dialog findFirstByInviteLink(String inviteLink);
+
 }

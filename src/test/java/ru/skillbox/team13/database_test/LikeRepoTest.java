@@ -96,7 +96,7 @@ public class LikeRepoTest {
         Like like = new Like();
         like.setTime(LocalDateTime.now());
         like.setPerson(em.find(Person.class, personId));
-        like.setPostOrComment(em.find(Post.class, postId));
+        like.setPost(em.find(Post.class, postId));
 
         em.persist(like);
         em.getTransaction().commit();
@@ -115,7 +115,7 @@ public class LikeRepoTest {
         Like like = new Like();
         like.setTime(LocalDateTime.now());
         like.setPerson(em.find(Person.class, personId));
-        like.setPostOrComment(em.find(Comment.class, commentId));
+        like.setComment(em.find(Comment.class, commentId));
 
         em.persist(like);
         em.getTransaction().commit();
@@ -140,7 +140,7 @@ public class LikeRepoTest {
             Like like = new Like();
             like.setTime(LocalDateTime.now());
             like.setPerson(persons.get(i));
-            like.setPostOrComment(likedPost);
+            like.setPost(likedPost);
             return like;
         }).collect(Collectors.toList());
 
@@ -163,7 +163,7 @@ public class LikeRepoTest {
         assertEquals(0, likeRepo.countByLikerAndItemId(p, commentId));
 
         Like l1 = new Like();
-        l1.setPostOrComment(postRepo.findById(postId).get());
+        l1.setPost(postRepo.findById(postId).get());
         l1.setPerson(p);
         l1.setTime(LocalDateTime.now());
 
@@ -180,7 +180,7 @@ public class LikeRepoTest {
         assertEquals(0, likeRepo.countByLikerAndItemId(p, postId));
 
         Like l1 = new Like();
-        l1.setPostOrComment(postRepo.findById(postId).get());
+        l1.setPost(postRepo.findById(postId).get());
         l1.setPerson(p);
         l1.setTime(LocalDateTime.now());
 

@@ -25,5 +25,19 @@ databaseChangeLog:
       file: db/changelogs/6-patch-posts/deleted-column.sql
   - include:
       file: db/changelogs/7-patch-tag/unique-tag.sql
+  - include:
+      file: db/changelogs/6-patch-posts/deleted-column.sql
+  - include:
+      file: db/changelogs/8-patch-notification/change-notification.sql
+  - include:
+      file: db/changelogs/9-patch-create-subscription/subscription.sql
   - includeAll:
       path: db/changelogs/10-friendship-fix
+  - include:
+      file: db/changelogs/11-patch-dialog/dialog-link.sql
+  - include:
+      file: db/changelogs/11-patch/add-deleted-user.sql
+  - include:
+      file: db/changelogs/12-comment-deleted/comment-column-deleted.sql
+  - include:
+      file: db/changelogs/12-comment-deleted/like-patch.sql

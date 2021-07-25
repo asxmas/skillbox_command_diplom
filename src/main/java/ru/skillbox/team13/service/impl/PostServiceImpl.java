@@ -3,55 +3,69 @@ package ru.skillbox.team13.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.CommentDto;
 import ru.skillbox.team13.dto.DTOWrapper;
-import ru.skillbox.team13.dto.PersonDTO;
+import ru.skillbox.team13.dto.MessageDTO;
 import ru.skillbox.team13.dto.PostDto;
+import ru.skillbox.team13.entity.Person;
+import ru.skillbox.team13.entity.Post;
+import ru.skillbox.team13.entity.Tag;
+import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
+import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.mapper.WrapperMapper;
+import ru.skillbox.team13.repository.PersonRepository;
+import ru.skillbox.team13.repository.PostRepository;
 import ru.skillbox.team13.repository.QueryDSL.CommentDAO;
 import ru.skillbox.team13.repository.QueryDSL.PersonDAO;
 import ru.skillbox.team13.repository.QueryDSL.PostDAO;
+import ru.skillbox.team13.repository.RepoPost;
+import ru.skillbox.team13.service.TagService;
 import ru.skillbox.team13.service.UserService;
+import ru.skillbox.team13.util.CommentUtil;
 import ru.skillbox.team13.util.TimeUtil;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 import static ru.skillbox.team13.util.PageUtil.getPageable;
 import static ru.skillbox.team13.util.TimeUtil.getTime;
 
-@Service
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
     private final PostDAO postDAO;
+    private final PostRepository postRepository; //todo move to PostDAO
+    private final PersonRepository personRepository; //todo move usage to PersonDAO
     private final PersonDAO personDAO;
     private final CommentDAO commentDAO;
     private final UserService userService;
+    private final RepoPost repoPost; //todo check and refactor
+    private final TagService tagService;
 
     @Override
     public DTOWrapper getFeed(String substr, int offset, int itemPerpage) {
 
         int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
 
-        List<PersonDTO> personDTOS = personDAO.fetchFriendDtos(currentPersonId, FriendshipStatusCode.FRIEND);
+        List<Integer> authorIds = personDAO.getFriendsIds(currentPersonId, FriendshipStatusCode.FRIEND);
 
-        List<Integer> authorIds = personDTOS.stream().map(PersonDTO::getId).collect(toList());
-        Page<PostDto> postDtoPage = postDAO.getPostDtosByAuthorIdAndSubstring(authorIds, substr, getPageable(offset, itemPerpage));
+        Page<PostDto> postDtoPage = postDAO.getPostDTOs(currentPersonId, authorIds, substr, getPageable(offset, itemPerpage));
 
         List<Integer> postIds = postDtoPage.getContent().stream().map(PostDto::getId).collect(toList());
-        List<CommentDto> commentDtos = commentDAO.getCommentDtosForPostIds(postIds);
+        List<CommentDto> commentDtos = commentDAO.getCommentDTOs(currentPersonId, postIds);
 
-        List<PostDto> combined = combine(postDtoPage.getContent(), personDTOS, commentDtos);
+        Map<Integer, Set<String>> tagMap = tagService.getPostIdTagsMap(postIds);
+
+        List<PostDto> combined = combine(postDtoPage.getContent(), commentDtos, tagMap);
         log.debug("Loading feed page {}, total {} posts and {} comments.", offset / itemPerpage, combined.size(), commentDtos.size());
 
         return WrapperMapper.wrap(combined, (int) postDtoPage.getTotalElements(), offset, itemPerpage, true);
@@ -59,27 +73,50 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
     @Override
     public DTOWrapper find(String text, Long timestampFrom, Long timestampTo, int offset, int itemPerPage) {
-        Page<PostDto> page = postDAO.getPostsDtosByTimeAndSubstring(text, getTime(timestampFrom), getTime(timestampTo),
+        int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
+
+        Page<PostDto> page = postDAO.getPostDTOs(currentPersonId, text, getTime(timestampFrom), getTime(timestampTo),
                 getPageable(offset, itemPerPage));
 
-        List<Integer> personIds = page.getContent().stream().map(p -> p.getAuthor().getId()).collect(toList());
-        List<PersonDTO> personDtos = personDAO.getById(personIds);
+        List<Integer> postIds = page.getContent().stream().map(PostDto::getId).collect(toList());
 
-        List<CommentDto> commentDtos = commentDAO.getCommentDtosForPostIds(personIds);
+        List<CommentDto> commentDtos = commentDAO.getCommentDTOs(currentPersonId, postIds);
 
-        List<PostDto> combined = combine(page.getContent(), personDtos, commentDtos);
+        Map<Integer, Set<String>> tagMap = tagService.getPostIdTagsMap(postIds);
+
+        List<PostDto> combined = combine(page.getContent(), commentDtos, tagMap);
         log.debug("Loading search page {}, total {} posts and {} comments.", offset / itemPerPage, combined.size(), commentDtos.size());
 
         return WrapperMapper.wrap(combined, (int) page.getTotalElements(), offset, itemPerPage, true);
     }
 
     @Override
+    public DTOWrapper getWallForUserId(int authorId, int offset, int itemPerPage) {
+        int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
+
+        Page<PostDto> userPosts = postDAO.getPostDTOs(currentPersonId, List.of(authorId),
+                null, getPageable(offset, itemPerPage));
+
+        List<Integer> postIds = userPosts.getContent().stream().map(PostDto::getId).collect(toList());
+        List<CommentDto> commentDtos = commentDAO.getCommentDTOs(currentPersonId, postIds);
+
+        Map<Integer, Set<String>> tagMap = tagService.getPostIdTagsMap(postIds);
+
+        List<PostDto> combined = combine(userPosts.getContent(), commentDtos, tagMap);
+        log.debug("Loading wall for user id={} page {}, total {} posts and {} comments.",
+                authorId, offset / itemPerPage, combined.size(), commentDtos.size());
+
+        return WrapperMapper.wrap(combined, (int) userPosts.getTotalElements(), offset, itemPerPage, true);
+    }
+
+    @Override
     public DTOWrapper getById(int id) {
-        PostDto postDto = postDAO.getSingleDtoById(id);
-        int authorId = postDto.getAuthor().getId();
-        PersonDTO personDTO = personDAO.getById(authorId);
-        List<CommentDto> commentDtos = commentDAO.getCommentDtosForPostIds(id);
-        combine(postDto, personDTO, commentDtos);
+        int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
+
+        PostDto postDto = postDAO.getPostDTO(currentPersonId, id);
+        List<CommentDto> commentDtos = commentDAO.getCommentDTOs(currentPersonId, Collections.singletonList(id));
+        Map<Integer, Set<String>> tagMap = tagService.getPostIdTagsMap(Collections.singletonList(id));
+        combine(List.of(postDto), commentDtos, tagMap);
         log.debug("Loading post id={}, with {} comments.", id, commentDtos.size());
 
         return WrapperMapper.wrap(postDto, true);
@@ -88,12 +125,16 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     @Override
     @Modifying
     @Transactional
-    public DTOWrapper edit(int id, Long pubDate, String title, String text) {
+    public DTOWrapper edit(int id, Long pubDate, String title, List<String> tagNames, String text) {
         LocalDateTime ldt = TimeUtil.getTime(pubDate);
-        postDAO.edit(id, ldt, title, text);
+
+        Set<Tag> tags = tagNames.isEmpty() ? new HashSet<>() : tagService.getTagsByName(tagNames);
+
+        postDAO.edit(id, ldt, title, text, tags);
         log.debug("Editing post id={} with date={}, title={} and text length={}", id, ldt, title, text);
 
-        return getById(id);
+//        return getById(id);
+        return WrapperMapper.wrapMessage(new MessageDTO("OK id=" + id + " title=" + title + " text=" + text));
     }
 
     @Override
@@ -103,7 +144,8 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         postDAO.delete(id, true);
         log.debug("Deleting post id={}", id);
 
-        return WrapperMapper.wrap(Map.of("id", id), true);
+//        return getById(postId);
+        return WrapperMapper.wrapMessage(new MessageDTO("OK id=" + id));
     }
 
     @Override
@@ -113,22 +155,64 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         postDAO.delete(id, false);
         log.debug("Un-deleting post id={}", id);
 
-        return getById(id);
+//        return getById(postId);
+        return WrapperMapper.wrapMessage(new MessageDTO("OK id=" + id));
     }
 
-    private List<PostDto> combine(List<PostDto> posts, List<PersonDTO> persons, List<CommentDto> comments) {
-        Map<Integer, PersonDTO> personMap = persons.stream().collect(toMap(PersonDTO::getId, p -> p));
-        Map<Integer, List<CommentDto>> commentMap = comments.stream().collect(groupingBy(CommentDto::getPostId));
+    @Override
+    @Transactional
+    public DTOWrapper post(String title, String text, List<String> tagNames, Integer authorId, Long pubDate) {
+        Person author = personRepository.findById(authorId)
+                .orElseThrow(() -> new BadRequestException("No person for id=" + authorId + " is found."));
+        Post post = new Post();
+        post.setAuthor(author);
+        post.setTitle(title);
+        post.setPostText(text);
+        post.setDeleted(false);
+        post.setBlocked(false);
+        post.setTime(Objects.requireNonNullElse(TimeUtil.getTime(pubDate), LocalDateTime.now()));
 
-        for (PostDto p : posts) {
-            p.setAuthor(personMap.get(p.getAuthor().getId()));
-            p.setComments(Objects.requireNonNullElse(commentMap.get(p.getId()), Collections.emptyList()));
+        if (!tagNames.isEmpty()) {
+            Set<Tag> tags = tagService.getTagsByName(tagNames);
+            post.setTags(tags);
         }
+        log.debug("Saving new post (author id={}, title='{}', tags ={})", authorId, title, tagNames);
+        int postId = postRepository.save(post).getId();
+
+//        return getById(postId);
+        return WrapperMapper.wrapMessage(new MessageDTO("OK id=" + postId + " title=" + title + " text=" + text));
+    }
+
+    private List<PostDto> combine(List<PostDto> posts, List<CommentDto> comments, Map<Integer, Set<String>> postIdTagMap) {
+        List<CommentDto> sortedComments = CommentUtil.twoLevelCommentSort(comments);
+
+        Map<Integer, PostDto> postDtoMap = posts.stream().collect(Collectors.toMap(PostDto::getId, p -> p));
+
+        for (CommentDto comment : sortedComments) {
+            if (postDtoMap.containsKey(comment.getPostId())) { //this check may be unnecessary
+                postDtoMap.get(comment.getPostId()).getComments().add(comment);
+            }
+        }
+
+        for (PostDto post : posts) {
+            if (postIdTagMap.containsKey(post.getId())) {
+                post.setTags(postIdTagMap.get(post.getId()));
+            }
+        }
+
         return posts;
     }
 
-    private void combine(PostDto post, PersonDTO person, List<CommentDto> comments) {
-        post.setAuthor(person);
-        post.setComments(comments);
+    @Modifying
+    @Override
+    public void setInactiveAuthor() {
+        User currentUser = userService.getAuthorizedUser();
+        Person currentPerson = currentUser.getPerson();
+        Person inactiveAuthor = userService.getInactivePerson();
+        List<Post> posts = repoPost.getPostsByAuthorId(PageRequest.of(0, 10), currentPerson.getId());
+        for (Post post : posts) {
+            post.setAuthor(inactiveAuthor);
+        }
+        repoPost.saveAllAndFlush(posts);
     }
 }

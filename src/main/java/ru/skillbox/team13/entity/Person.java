@@ -40,6 +40,9 @@ public class Person extends Notified {
     @Column(name = "about")
     private String about;
 
+    @Column(name = "deleted")
+    private boolean deleted;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "city_id")
     private City city;
@@ -83,6 +86,9 @@ public class Person extends Notified {
 
     @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
     private Set<Block> blocks;
+
+    @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+    private Set<Subscription> subscriptions;
 
     @ManyToMany(mappedBy = "persons", fetch = FetchType.LAZY)
     private Set<Dialog> dialogs;

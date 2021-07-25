@@ -9,7 +9,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -34,4 +34,16 @@ spring.mail:
 server:
   port: ${PORT:8080}
 
-server.base_url: https://team13.herokuapp.com
+#для heroku установить значение https://team13.herokuapp.com - сервер на котором развернут фронт
+server.base_url: ${BASE_URL:http://localhost:8081}
+
+logging:
+  level:
+    liquibase: INFO
+    org:
+      springframework: INFO
+      hibernate: INFO
+    ru:
+      skillbox: DEBUG
+  pattern:
+    console: "%date{dd.MM-HH:mm:ss.SSS} %highlight(%5level) [%thread] %logger{45}: %message %n"

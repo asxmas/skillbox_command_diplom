@@ -3,34 +3,37 @@ package ru.skillbox.team13.service;
 
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.LoginDto;
-import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.dto.UserDto;
-import ru.skillbox.team13.entity.NotificationType;
+import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.User;
-import ru.skillbox.team13.entity.enums.NotificationCode;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 public interface UserService {
 
-    Boolean register(UserDto.Request.Register userDto);
+    DTOWrapper register(UserDto.Request.Register userDto, HttpServletRequest request);
 
-    PersonDTO login(LoginDto loginDto);
+    DTOWrapper login(LoginDto loginDto);
 
-    Boolean logout(HttpServletRequest request);
-
-    PersonDTO getCurrentUserDto();
+    DTOWrapper logout(HttpServletRequest request);
 
     User getAuthorizedUser();
 
-    Boolean codeGenerationAndEmail(String email, String origin);
+    DTOWrapper universalAccountMailLink(String email, String route, HttpServletRequest request);
 
-    Boolean setPassword(String token, String password);
+    DTOWrapper setPassword(String token, String password);
 
-    Boolean setEmail(String email);
+    Boolean setEmail(String token);
 
-    Boolean setNotification(NotificationCode notificationcode, Boolean enabled);
+    Person getInactivePerson();
+
+    String resetAndGetToken(String link);
+
+    DTOWrapper setNotification(SubscribeResponseDto subscribeType);
+
+    DTOWrapper getNotifications();
+
+    Boolean registerConfirm(String link);
 
     String resetPasswordAndGetToken(String link);
 
