@@ -1,12 +1,8 @@
 package ru.skillbox.team13.service;
 
 import ru.skillbox.team13.dto.DTOWrapper;
-import ru.skillbox.team13.entity.Person;
-import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
 
-import java.util.List;
-
-public interface FriendsService {
+public interface FriendService {
     DTOWrapper getFriends(String name, int offset, int itemPerPage);
 
     DTOWrapper deleteFriend(Integer friendPersonId);
@@ -18,6 +14,4 @@ public interface FriendsService {
     DTOWrapper getRecommendations(int offset, int itemPerPage);
 
     DTOWrapper getStatusForIds(int[] friendsIds);
-
-    List<Person> getFriends(Integer srcId, FriendshipStatusCode code);
 }

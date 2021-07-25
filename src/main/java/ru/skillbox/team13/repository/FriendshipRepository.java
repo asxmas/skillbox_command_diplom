@@ -1,8 +1,11 @@
 package ru.skillbox.team13.repository;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.entity.Friendship;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
@@ -53,4 +56,15 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Integer>
     @Query("select f from Friendship f where f.destinationPerson.id = :dstId and f.sourcePerson.id in :srcIds")
     List<Friendship> findFriendshipsFromIdsToId(Integer dstId, int[] srcIds);
 
+    boolean existsBySourcePersonAndDestinationPerson(Person src, Person dst);
+
+    @Modifying
+    @Transactional
+    void deleteBySourcePersonIdAndDestinationPersonId(int srcId, int dstId);
+
+    @Query("select dst from Friendship f join f.destinationPerson dst where f.sourcePerson.id = :srcId")
+    Page<Person> findFriends(int srcId, Pageable p);
+
+    @Query("select f.destinationPerson.id from Friendship f where f.sourcePerson.id = :srcId")
+    List<Integer> findFriendsIds (int srcId);
 }

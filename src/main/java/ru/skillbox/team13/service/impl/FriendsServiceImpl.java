@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsService {
+public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendService {
 
     private final PersonRepository personRepository;
     private final FriendshipRepository friendshipRepo;
@@ -156,7 +156,7 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
         return WrapperMapper.wrap(results, false);
     }
 
-    @Override
+    @Deprecated
     public List<Person> getFriends(Integer srcId, FriendshipStatusCode code) {
         return friendshipRepo.findRequestedFriendships(srcId, code);
     }
