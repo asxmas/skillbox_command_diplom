@@ -3,6 +3,7 @@ package ru.skillbox.team13.service.impl;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.AuthenticationException;
@@ -54,6 +55,9 @@ public class UserServiceImpl implements UserService {
     private final SessionRegistry sessionRegistry;
     private final SubscriptionRepository subscriptionRepository;
 
+    @Value("${jwt.token.mail.expired}")
+    private long deleteExpiredRegistrationPeriod;
+
     @Override
     @Transactional
     @Modifying
@@ -77,7 +81,7 @@ public class UserServiceImpl implements UserService {
             //заполняем Person имеющимися данными
             User user = new User();
             user.setEmail(userDto.getEmail());
-            user.setName(userDto.getEmail());//НЕТ ДАННЫХ, NOT NULL
+            user.setName("noname");//НЕТ ДАННЫХ, NOT NULL
             user.setPassword(passwordEncoder.encode(userDto.getFirstPassword()));
             user.setType(UserType.USER);//НЕТ ДАННЫХ, NOT NULL
             user.setPerson(personRepository.save(person));
@@ -98,7 +102,6 @@ public class UserServiceImpl implements UserService {
             String username = loginDto.getEmail();
             User user = userRepository.findByEmail(username).get();
             Person person = personRepository.getById(user.getPerson().getId());
-            user.setName(loginDto.getEmail());
             userRepository.save(user);
             log.debug("Successful login: {}", loginDto.getEmail());
             return WrapperMapper.wrap(PersonMapper.convertPersonToPersonDTOWithToken(person, jwtTokenProvider.createToken(username, TokenType.ORDINARY)), true);
@@ -110,10 +113,10 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public DTOWrapper logout(HttpServletRequest request) {
-        String username = "anonymous";
+
+        String token = jwtTokenProvider.resolveToken(request);
+        String username = jwtTokenProvider.getUsername(token);
         try {
-            username = getAuthorizedUser().getEmail();
-            String token = jwtTokenProvider.resolveToken(request);
             if (token != null) {
                     putTokenToBlackList(token);
                     log.debug("Successful logout: {}", username);
@@ -158,12 +161,11 @@ public class UserServiceImpl implements UserService {
     @Modifying
     public void clearNotApprovedUsers(){
         List<User> usersList = userRepository.findAllByNotApproved();
-        for (User user : usersList) {
-            if (user.getPerson().getRegDate().isBefore(LocalDateTime.now().minusMinutes(10))) {
-                userRepository.delete(user);
-                log.debug("Scheduled task complete: not approved user {} deleted", user.getEmail());
-            }
-        }
+        List<User> deleteList = usersList.stream().filter((user) -> user.getPerson().getRegDate().isBefore(LocalDateTime.now().minusSeconds(deleteExpiredRegistrationPeriod / 1000)))
+                .collect(Collectors.toList());
+        userRepository.deleteAll(deleteList);
+        deleteList.stream().forEach((user) -> log.debug("Scheduled task complete: not approved user {} was deleted", user.getEmail()));
+
      }
 
     private Optional<User> checkUserRegistration(String email) {
@@ -219,8 +221,8 @@ public class UserServiceImpl implements UserService {
     public DTOWrapper setPassword(String token, String password) {
 
         User user;
-        if (jwtTokenProvider.validateToken(token)) {
-            user = userRepository.findByName(jwtTokenProvider.getUsername(token)).get();
+        if (jwtTokenProvider.resolveTokenDate(token).after(new Date())) {
+            user = userRepository.findByEmail(jwtTokenProvider.getUsername(token)).get();
         } else {
             log.warn("Change password failed (expired token).");
             throw new BadRequestException("Не удалось установить пароль");
@@ -238,7 +240,7 @@ public class UserServiceImpl implements UserService {
 
         User user;
         String newEmail = jwtTokenProvider.getUsername(token);
-        if (jwtTokenProvider.validateToken(token) &&
+        if (jwtTokenProvider.resolveTokenDate(token).after(new Date()) &&
                 checkUserRegistration(newEmail).isEmpty()) {
             user = userRepository.findByConfirmationCode(token).get();
         } else {
@@ -286,7 +288,7 @@ public class UserServiceImpl implements UserService {
 
         //получаем user'a из токена
         User user;
-        if (jwtTokenProvider.validateToken(token)) { user = userRepository.findByName(jwtTokenProvider.getUsername(token)).get(); }
+        if (jwtTokenProvider.resolveTokenDate(token).after(new Date())) { user = userRepository.findByName(jwtTokenProvider.getUsername(token)).get(); }
         else {
             log.warn("Password reset failed (expired token).");
             return null;
@@ -305,7 +307,7 @@ public class UserServiceImpl implements UserService {
     public Boolean registerConfirm(String token) {
 
         User user;
-        if (jwtTokenProvider.validateToken(token)) {
+        if (jwtTokenProvider.resolveTokenDate(token).after(new Date())) {
             user = userRepository.findByEmailNoApproval(jwtTokenProvider.getUsername(token)).get();
         } else {
             log.warn("Registration confirm failed (expired token).");

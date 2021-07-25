@@ -30,12 +30,6 @@ public class AccountController {
         return ResponseEntity.ok(userService.universalAccountMailLink(loginDto.getEmail(), "password/reset", request));
     }
 
-    //отправка ссылки на запланированную смену пароля
-    @PutMapping("password/shift")
-    public ResponseEntity<DTOWrapper> shiftPassword(@RequestBody @Valid LoginDto loginDto, HttpServletRequest request){
-        return ResponseEntity.ok(userService.universalAccountMailLink(loginDto.getEmail(), "password/shift", request));
-    }
-
     //отправка ссылки на запланированную смену почты
     @PutMapping("email/shift")
     public ResponseEntity<DTOWrapper> shiftEmail(@RequestBody @Valid LoginDto loginDto, HttpServletRequest request){

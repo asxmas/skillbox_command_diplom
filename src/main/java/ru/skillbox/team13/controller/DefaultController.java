@@ -42,7 +42,7 @@ public class DefaultController {
     public String emailShift(@RequestParam("link") String token){
 
         Boolean isEmailShifted = userService.setEmail(token);
-        if (!isEmailShifted) return "redirect:" +  baseUrl + "/forgot-expired";
+        if (!isEmailShifted) { return "redirect:" +  baseUrl + "/forgot-expired"; }
         return "redirect:" + baseUrl + "/change-email-success";
     }
 }

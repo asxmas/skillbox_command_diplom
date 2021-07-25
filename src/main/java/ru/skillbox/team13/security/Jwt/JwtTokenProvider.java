@@ -10,7 +10,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
+import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.repository.BlacklistedTokenRepository;
+import ru.skillbox.team13.repository.UserRepository;
 import ru.skillbox.team13.security.JwtUserDetailsService;
 import ru.skillbox.team13.security.TokenType;
 
@@ -40,6 +42,9 @@ public class JwtTokenProvider {
 
     @Autowired
     private BlacklistedTokenRepository blacklistedTokenRepo;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -108,7 +113,8 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            if (blacklistedTokenRepo.findByToken(token).isPresent()) {
+            if (blacklistedTokenRepo.findByToken(token).isPresent() ||
+                    userRepository.findByEmail(getUsername(token)).isEmpty()) {
                 throw new JwtException("JWT token in blacklist");
             }
             Jws<Claims> claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token);

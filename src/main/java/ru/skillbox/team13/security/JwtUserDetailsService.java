@@ -24,8 +24,7 @@ public class JwtUserDetailsService implements UserDetailsService {
 
         User user;
         Optional<User> optionalUser = userRepository.findByEmail(username);
-        if (optionalUser.isEmpty()) { user = userRepository.findByName(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User with username: " + username + " not found")); }
+        if (optionalUser.isEmpty()) { throw new UsernameNotFoundException("User with username: " + username + " not found"); }
         else { user = optionalUser.get(); }
 //        log.info("IN loadUserByUsername - user with username: {} successfully loaded", username);
         return JwtUserFactory.create(user);
