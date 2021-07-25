@@ -41,7 +41,7 @@ public class NotificationServiceImpl implements NotificationService {
             noteRepository.deleteAllByPersonId(currentPersonId);
             return request;
         }
-        NotificationDto noteDto = NotificationMapper.mapNotification(noteRepository.findNotificationByPersonIdAndAndId(currentPersonId, id));
+        NotificationDto noteDto = NotificationMapper.mapNotification(noteRepository.findNotificationByPersonIdAndId(currentPersonId, id));
         NotificationDto[] noteArray = {noteDto};
         noteRepository.deleteByPersonIdAndId(currentPersonId, id);
         return WrapperMapper.wrap(noteArray, 1, 0, 10, true);

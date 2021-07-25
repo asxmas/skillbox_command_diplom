@@ -67,7 +67,7 @@ public class JwtTokenProvider {
                 tokenValidity = mailValidityInMillis;
                 break;
             case RECOVERY:
-                tokenValidity = mailValidityInMillis;
+                tokenValidity = recoveryValidityInMillis;
                 break;
         }
 

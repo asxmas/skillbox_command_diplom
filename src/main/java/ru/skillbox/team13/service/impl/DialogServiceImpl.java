@@ -17,6 +17,7 @@ import ru.skillbox.team13.entity.Dialog2Person;
 import ru.skillbox.team13.entity.Message;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.enums.MessageReadStatus;
+import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.mapper.DialogMapper;
 import ru.skillbox.team13.mapper.WrapperMapper;
 import ru.skillbox.team13.repository.Dialog2PersonRepository;

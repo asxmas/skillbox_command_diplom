@@ -19,9 +19,9 @@ jwt:
     ordinary:
       expired: 3600000
     recovery:
-      expired: 60000
+      expired: 600000
     mail:
-      expired: 60000
+      expired: 600000
 
 spring.mail:
   host: smtp.gmail.com
@@ -35,7 +35,7 @@ server:
   port: ${PORT:8080}
 
 #для heroku установить значение https://team13.herokuapp.com - сервер на котором развернут фронт
-server.base_url: ${BASE_URL:http://localhost:8081}
+server.base_url: ${BASE_URL:http://localhost:8080}
 
 logging:
   level:

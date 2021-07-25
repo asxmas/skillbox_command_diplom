@@ -12,12 +12,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skillbox.team13.dto.DTOWrapper;
-import ru.skillbox.team13.dto.LoginDto;
-import ru.skillbox.team13.dto.MessageDTO;
-import ru.skillbox.team13.dto.UserDto;
+import ru.skillbox.team13.dto.*;
 import ru.skillbox.team13.entity.BlacklistedToken;
 import ru.skillbox.team13.entity.Person;
+import ru.skillbox.team13.entity.Subscription;
 import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.entity.enums.NotificationCode;
 import ru.skillbox.team13.entity.enums.PersonMessagePermission;
@@ -28,6 +26,7 @@ import ru.skillbox.team13.mapper.PersonMapper;
 import ru.skillbox.team13.mapper.WrapperMapper;
 import ru.skillbox.team13.repository.BlacklistedTokenRepository;
 import ru.skillbox.team13.repository.PersonRepository;
+import ru.skillbox.team13.repository.SubscriptionRepository;
 import ru.skillbox.team13.repository.UserRepository;
 import ru.skillbox.team13.security.Jwt.JwtTokenProvider;
 import ru.skillbox.team13.security.Jwt.JwtUser;
@@ -74,6 +73,7 @@ public class UserServiceImpl implements UserService {
             person.setBlocked(false);//НЕТ ДАННЫХ, NOT NULL
             person.setLastOnlineTime(LocalDateTime.now());
             person.setMessagesPermission(PersonMessagePermission.ALL);//NOT NULL, ставим значение по-умолчанию
+            person.setPhoto("duser.png");
             //заполняем Person имеющимися данными
             User user = new User();
             user.setEmail(userDto.getEmail());

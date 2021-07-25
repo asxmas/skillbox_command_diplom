@@ -27,7 +27,5 @@ public interface DialogService {
 
     DTOWrapper addUserToDialogByLink(int dialogId, String inviteLink);
 
-    DTOWrapper getDialogMessages(int dialogId, String query, int offset, int itemPerPage);
-
     DTOWrapper setStatus(int messageId, MessageReadStatus read);
 }
