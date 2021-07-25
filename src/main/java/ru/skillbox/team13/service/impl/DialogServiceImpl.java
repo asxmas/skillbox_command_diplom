@@ -234,4 +234,11 @@ public class DialogServiceImpl implements DialogService {
                 .findAny().get()
                 .getPerson();
     }
+
+    @Override
+    public DTOWrapper setStatus(int msgId, MessageReadStatus status) {
+        messageRepository.setStatusForId(status, msgId);
+        log.debug("Setting status {} for message id {}", status.name(), msgId);
+        return WrapperMapper.wrap(Map.of("message", "ok"), true);
+    }
 }

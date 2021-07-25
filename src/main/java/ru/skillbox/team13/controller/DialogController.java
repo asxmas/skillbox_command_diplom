@@ -4,12 +4,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.team13.dto.DTOWrapper;
-import ru.skillbox.team13.dto.PlainObjectDto;
+import ru.skillbox.team13.dto.LongpollParamDto;
+import ru.skillbox.team13.entity.enums.MessageReadStatus;
 import ru.skillbox.team13.service.DialogService;
+import ru.skillbox.team13.service.LongpollService;
+import ru.skillbox.team13.service.UserService;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,6 +20,8 @@ import java.util.Map;
 public class DialogController {
 
     private final DialogService dialogService;
+    private final LongpollService longpollService;
+    private final UserService userService;
 
     @GetMapping("dialogs")
     //получение списка диалогов
@@ -79,5 +84,39 @@ public class DialogController {
     public ResponseEntity<DTOWrapper> addUserToDialogByLink(@PathVariable("id") Integer dialogId,
                                                             @RequestBody Map<String, String> linkObject) {
         return ResponseEntity.ok(dialogService.addUserToDialogByLink(dialogId, linkObject.get("link")));
+    }
+
+    @PutMapping("dialogs/{dlg_id}/messages/{msg_id}/read")
+    //Пометить сообщение как "Прочитанное"
+    public ResponseEntity<DTOWrapper> markMessageAsRead(@PathVariable("dlg_id") int dialogId, //dialog id is not used
+                                                        @PathVariable("msg_id") int messageId) {
+        return ResponseEntity.ok(dialogService.setStatus(messageId, MessageReadStatus.READ));
+    }
+
+    @GetMapping("dialogs/{dlg_id}/activity/{user_id}")
+    //Получить последнюю активность и текущий статус для пользователя с которым ведется диалог
+    public ResponseEntity<DTOWrapper> getUserStatus(@PathVariable("dlg_id") int dialogId, //dialog id is not used
+                                                    @PathVariable("user_id") int userId) {
+        return ResponseEntity.ok(userService.getUserActivity(userId));
+    }
+
+    @PostMapping("dialogs/{dlg_id}/activity/{user_id}")
+    //    Изменить статус набора текста пользователем в диалоге.
+    public ResponseEntity<DTOWrapper> setUserDialogStatus(@PathVariable("dlg_id") int dialogId, //dialog id is not used
+                                                          @PathVariable("user_id") int userId) {
+        String[] stat = {"Typing", "Writing", "Singing", "Shitposting", "Barking"};
+        return ResponseEntity.ok(userService.setUserDialogStatus(userId, stat[new Random().nextInt(stat.length)]));
+    }
+
+    @GetMapping("dialogs/longpoll")
+    //Получить данные для подключения к longpoll серверу
+    public ResponseEntity<DTOWrapper> getLongpollConnectionData() {
+        return ResponseEntity.ok(longpollService.getConnectionData());
+    }
+
+    @PostMapping("dialogs/longpoll/history")
+    //Получить обновления личных сообщений пользователя
+    public ResponseEntity<DTOWrapper> getUpdates(@RequestBody LongpollParamDto paramDto) {
+        return ResponseEntity.ok(longpollService.getSomething(paramDto));
     }
 }

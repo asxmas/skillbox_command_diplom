@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +29,10 @@ import ru.skillbox.team13.repository.PersonRepository;
 import ru.skillbox.team13.repository.SubscriptionRepository;
 import ru.skillbox.team13.repository.UserRepository;
 import ru.skillbox.team13.security.Jwt.JwtTokenProvider;
+import ru.skillbox.team13.security.Jwt.JwtUser;
 import ru.skillbox.team13.security.TokenType;
 import ru.skillbox.team13.service.UserService;
+import ru.skillbox.team13.util.TimeUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -47,6 +51,7 @@ public class UserServiceImpl implements UserService {
     private final JwtTokenProvider jwtTokenProvider;
     private final BlacklistedTokenRepository blacklistedTokenRepo;
     private final MailServiceImpl mailServiceImpl;
+    private final SessionRegistry sessionRegistry;
     private final SubscriptionRepository subscriptionRepository;
 
     @Override
@@ -68,6 +73,7 @@ public class UserServiceImpl implements UserService {
             person.setBlocked(false);//НЕТ ДАННЫХ, NOT NULL
             person.setLastOnlineTime(LocalDateTime.now());
             person.setMessagesPermission(PersonMessagePermission.ALL);//NOT NULL, ставим значение по-умолчанию
+            person.setPhoto("duser.png");
             //заполняем Person имеющимися данными
             User user = new User();
             user.setEmail(userDto.getEmail());
@@ -323,6 +329,42 @@ public class UserServiceImpl implements UserService {
                                else {return new SubscribeResponseDto(type, false);}})
                 .collect(Collectors.toList());
         return WrapperMapper.wrap(results, true);
+    }
+
+    @Override
+    public DTOWrapper getUserActivity(int userId) {
+        User user = getUser(userId);
+
+        boolean isOnline = isOnline(user);
+        LocalDateTime lastOnlineTime = user.getPerson().getLastOnlineTime();
+        Long timestamp = TimeUtil.getTimestamp(lastOnlineTime);
+        log.debug("Checking online status for user id {} ({}, last online: {}).", userId, isOnline, lastOnlineTime);
+        return WrapperMapper.wrap(Map.of("online", isOnline, "last_activity", timestamp), true);
+    }
+
+    @Override
+    public DTOWrapper setUserDialogStatus(int userId, String status) {
+        User user = getUser(userId);
+        JwtUser ud = getUserDetails(user.getEmail());
+        ud.setOnlineStatus(status);
+        log.debug("Setting status '{}' to user id={} .", status, userId);
+        return WrapperMapper.wrap(Map.of("message", "ok"), true);
+    }
+
+    private JwtUser getUserDetails(String username) {
+        return (JwtUser) sessionRegistry.getAllPrincipals().stream()
+                .filter(o -> ((JwtUser) o).getUsername().equals(username))
+                .findAny().orElseThrow(() -> new BadRequestException("Internal user ID mismatch"));
+    }
+
+    private boolean isOnline(User user) {
+        return sessionRegistry.getAllPrincipals().stream()
+                .anyMatch(principal -> ((UserDetails) principal).getUsername().equals(user.getEmail()));
+    }
+
+    private User getUser(int userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
+                new BadRequestException("User for id=" + userId + " is not found"));
     }
 
     private void putTokenToBlackList(String token) {
