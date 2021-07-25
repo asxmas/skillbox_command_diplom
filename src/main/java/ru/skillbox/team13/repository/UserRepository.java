@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.skillbox.team13.entity.User;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
@@ -23,4 +24,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Modifying
     @Query("DELETE FROM User WHERE person.id = :id")
     void deleteUserByPersonId(Integer id);
+
+    @Query("select u from User u where u.isApproved = false")
+    List<User> findAllByNotApproved();
 }

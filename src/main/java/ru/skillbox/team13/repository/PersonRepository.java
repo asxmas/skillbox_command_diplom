@@ -23,7 +23,4 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
 
     Integer countByCity(City city);
 
-    @Modifying
-    @Query("DELETE FROM Person where id =:id")
-    void deletePersonById(Integer id);
 }

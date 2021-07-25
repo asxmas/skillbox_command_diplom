@@ -146,6 +146,20 @@ public class UserServiceImpl implements UserService {
         log.debug("Scheduled task complete: expired tokens deleted");
     }
 
+    //очистка пользователей не подтвердивших регистрацию
+    @Scheduled(fixedRate = 60000)
+    @Transactional
+    @Modifying
+    public void clearNotApprovedUsers(){
+        List<User> usersList = userRepository.findAllByNotApproved();
+        for (User user : usersList) {
+            if (user.getPerson().getRegDate().isBefore(LocalDateTime.now().minusMinutes(10))) {
+                userRepository.delete(user);
+                log.debug("Scheduled task complete: not approved user {} deleted", user.getEmail());
+            }
+        }
+     }
+
     private Optional<User> checkUserRegistration(String email) {
         return userRepository.findByEmailNoApproval(email);
     }
