@@ -9,8 +9,8 @@ databaseChangeLog:
       file: db/changelogs/1.3-insert-data/data.sql
   - includeAll:
       path: db/changelogs/2.1-patch
-  - includeAll:
-      path: db/changelogs/3.1-patch
+  - include:
+      file: db/changelogs/3.1-patch/token.sql
   - include:
       file: db/changelogs/4-patch/modify-like.sql
   - include:
@@ -41,3 +41,5 @@ databaseChangeLog:
       file: db/changelogs/12-comment-deleted/comment-column-deleted.sql
   - include:
       file: db/changelogs/12-comment-deleted/like-patch.sql
+  - include:
+      file: db/changelogs/3.1-patch/3.2-token-unique-constraint.sql
