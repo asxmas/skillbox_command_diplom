@@ -1,17 +1,30 @@
 package ru.skillbox.team13.repository;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.skillbox.team13.entity.User;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-    @Query("SELECT u FROM User u WHERE u.email = :email")
+    @Query("select u from User u where u.email = :email and u.isApproved = true and u.person.deleted = false")
     Optional<User> findByEmail(String email);
 
+    @Query("select u from User u where u.email = :email")
+    Optional<User> findByEmailNoApproval(String email);
+
+    @Query("select u from User u where u.name = :name and u.isApproved = true")
     Optional<User> findByName(String name);
 
     Optional<User> findByConfirmationCode(String token);
+
+    @Modifying
+    @Query("DELETE FROM User WHERE person.id = :id")
+    void deleteUserByPersonId(Integer id);
+
+    @Query("select u from User u where u.isApproved = false")
+    List<User> findAllByNotApproved();
 }

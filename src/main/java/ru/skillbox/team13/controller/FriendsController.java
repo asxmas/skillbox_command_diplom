@@ -1,19 +1,26 @@
 package ru.skillbox.team13.controller;
 
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.team13.dto.DTOWrapper;
-import ru.skillbox.team13.service.impl.FriendsServiceImpl;
+import ru.skillbox.team13.service.FriendService;
 
+@Slf4j
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/v1/")
 public class FriendsController {
 
-    private final FriendsServiceImpl friendService;
+    private final FriendService friendService;
+
+    //using 'simple' version of friend service (no REQUESTs, instant FRIENDS)
+    public FriendsController(@Qualifier("friendSimpleServiceImpl") FriendService friendService) {
+        log.warn("Using simplified implementation of Friend Service");
+        this.friendService = friendService;
+    }
 
     @GetMapping("friends")
     //Получить список друзей

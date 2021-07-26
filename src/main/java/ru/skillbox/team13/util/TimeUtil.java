@@ -1,7 +1,9 @@
 package ru.skillbox.team13.util;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.TimeZone;
 
 public class TimeUtil {
 
@@ -14,4 +16,12 @@ public class TimeUtil {
 
         return ldt.toInstant(ZONE_OFFSET).toEpochMilli();
     }
+
+
+    public static LocalDateTime getTime(Long timestamp) {
+        if (timestamp == null) return null;
+        if (timestamp == 0L) return LocalDateTime.now();
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZONE_OFFSET);
+    }
+
 }

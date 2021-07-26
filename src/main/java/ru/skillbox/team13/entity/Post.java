@@ -31,7 +31,7 @@ public class Post extends Notified {
     @Column(name = "is_blocked", nullable = false)
     private boolean isBlocked;
 
-    @OneToMany(mappedBy = "postOrComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Like> likes;
 
     @OneToMany(mappedBy = "post")
@@ -45,4 +45,7 @@ public class Post extends Notified {
 
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Attachment> attachments;
+
+    @Column(name = "deleted")
+    private boolean deleted;
 }

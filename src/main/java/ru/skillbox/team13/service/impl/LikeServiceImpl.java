@@ -1,13 +1,12 @@
 package ru.skillbox.team13.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.LikesDto;
-import ru.skillbox.team13.entity.Like;
-import ru.skillbox.team13.entity.Notified;
-import ru.skillbox.team13.entity.Person;
+import ru.skillbox.team13.entity.*;
 import ru.skillbox.team13.entity.projection.Liker;
 import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.mapper.WrapperMapper;
@@ -21,6 +20,7 @@ import ru.skillbox.team13.service.UserService;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LikeServiceImpl implements LikeService {
@@ -60,13 +60,14 @@ public class LikeServiceImpl implements LikeService {
             throw new BadRequestException("Person id=" + liker.getId() + " has already liked id=" + id);
         }
 
-        Notified postOrComment = switch (type) {
-            case "Post" -> postRepo.findById(id).get(); //todo throw exc??
-            case "Comment" -> commentRepo.findById(id).get();
+        switch (type) {
+            case "Post" -> likePost(liker, postRepo.findById(id).get());
+            case "Comment" -> likeComment(liker, commentRepo.findById(id).get());
             default -> throw new BadRequestException("Bad 'type' parameter");
-        };
+        }
 
-        applyLike(liker, postOrComment);
+//        applyLike(liker, postOrComment);
+//        log.debug("id={} liked {} (id={})", liker.getId(), type, id);
         return getLikedBy(id, type);
     }
 
@@ -78,6 +79,7 @@ public class LikeServiceImpl implements LikeService {
             throw new BadRequestException("Person id=" + liker.getId() + " has hasn't liked id=" + itemId);
         }
 
+        log.debug("id={} removed like from {} (id={})", liker.getId(), type, itemId);
         likeRepo.deleteByLikerAndId(liker, itemId);
 
         return getLikedBy(itemId, type);
@@ -87,11 +89,18 @@ public class LikeServiceImpl implements LikeService {
         return likeRepo.countByLikerAndItemId(liker, itemId) > 0;
     }
 
-    private void applyLike(Person liker, Notified item) {
+    private void likePost(Person liker, Post post) {
         Like like = new Like();
         like.setTime(LocalDateTime.now());
         like.setPerson(liker);
-        like.setPostOrComment(item);
+        like.setPost(post);
+        likeRepo.save(like);
+    }
+    private void likeComment(Person liker, Comment comment) {
+        Like like = new Like();
+        like.setTime(LocalDateTime.now());
+        like.setPerson(liker);
+        like.setComment(comment);
         likeRepo.save(like);
     }
 }

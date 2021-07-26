@@ -1,20 +1,11 @@
 package ru.skillbox.team13.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import ru.skillbox.team13.entity.Comment;
-import ru.skillbox.team13.entity.Post;
-import ru.skillbox.team13.entity.projection.CommentProjection;
+import ru.skillbox.team13.entity.Person;
 
-import java.util.List;
+import java.util.Set;
 
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
-
-    List<Comment> findAllByPost(Post post);
-
-
-    @Query("select c.id as id, c.commentText as text, c.post.id as postId," +
-            "c.parent.id as parentId, c.time as time, c.author.id as authorId, " +
-            "c.isBlocked as blocked from Comment c")
-    List<CommentProjection> getCommProjections(Post post);
+    Set<Comment> findAllByAuthor(Person currentPerson);
 }

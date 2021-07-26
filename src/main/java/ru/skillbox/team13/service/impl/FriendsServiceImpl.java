@@ -1,6 +1,7 @@
 package ru.skillbox.team13.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
@@ -10,7 +11,6 @@ import ru.skillbox.team13.dto.PersonDTO;
 import ru.skillbox.team13.dto.UserFriendshipStatusDTO;
 import ru.skillbox.team13.entity.City;
 import ru.skillbox.team13.entity.Friendship;
-import ru.skillbox.team13.entity.FriendshipStatus;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
 import ru.skillbox.team13.exception.BadRequestException;
@@ -26,9 +26,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsService {
+public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendService {
 
     private final PersonRepository personRepository;
     private final FriendshipRepository friendshipRepo;
@@ -55,6 +56,7 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
                     "%" + name.toLowerCase() + "%");
         }
 
+        log.debug("Fetching friends for person id={}: page {}, total {}", currentPersonId, offset / itemPerPage, count);
         List<PersonDTO> results = friendships.stream().map(Friendship::getDestinationPerson)
                 .map(PersonMapper::convertPersonToPersonDTO).collect(Collectors.toList());
 
@@ -70,7 +72,7 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
         Integer currentPersonId = userService.getAuthorizedUser().getPerson().getId();
 
         Friendship friendship = getRequestedFriendship(currentPersonId, friendPersonId);
-
+        log.debug("Deleting friendship 'id={} -> id={}'", currentPersonId, friendPersonId);
         friendshipRepo.delete(friendship); //todo set FSC to 'BLOCKED' or 'DECLINED' ???
 
         return WrapperMapper.wrapMessage(new MessageDTO("ok"));
@@ -118,6 +120,8 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
 
         List<PersonDTO> results = friendships.stream().map(Friendship::getSourcePerson)
                 .map(PersonMapper::convertPersonToPersonDTO).collect(Collectors.toList());
+        log.debug("Fetching friendship requests for person id={}: page {}, total {}",
+                currentPersonId, offset / itemPerPage, count);
 
         return WrapperMapper.wrap(results, count, offset, itemPerPage, true);
     }
@@ -134,7 +138,8 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
 
         List<PersonDTO> results = personList.stream()
                 .map(PersonMapper::convertPersonToPersonDTO).collect(Collectors.toList());
-
+        log.debug("Fetching friendship recommendations for person id={}: page {}, total {}",
+                thisPerson.getId(), offset / itemPerPage, count);
         return WrapperMapper.wrap(results, count, offset, itemPerPage, true);
     }
 
@@ -145,12 +150,13 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
         Integer currentPersonId = userService.getAuthorizedUser().getPerson().getId();
         List<Friendship> friendships = friendshipRepo.findFriendshipsFromIdsToId(currentPersonId, friendsIds);
         List<UserFriendshipStatusDTO> results = friendships.stream()
-                .map(f -> new UserFriendshipStatusDTO(f.getSourcePerson().getId(), f.getStatus().getCode().name()))
+                .map(f -> new UserFriendshipStatusDTO(f.getSourcePerson().getId(), f.getCode().name()))
                 .collect(Collectors.toList());
+        log.debug("Fetching friedndship status for ids {}", friendsIds);
         return WrapperMapper.wrap(results, false);
     }
 
-    @Override
+    @Deprecated
     public List<Person> getFriends(Integer srcId, FriendshipStatusCode code) {
         return friendshipRepo.findRequestedFriendships(srcId, code);
     }
@@ -162,7 +168,8 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
         } catch (BadRequestException ignored) {
         }
         if (friendship != null) {
-            friendship.getStatus().setCode(FriendshipStatusCode.FRIEND);
+            friendship.setCode(FriendshipStatusCode.FRIEND);
+            log.debug("Setting status {} for friendship id={} -> id={}", code.name(), srcFriendId, dstCurrentPersonId);
             friendshipRepo.save(friendship);
         }
     }
@@ -177,8 +184,10 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
         if (friendship != null) {
             throw new BadRequestException(
                     "friendship from id=" + srcCurrentPersonId + " to id=" + dstFriendId + " already exists " +
-                            "with code=" + friendship.getStatus().getCode());
+                            "with code=" + friendship.getCode());
         } else {
+            log.debug("Creating friendship id={} -> id={} with status {}", srcCurrentPersonId, dstFriendId,
+                    FriendshipStatusCode.REQUEST.name());
             friendship = createNewFriendship(srcCurrentPersonId, dstFriendId, FriendshipStatusCode.REQUEST);
             friendshipRepo.save(friendship);
         }
@@ -187,8 +196,7 @@ public class FriendsServiceImpl implements ru.skillbox.team13.service.FriendsSer
     private Friendship createNewFriendship(Integer src, Integer dst, FriendshipStatusCode code) {
         Person srcPerson = personRepository.findById(src).get(); //todo exception handling
         Person dstPerson = personRepository.findById(dst).get();
-        FriendshipStatus status = new FriendshipStatus(LocalDateTime.now(), "", FriendshipStatusCode.REQUEST);
-        return new Friendship(status, srcPerson, dstPerson);
+        return new Friendship(LocalDateTime.now(), "", code, srcPerson, dstPerson);
     }
 
     private Friendship getRequestedFriendship(Integer src, Integer dst) {

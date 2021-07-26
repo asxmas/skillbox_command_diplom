@@ -1,0 +1,2 @@
+webpackJsonp([26],{"0b7B":function(e,s){},JlvQ:function(e,s,t){"use strict";Object.defineProperty(s,"__esModule",{value:!0});var a={render:function(){var e=this.$createElement,s=this._self._c||e;return s("div",{staticClass:"change-password-success"},[s("simple-svg",{attrs:{filepath:"/static/img/success-change-password.svg"}})],1)},staticRenderFns:[]};var n=t("VU/8")({name:"ChangePasswordFailed"},a,!1,function(e){t("0b7B")},null,null);s.default=n.exports}});
+//# sourceMappingURL=26.3cf2512477cee7aa68fb.js.map

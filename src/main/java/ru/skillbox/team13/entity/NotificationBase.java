@@ -3,6 +3,7 @@ package ru.skillbox.team13.entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.skillbox.team13.entity.enums.NotificationCode;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -21,9 +22,9 @@ public class NotificationBase {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private int id;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "type_id", nullable = false)
-    private NotificationType notificationType;
+    @JoinColumn(name = "notification_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private NotificationCode notificationType;
 
     @Column(name = "sent_time", nullable = false)
     private LocalDateTime sentTime;

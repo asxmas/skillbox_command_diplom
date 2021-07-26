@@ -9,14 +9,19 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
 jwt:
   token:
     secret: stream-team13
-    expired: 3600000
+    ordinary:
+      expired: 3600000
+    recovery:
+      expired: 600000
+    mail:
+      expired: 600000
 
 spring.mail:
   host: smtp.gmail.com
@@ -25,5 +30,23 @@ spring.mail:
   password: ${EMAILPASS}
   properties.mail.smtp.auth: true
   properties.mail.smtp.starttls.enable: true
-#server:
-#  port: ${PORT:8080}
+
+#осуществлять отправку писем подтверждения регистрации и сброса пароля
+email.sender.active: false
+
+server:
+  port: ${PORT:8080}
+
+#для heroku установить значение https://team13.herokuapp.com - сервер на котором развернут фронт
+server.base_url: ${BASE_URL:http://localhost:8080}
+
+logging:
+  level:
+    liquibase: INFO
+    org:
+      springframework: INFO
+      hibernate: INFO
+    ru:
+      skillbox: DEBUG
+  pattern:
+    console: "%date{dd.MM-HH:mm:ss.SSS} %highlight(%5level) [%thread] %logger{45}: %message %n"

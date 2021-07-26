@@ -13,15 +13,16 @@ import java.util.Set;
 @Entity
 @NoArgsConstructor
 @Table(name = "post_comment")
-public class  Comment extends Notified {
+public class Comment extends Notified {
+
     @Column(name = "time", nullable = false)
     private LocalDateTime time;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id", nullable = true)
     private Comment parent;
 
@@ -35,9 +36,20 @@ public class  Comment extends Notified {
     @Column(name = "is_blocked", nullable = false)
     private boolean isBlocked;
 
+    @Column(name = "deleted")
+    private boolean deleted;
+
     @OneToMany(mappedBy = "parent")
     private Set<Comment> childComments;
 
-    @OneToMany(mappedBy = "postOrComment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "comment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Like> likes;
+
+    public Comment(LocalDateTime time, Post post, Person author, String commentText, boolean isBlocked) {
+        this.time = time;
+        this.post = post;
+        this.author = author;
+        this.commentText = commentText;
+        this.isBlocked = isBlocked;
+    }
 }

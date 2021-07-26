@@ -10,6 +10,7 @@ import ru.skillbox.team13.entity.enums.UserType;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+//todo добавить isActive
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public enum UserDto {;
 
@@ -52,6 +53,7 @@ public enum UserDto {;
             String firstName;
             String lastName;
             String code;
+            Boolean isActive;
         }
     }
 

@@ -10,6 +10,8 @@ import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.repository.UserRepository;
 import ru.skillbox.team13.security.Jwt.JwtUserFactory;
 
+import java.util.Optional;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -20,9 +22,11 @@ public class JwtUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        User user = userRepository.findByEmail(username).orElse(userRepository.findByName(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User with username: " + username + " not found")));
-        log.info("IN loadUserByUsername - user with username: {} successfully loaded", username);
+        User user;
+        Optional<User> optionalUser = userRepository.findByEmail(username);
+        if (optionalUser.isEmpty()) { throw new UsernameNotFoundException("User with username: " + username + " not found"); }
+        else { user = optionalUser.get(); }
+//        log.info("IN loadUserByUsername - user with username: {} successfully loaded", username);
         return JwtUserFactory.create(user);
     }
 }

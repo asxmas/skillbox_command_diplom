@@ -8,18 +8,18 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import ru.skillbox.team13.dto.ErrorDto;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@ControllerAdvice
 @Slf4j
+@ControllerAdvice
 public class RestExceptionHandler {
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorDto> handleBadRequestException(BadRequestException e) {
+        log.error(e.getResponse().getErrorDescription());
         return new ResponseEntity<>(e.getResponse(), HttpStatus.BAD_REQUEST);
     }
 
@@ -30,6 +30,7 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorDto> handleUnauthorizedException(UnauthorizedException e) {
+        log.error(e.getResponse().getErrorDescription());
         return new ResponseEntity<>(e.getResponse(), HttpStatus.UNAUTHORIZED);
     }
 
