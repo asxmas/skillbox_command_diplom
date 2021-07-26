@@ -32,7 +32,7 @@ spring.mail:
   properties.mail.smtp.starttls.enable: true
 
 #осуществлять отправку писем подтверждения регистрации и сброса пароля
-email.sender.active: false
+email.sender.active: true
 
 server:
   port: ${PORT:8080}
