@@ -39,4 +39,6 @@ public interface UserService {
     DTOWrapper getUserActivity(int userId);
 
     DTOWrapper setUserDialogStatus(int userId, String status);
+
+    DTOWrapper deactivateUser(User user);
 }

@@ -8,6 +8,7 @@ import ru.skillbox.team13.dto.*;
 import ru.skillbox.team13.entity.City;
 import ru.skillbox.team13.entity.Country;
 import ru.skillbox.team13.entity.Person;
+import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.mapper.PersonMapper;
 import ru.skillbox.team13.mapper.WrapperMapper;
@@ -26,8 +27,7 @@ public class PersonServiceImpl implements PersonService {
     private final CitiesRepository citiesRepository;
     private final CountryRepository countryRepository;
     private final PostService postsService; //todo refactor
-    private final CityServiceRepo cityServiceRepo; //todo refactor
-    private final CountryServiceRepo countryServiceRepo; //todo refactor
+    private final CommentService commentService;
 
     @Override
     @Transactional(readOnly = true)
@@ -52,13 +52,19 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     @Transactional
-    public DTOWrapper deleteMyProfile() { //todo tests
-        int personId = userService.getAuthorizedUser().getPerson().getId();
+    public DTOWrapper deleteMyProfile() {
+        User user = userService.getAuthorizedUser();
+        int personId = user.getPerson().getId();
+
+        postsService.deletePostsForAuthor(personId);
+        commentService.deleteCommentsForAuthor(personId);
+
         log.debug("Deleting person id={}.", personId);
         Person person = personRepository.getById(personId);
-        postsService.setInactiveAuthor();
         person.setDeleted(true);
         personRepository.save(person);
+        userService.deactivateUser(user);
+
         return WrapperMapper.wrap(new MessageDTO("ok"), true);
     }
 
@@ -67,13 +73,6 @@ public class PersonServiceImpl implements PersonService {
         log.debug("Fetching data for person id={}.", id);
         Person person = personRepository.findById(id).orElseThrow(() -> new BadRequestException("No user for id=" + id + " found"));
         return WrapperMapper.wrap(PersonMapper.convertPersonToPersonDTO(person), true);
-    }
-
-    private void fillPersonDTOFields(PersonDTO personDTO) { //todo check
-//        CityDto cityDTO = PersonMapper.convertCityToCityDTO(cityServiceRepo.getById(personDTO.getTownId()));
-//        CountryDto countryDto = PersonMapper.convertCountryToCountryDTO(countryServiceRepo.getCountryById(personDTO.getCountryId()));
-//        personDTO.setCityDto(cityDTO);
-//        personDTO.setCountryDto(countryDto);
     }
 
     private void fillPersonFields(Person person, EditPersonDto dto) {

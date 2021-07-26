@@ -24,6 +24,7 @@ import ru.skillbox.team13.util.CommentUtil;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.util.Objects.nonNull;
 import static ru.skillbox.team13.util.PageUtil.getPageable;
@@ -107,6 +108,15 @@ public class CommentServiceImpl implements CommentService {
 
 //      return WrapperMapper.wrap(Collections.singletonList(getCommentDto(commentId)), true); unnecessary DB load
         return WrapperMapper.wrapMessage(new MessageDTO("OK id="+commentId + " text=" + comment.getCommentText()));
+    }
+
+    @Override
+    public DTOWrapper deleteCommentsForAuthor(int authorId) {
+        Person currentPerson = userService.getAuthorizedUser().getPerson();
+        Set<Comment> comments = commentRepository.findAllByAuthor(currentPerson);
+        log.debug("Deleting {} comments.", comments.size());
+        comments.forEach(c -> c.setDeleted(true));
+        return WrapperMapper.wrapMessage("OK");
     }
 
     private Comment createComment(int postId, String text) {

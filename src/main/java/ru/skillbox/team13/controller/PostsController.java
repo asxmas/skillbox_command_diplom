@@ -37,7 +37,7 @@ public class PostsController {
     @PutMapping("{id}")
 //Редактирование публикации по ID
     ResponseEntity<DTOWrapper> editPost(@PathVariable int id,
-                                        @RequestParam(name = "publish_date", required = false) Long pubDate, //todo wtf??
+                                        @RequestParam(name = "publish_date", required = false) Long pubDate,
                                         @RequestBody AddPostDto payload) {
         String title = payload.getTitle();
         String text = payload.getPostText();

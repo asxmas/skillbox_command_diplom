@@ -21,5 +21,5 @@ public interface PostService {
 
     DTOWrapper post(String title, String text, List<String> tags, Integer id, Long pubDate);
 
-    void setInactiveAuthor();
+    DTOWrapper deletePostsForAuthor(int authorId);
 }

@@ -23,7 +23,6 @@ import ru.skillbox.team13.repository.PostRepository;
 import ru.skillbox.team13.repository.QueryDSL.CommentDAO;
 import ru.skillbox.team13.repository.QueryDSL.PersonDAO;
 import ru.skillbox.team13.repository.QueryDSL.PostDAO;
-import ru.skillbox.team13.repository.RepoPost;
 import ru.skillbox.team13.service.TagService;
 import ru.skillbox.team13.service.UserService;
 import ru.skillbox.team13.util.CommentUtil;
@@ -48,7 +47,6 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     private final PersonDAO personDAO;
     private final CommentDAO commentDAO;
     private final UserService userService;
-    private final RepoPost repoPost; //todo check and refactor
     private final TagService tagService;
 
     @Override
@@ -203,16 +201,25 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
         return posts;
     }
 
-    @Modifying
     @Override
+    public DTOWrapper deletePostsForAuthor(int authorId) {
+        Person currentPerson = userService.getAuthorizedUser().getPerson();
+        Set<Post> posts = postRepository.findAllByAuthor(currentPerson);
+        log.debug("Deleting {} posts.", posts.size());
+        posts.forEach(p -> p.setDeleted(true));
+        return WrapperMapper.wrapMessage("OK");
+    }
+
+    @Modifying
+    @Deprecated
     public void setInactiveAuthor() {
         User currentUser = userService.getAuthorizedUser();
         Person currentPerson = currentUser.getPerson();
         Person inactiveAuthor = userService.getInactivePerson();
-        List<Post> posts = repoPost.getPostsByAuthorId(PageRequest.of(0, 10), currentPerson.getId());
+        List<Post> posts = postRepository.getPostsByAuthorId(PageRequest.of(0, 10), currentPerson.getId());
         for (Post post : posts) {
             post.setAuthor(inactiveAuthor);
         }
-        repoPost.saveAllAndFlush(posts);
+        postRepository.saveAllAndFlush(posts);
     }
 }

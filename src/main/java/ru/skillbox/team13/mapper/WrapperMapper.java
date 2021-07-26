@@ -48,6 +48,10 @@ public class WrapperMapper {
                 .build();
     }
 
+    public static DTOWrapper wrapMessage(String message) {
+        return wrapMessage(new MessageDTO(message));
+    }
+
     private static Object getDataByClass(Object payload) {
         if (payload instanceof Collection<?>) {
             return ((Collection<?>) payload).toArray();

@@ -12,4 +12,6 @@ public interface CommentService {
     DTOWrapper delete(int commentId);
 
     DTOWrapper restore(int commentId);
+
+    DTOWrapper deleteCommentsForAuthor(int authorId);
 }

@@ -35,7 +35,7 @@ public class Friendship {
     private Person sourcePerson;
 
     //person who was 'friended' by someone
-    @ManyToOne(fetch = FetchType.EAGER)  //todo test
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "dst_person_id", nullable = false)
     private Person destinationPerson;
 

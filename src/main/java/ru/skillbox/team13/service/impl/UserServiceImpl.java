@@ -38,6 +38,7 @@ import ru.skillbox.team13.util.TimeUtil;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -89,7 +90,7 @@ public class UserServiceImpl implements UserService {
             user.setApproved(false);//требует подтверждения переходом по ссылке из почты
             log.debug("Saving user and person data...");
             User registeredUser = userRepository.save(user);
-            log.info("New user registered: '{}', type: {}, message permission: {}, not approval.",
+            log.info("New user registered: '{}', type: {}, message permission: {}, not approved.",
                     registeredUser.getEmail(), registeredUser.getType().name(), person.getMessagesPermission().name());
             return universalAccountMailLink(userDto.getEmail(), "register/confirm", request);
     }
@@ -159,14 +160,14 @@ public class UserServiceImpl implements UserService {
     @Scheduled(fixedRate = 60000)
     @Transactional
     @Modifying
-    public void clearNotApprovedUsers(){
+    public void clearNotApprovedUsers() {
         List<User> usersList = userRepository.findAllByNotApproved();
-        List<User> deleteList = usersList.stream().filter((user) -> user.getPerson().getRegDate().isBefore(LocalDateTime.now().minusSeconds(deleteExpiredRegistrationPeriod / 1000)))
+        List<User> deleteList = usersList.stream().filter((user) -> user.getPerson().getRegDate()
+                .isBefore(LocalDateTime.now().minus(deleteExpiredRegistrationPeriod, ChronoUnit.MILLIS)))
                 .collect(Collectors.toList());
         userRepository.deleteAll(deleteList);
-        deleteList.stream().forEach((user) -> log.debug("Scheduled task complete: not approved user {} was deleted", user.getEmail()));
-
-     }
+        deleteList.forEach((user) -> log.info("Scheduled task complete: not approved user '{}' was deleted", user.getEmail()));
+    }
 
     private Optional<User> checkUserRegistration(String email) {
         return userRepository.findByEmailNoApproval(email);
@@ -212,8 +213,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Deprecated
     public Person getInactivePerson() {
-        return personRepository.getById(13); //todo ???
+        return personRepository.getById(13);
     }
 
     @Override
@@ -351,6 +353,14 @@ public class UserServiceImpl implements UserService {
         ud.setOnlineStatus(status);
         log.debug("Setting status '{}' to user id={} .", status, userId);
         return WrapperMapper.wrap(Map.of("message", "ok"), true);
+    }
+
+    @Override
+    public DTOWrapper deactivateUser(User user) {
+        user.setApproved(false);
+        userRepository.save(user);
+        log.info("User '{}' was marked as non-approved", user.getEmail());
+        return WrapperMapper.wrapMessage("OK");
     }
 
     private JwtUser getUserDetails(String username) {
