@@ -49,7 +49,7 @@ public class PersonDAO {
 
         QueryResults<PersonDTO> qr = query.select(Projections.constructor(PersonDTO.class,
                 person.id, person.firstName, person.lastName, person.regDate, person.birthDate,
-                person.email, person.phone, person.phone, person.about, city.id, city.title,
+                person.email, person.phone, person.photo, person.about, city.id, city.title,
                 country.id, country.title))
                 .from(person)
                 .leftJoin(person.city, city)

@@ -78,7 +78,7 @@ public class UserServiceImpl implements UserService {
             person.setBlocked(false);//НЕТ ДАННЫХ, NOT NULL
             person.setLastOnlineTime(LocalDateTime.now());
             person.setMessagesPermission(PersonMessagePermission.ALL);//NOT NULL, ставим значение по-умолчанию
-            person.setPhoto("duser.png");
+            person.setPhoto("/pic/duser.png");
             //заполняем Person имеющимися данными
             User user = new User();
             user.setEmail(userDto.getEmail());
