@@ -2,6 +2,7 @@ package ru.skillbox.team13.repository.QueryDSL;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -31,11 +32,9 @@ public class PostDAO {
 
     private final EntityManager em;
 
-    //todo tags
     public Page<PostDto> getPostDTOs(int viewerId, List<Integer> authorIds, String substr, Pageable pageable) {
         QPost post = QPost.post;
         QPerson author = QPerson.person;
-        QLike like = QLike.like;
 
         Predicate where = author.id.in(authorIds).and(post.deleted.isFalse());
         BooleanBuilder whereBool = new BooleanBuilder(where);
@@ -44,56 +43,26 @@ public class PostDAO {
                     .or(post.postText.containsIgnoreCase(substr)));
         }
 
-        JPAQuery<PostDto> query = new JPAQuery<>(em);
-        QueryResults<PostDto> results = query.select(Projections.constructor(PostDto.class,
-                post.id, post.time, author.id, author.firstName, author.lastName, author.photo, author.lastOnlineTime,
-                post.title, post.postText, post.isBlocked, post.likes.size(),
-                like.person.id                                          //liked by this person
-                        .when(viewerId).then(true)
-                        .otherwise(false)))
-                .distinct()  //todo something produces duplicates
-                .from(post)
-                .leftJoin(post.likes, like)
-                .join(post.author, author)
-                .where(whereBool)
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .orderBy(post.time.desc())
-                .fetchResults();
-
+        QueryResults<PostDto> results = doPageQuery(viewerId, whereBool, pageable.getOffset(), pageable.getPageSize());
         return new PageImpl<>(results.getResults(), pageable, results.getTotal());
     }
 
     public Page<PostDto> getPostDTOs(int viewerId, String text, LocalDateTime earliest, LocalDateTime latest, Pageable pageable) {
         QPost post = QPost.post;
-        QPerson author = QPerson.person;
-        QLike like = QLike.like;
-
 
         Predicate where = post.deleted.isFalse();
         BooleanBuilder whereBool = new BooleanBuilder(where);
         if (nonNull(earliest)) whereBool.and(post.time.after(earliest));
         if (nonNull(latest)) whereBool.and(post.time.before(latest));
         if (nonNull(text) && !text.isBlank()) {
-            whereBool.and(post.title.containsIgnoreCase(text).or(post.postText.containsIgnoreCase(text)));
+            whereBool.and(
+                    post.title.containsIgnoreCase(text)
+                            .or(post.title.containsIgnoreCase(text))
+                            .or(post.title.contains(text))    //db collation bugs lower() func on cyrillic strings :'(
+                            .or(post.title.contains(text)));
         }
-        JPAQuery<PostDto> query = new JPAQuery<>(em);
-        QueryResults<PostDto> results = query.select(Projections.constructor(PostDto.class,
-                post.id, post.time, author.id, author.firstName, author.lastName, author.photo, author.lastOnlineTime,
-                post.title, post.postText, post.isBlocked, post.likes.size(),
-                like.person.id                                          //liked by this person
-                        .when(viewerId).then(true)
-                        .otherwise(false)))
-                .distinct()  //todo something produces duplicates
-                .from(post)
-                .leftJoin(post.likes, like)
-                .join(post.author, author)
-                .where(whereBool)
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .orderBy(post.time.desc())
-                .fetchResults();
 
+        QueryResults<PostDto> results = doPageQuery(viewerId, whereBool, pageable.getOffset(), pageable.getPageSize());
         return new PageImpl<>(results.getResults(), pageable, results.getTotal());
     }
 
@@ -104,13 +73,8 @@ public class PostDAO {
 
         Predicate where = post.id.eq(postId).and(post.deleted.isFalse());
         JPAQuery<PostDto> query = new JPAQuery<>(em);
-        PostDto dto = query.select(Projections.constructor(PostDto.class,
-                post.id, post.time, author.id, author.firstName, author.lastName, author.photo, author.lastOnlineTime,
-                post.title, post.postText, post.isBlocked, post.likes.size(),
-                like.person.id                                          //liked by this person
-                        .when(viewerId).then(true)
-                        .otherwise(false)))
-                .distinct()  //todo something produces duplicates
+        PostDto dto = query.select(getSelectExpr(viewerId))
+                .distinct()
                 .from(post)
                 .leftJoin(post.likes, like)
                 .join(post.author, author)
@@ -139,5 +103,34 @@ public class PostDAO {
             throw new BadRequestException("Post id=" + id + "does not exist or was deleted.");
         }
         post.setDeleted(delete);
+    }
+
+    private QueryResults<PostDto> doPageQuery(int viewerId, Predicate where, long offset, int limit) {
+        QPost post = QPost.post;
+        QPerson author = QPerson.person;
+        QLike like = QLike.like;
+
+        JPAQuery<PostDto> query = new JPAQuery<>(em);
+        return query.select(getSelectExpr(viewerId))
+                .distinct()  //todo something produces duplicates
+                .from(post)
+                .leftJoin(post.likes, like)
+                .join(post.author, author)
+                .where(where)
+                .offset(offset)
+                .limit(limit)
+                .orderBy(post.time.desc())
+                .fetchResults();
+    }
+
+    private Expression<PostDto> getSelectExpr(int viewerId) {
+        QPost post = QPost.post;
+        QPerson author = post.author;
+
+        return Projections.constructor(PostDto.class,
+                post.id, post.time, author.id, author.firstName, author.lastName, author.photo, author.lastOnlineTime,
+                post.title, post.postText, post.isBlocked, post.likes.size(), QLike.like.person.id
+                        .when(viewerId).then(true)
+                        .otherwise(false));
     }
 }

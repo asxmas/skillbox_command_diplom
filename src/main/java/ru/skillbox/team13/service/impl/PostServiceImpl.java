@@ -56,7 +56,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
         List<Integer> authorIds = personDAO.getFriendsIds(currentPersonId, FriendshipStatusCode.FRIEND);
 
-        Page<PostDto> postDtoPage = postDAO.getPostDTOs(currentPersonId, authorIds, substr, getPageable(offset, itemPerpage));
+        Page<PostDto> postDtoPage = postDAO.getPostDTOs(currentPersonId, authorIds, null, getPageable(offset, itemPerpage));
 
         List<Integer> postIds = postDtoPage.getContent().stream().map(PostDto::getId).collect(toList());
         List<CommentDto> commentDtos = commentDAO.getCommentDTOs(currentPersonId, postIds);

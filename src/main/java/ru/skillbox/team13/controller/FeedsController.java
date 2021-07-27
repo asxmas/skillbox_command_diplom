@@ -17,7 +17,7 @@ public class FeedsController {
 
     //Получение списка новостей
     @GetMapping("/api/v1/feeds")
-    ResponseEntity<DTOWrapper> getFeed(@RequestParam(defaultValue = "") String name,
+    ResponseEntity<DTOWrapper> getFeed(@RequestParam(defaultValue = "") String name, //frontend does not use 'name'
                                        @RequestParam(required = false, defaultValue = "0") int offset,
                                        @RequestParam(required = false, defaultValue = "20") int itemPerPage){
         return new ResponseEntity<>(postService.getFeed(name, offset, itemPerPage), HttpStatus.OK);
