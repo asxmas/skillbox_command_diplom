@@ -2,7 +2,6 @@ package ru.skillbox.team13.service;
 
 import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.EditPersonDto;
-import ru.skillbox.team13.dto.PersonDTO;
 
 public interface PersonService {
 
@@ -13,4 +12,7 @@ public interface PersonService {
     DTOWrapper deleteMyProfile();
 
     DTOWrapper getProfile(int id);
+
+    DTOWrapper find(String firstName, String lastName, Integer ageFrom, Integer ageTo, String country, String city,
+                    int offset, int itemPerPage);
 }

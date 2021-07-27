@@ -44,4 +44,16 @@ public class PersonController {
     public ResponseEntity<DTOWrapper> getUserProfile(@PathVariable("id") int id) {
         return ResponseEntity.ok(personService.getProfile(id));
     }
+
+    @GetMapping("search")
+    public ResponseEntity<DTOWrapper> findUser(@RequestParam(name = "first_name", required = false) String firstName,
+                                               @RequestParam(name = "last_name", required = false) String lastName,
+                                               @RequestParam(name = "age_from", required = false) Integer ageFrom,
+                                               @RequestParam(name = "age_to", required = false) Integer ageTo,
+                                               @RequestParam(required = false) String country,
+                                               @RequestParam(required = false) String city,
+                                               @RequestParam(required = false, defaultValue = "0") int offset,
+                                               @RequestParam(required = false, defaultValue = "20") int itemPerPage) {
+        return ResponseEntity.ok(personService.find(firstName, lastName, ageFrom, ageTo, country, city, offset, itemPerPage));
+    }
 }

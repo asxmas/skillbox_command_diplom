@@ -24,4 +24,7 @@ public class TimeUtil {
         return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZONE_OFFSET);
     }
 
+    public static LocalDateTime getBirthday(Integer age) {
+        return LocalDateTime.now().minusYears(age);
+    }
 }

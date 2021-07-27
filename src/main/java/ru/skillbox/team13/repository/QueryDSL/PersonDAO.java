@@ -1,5 +1,6 @@
 package ru.skillbox.team13.repository.QueryDSL;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
@@ -16,8 +17,11 @@ import ru.skillbox.team13.entity.enums.FriendshipStatusCode;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.nonNull;
 
 @Repository
 @PersistenceContext
@@ -32,7 +36,7 @@ public class PersonDAO {
 
         JPAQuery<Person> query = new JPAQuery<>(em);
 
-        List<PersonCompactDto> dtos =  query.select(Projections.constructor(PersonCompactDto.class, person.id))
+        List<PersonCompactDto> dtos = query.select(Projections.constructor(PersonCompactDto.class, person.id))
                 .from(friendship)
                 .innerJoin(friendship.destinationPerson, person)
                 .where(friendship.sourcePerson.id.eq(srcPersonID).and(friendship.code.eq(fsc))).fetch();
@@ -46,6 +50,45 @@ public class PersonDAO {
         QCountry country = QCountry.country;
 
         Predicate where = person.id.notIn(minusIds);
+
+        QueryResults<PersonDTO> qr = query.select(Projections.constructor(PersonDTO.class,
+                person.id, person.firstName, person.lastName, person.regDate, person.birthDate,
+                person.email, person.phone, person.photo, person.about, city.id, city.title,
+                country.id, country.title))
+                .from(person)
+                .leftJoin(person.city, city)
+                .leftJoin(person.country, country)
+                .where(where)
+                .limit(pageable.getPageSize())
+                .offset(pageable.getOffset())
+                .fetchResults();
+
+        return new PageImpl<>(qr.getResults(), pageable, (int) (qr.getTotal()));
+    }
+
+    public Page<PersonDTO> find(int currentPersonId, String firstName, String lastName, LocalDateTime earliest,
+                                LocalDateTime latest, String countryTitle, String cityTitle, Pageable pageable) {
+        QPerson person = QPerson.person;
+        QCity city = QCity.city;
+        QCountry country = QCountry.country;
+
+        Predicate predicate = person.id.ne(currentPersonId);
+
+        BooleanBuilder where = new BooleanBuilder(predicate);
+        if (nonNull(firstName)) {
+            where.and(person.firstName.contains(firstName).or(person.firstName.containsIgnoreCase(firstName)));
+        }
+
+        if (nonNull(lastName)) {
+            where.and(person.lastName.contains(lastName).or(person.lastName.containsIgnoreCase(lastName)));
+        }
+
+        if (nonNull(earliest)) where.and(person.birthDate.after(earliest));
+        if (nonNull(latest)) where.and(person.birthDate.before(latest));
+        if (nonNull(cityTitle)) where.and(city.title.eq(cityTitle));
+        if (nonNull(countryTitle)) where.and(country.title.eq(countryTitle));
+
+        JPAQuery<Person> query = new JPAQuery<>(em);
 
         QueryResults<PersonDTO> qr = query.select(Projections.constructor(PersonDTO.class,
                 person.id, person.firstName, person.lastName, person.regDate, person.birthDate,
