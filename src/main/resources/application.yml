@@ -19,9 +19,9 @@ jwt:
     ordinary:
       expired: 3600000
     recovery:
-      expired: 600000
+      expired: 300000
     mail:
-      expired: 600000
+      expired: 300000
 
 spring.mail:
   host: smtp.gmail.com
