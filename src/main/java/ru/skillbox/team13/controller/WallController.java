@@ -3,12 +3,13 @@ package ru.skillbox.team13.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.dto.AddPostDto;
+import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.service.PostService;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,7 +33,7 @@ public class WallController {
                                                  @RequestBody AddPostDto payload) {
         String title = payload.getTitle();
         String text = payload.getPostText();
-        List<String> tags = Arrays.asList(payload.getTags());
+        Set<String> tags = Arrays.stream(payload.getTags()).collect(Collectors.toSet());
         return ResponseEntity.ok(postService.post(title, text, tags, id, pubDate));
     }
 }

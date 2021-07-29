@@ -123,7 +123,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     @Override
     @Modifying
     @Transactional
-    public DTOWrapper edit(int id, Long pubDate, String title, List<String> tagNames, String text) {
+    public DTOWrapper edit(int id, Long pubDate, String title, Set<String> tagNames, String text) {
         LocalDateTime ldt = TimeUtil.getTime(pubDate);
 
         Set<Tag> tags = tagNames.isEmpty() ? new HashSet<>() : tagService.getTagsByName(tagNames);
@@ -159,7 +159,7 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
     @Override
     @Transactional
-    public DTOWrapper post(String title, String text, List<String> tagNames, Integer authorId, Long pubDate) {
+    public DTOWrapper post(String title, String text, Set<String> tagNames, Integer authorId, Long pubDate) {
         Person author = personRepository.findById(authorId)
                 .orElseThrow(() -> new BadRequestException("No person for id=" + authorId + " is found."));
         Post post = new Post();

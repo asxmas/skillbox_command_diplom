@@ -57,9 +57,9 @@ public class PostDAO {
         if (nonNull(text) && !text.isBlank()) {
             whereBool.and(
                     post.title.containsIgnoreCase(text)
-                            .or(post.title.containsIgnoreCase(text))
-                            .or(post.title.contains(text))    //db collation bugs lower() func on cyrillic strings :'(
-                            .or(post.title.contains(text)));
+                            .or(post.postText.containsIgnoreCase(text))
+                            .or(post.title.contains(text))
+                            .or(post.postText.contains(text))); //todo test on heroku collation
         }
 
         QueryResults<PostDto> results = doPageQuery(viewerId, whereBool, pageable.getOffset(), pageable.getPageSize());

@@ -71,7 +71,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public Set<Tag> getTagsByName(List<String> tagNames) {
+    public Set<Tag> getTagsByName(Set<String> tagNames) {
         Set<Tag> tags = tagRepository.findAllByTagIn(tagNames);
 
         if (tags.isEmpty()) {

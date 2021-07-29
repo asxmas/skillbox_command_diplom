@@ -9,7 +9,8 @@ import ru.skillbox.team13.dto.DTOWrapper;
 import ru.skillbox.team13.service.PostService;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,7 +42,7 @@ public class PostsController {
                                         @RequestBody AddPostDto payload) {
         String title = payload.getTitle();
         String text = payload.getPostText();
-        List<String> tags = Arrays.asList(payload.getTags());
+        Set<String> tags = Arrays.stream(payload.getTags()).collect(Collectors.toSet());
         return new ResponseEntity<>(postService.edit(id, pubDate, title, tags, text), HttpStatus.OK);
     }
 

@@ -16,7 +16,7 @@ public interface TagService {
 
     Optional<String> deleteTag(int id);
 
-    Set<Tag> getTagsByName(List<String> tagNames);
+    Set<Tag> getTagsByName(Set<String> tagNames);
 
     Map<Integer, Set<String>> getPostIdTagsMap(List<Integer> postIds);
 }
