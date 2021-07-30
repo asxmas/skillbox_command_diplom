@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @Table(name = "languages")
-public class Languages {
+public class Language {
         @Id
         @Column(name = "id", nullable = false)
         @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -19,4 +19,8 @@ public class Languages {
 
         @Column(name = "title", nullable = false)
         private String title;
+
+        public Language(String title) {
+                this.title = title;
+        }
 }

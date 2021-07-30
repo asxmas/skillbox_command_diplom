@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.test.web.servlet.*;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.skillbox.team13.dto.CommentDto;
-import ru.skillbox.team13.dto.DTOWrapper;
-import ru.skillbox.team13.dto.MessageDTO;
-import ru.skillbox.team13.dto.PostDto;
+import ru.skillbox.team13.dto.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -80,5 +77,11 @@ public class RequestService {
     public MessageDTO getAsMessageDTO(RequestBuilder req, boolean doPrint) {
         String data = getDataAsString(req, doPrint);
         return om.readValue(data, MessageDTO.class);
+    }
+
+    @SneakyThrows
+    public PlatformValuesDto getAsPlatformValuesDto(RequestBuilder req, boolean doPrint) {
+        String data = getDataAsString(req, doPrint);
+        return om.readValue(data, PlatformValuesDto.class);
     }
 }

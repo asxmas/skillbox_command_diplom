@@ -19,4 +19,8 @@ public class City {
 
     @Column(name = "title", nullable = false)
     private String title;
+
+    public City(String title) {
+        this.title = title;
+    }
 }

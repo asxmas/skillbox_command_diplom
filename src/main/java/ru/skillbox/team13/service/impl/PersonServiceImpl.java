@@ -17,7 +17,7 @@ import ru.skillbox.team13.entity.User;
 import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.mapper.PersonMapper;
 import ru.skillbox.team13.mapper.WrapperMapper;
-import ru.skillbox.team13.repository.CitiesRepository;
+import ru.skillbox.team13.repository.CityRepository;
 import ru.skillbox.team13.repository.CountryRepository;
 import ru.skillbox.team13.repository.PersonRepository;
 import ru.skillbox.team13.repository.QueryDSL.PersonDAO;
@@ -41,7 +41,7 @@ public class PersonServiceImpl implements PersonService {
     private final PersonRepository personRepository;
     private final PersonDAO personDAO;
     private final UserService userService;
-    private final CitiesRepository citiesRepository;
+    private final CityRepository citiesRepository;
     private final CountryRepository countryRepository;
     private final PostService postsService; //todo refactor
     private final CommentService commentService;
