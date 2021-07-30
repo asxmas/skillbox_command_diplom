@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skillbox.team13.dto.AddPostDto;
 import ru.skillbox.team13.dto.DTOWrapper;
+import ru.skillbox.team13.dto.SearchPostDto;
 import ru.skillbox.team13.service.PostService;
 
 import java.util.Arrays;
@@ -21,12 +22,17 @@ public class PostsController {
 
     @GetMapping()
 //Поиск публикации
-    ResponseEntity<DTOWrapper> findPost(@RequestParam String text,
-                                        @RequestParam(required = false, name = "date_from") Long timestampFrom,
-                                        @RequestParam(required = false, name = "date_to") Long timestampTo,
+    ResponseEntity<DTOWrapper> findPost(@RequestBody SearchPostDto searchDto,
                                         @RequestParam(required = false, defaultValue = "0") int offset,
                                         @RequestParam(required = false, defaultValue = "10") int itemPerPage) {
-        return new ResponseEntity<>(postService.find(text, timestampFrom, timestampTo, offset, itemPerPage), HttpStatus.OK);
+        String text = searchDto.getText();
+        Long timestampFrom = searchDto.getTimestampFrom();
+        Long timestampTo = searchDto.getTimestampTo();
+        String authorName = searchDto.getAuthor();
+        String[] tags = searchDto.getTags();
+
+        return new ResponseEntity<>(postService.find(text, timestampFrom, timestampTo,
+                authorName, tags, offset, itemPerPage), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")

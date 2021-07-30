@@ -5,7 +5,8 @@ import ru.skillbox.team13.dto.DTOWrapper;
 import java.util.Set;
 
 public interface PostService {
-    DTOWrapper find(String text, Long timestampFrom, Long timestampTo, int offset, int itemPerPage);
+    DTOWrapper find(String text, Long timestampFrom, Long timestampTo, String authorName, String[] tags,
+                    int offset, int itemPerPage);
 
     DTOWrapper getFeed(String name, int offset, int itemPerPage);
 

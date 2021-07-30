@@ -13,6 +13,7 @@ import ru.skillbox.team13.dto.PostDto;
 import ru.skillbox.team13.entity.Like;
 import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Post;
+import ru.skillbox.team13.entity.Tag;
 import ru.skillbox.team13.exception.BadRequestException;
 import ru.skillbox.team13.repository.PostRepository;
 import ru.skillbox.team13.repository.QueryDSL.PostDAO;
@@ -50,7 +51,14 @@ public class PostDAOTest {
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
 
-        List<Person> persons = List.of(makePerson(), makePerson(), makePerson());
+        Tag t1 = new Tag("tag1");
+        Tag t2 = new Tag("tag2");
+        em.persist(t1);
+        em.persist(t2);
+
+        List<Person> persons = List.of(makePerson("bob", "bobson","b@email"),
+                makePerson("jim", "jimson", "j@email"),
+                makePerson("rob", "robson", "r@email"));
 
         persons.forEach(em::persist);
 
@@ -68,6 +76,10 @@ public class PostDAOTest {
 
         posts.get(1).setTime(LocalDateTime.now().minusHours(1));
         posts.get(3).setTime(LocalDateTime.now().plusHours(1));
+
+        posts.get(1).getTags().add(t1);
+        posts.get(2).getTags().add(t1);
+        posts.get(2).getTags().add(t2);
 
         posts.forEach(em::persist);
 
@@ -118,27 +130,29 @@ public class PostDAOTest {
 
     @Test
     void findBySubstring() {
-        Page<PostDto> page = postDAO.getPostDTOs(0, "substring", null, null, PageRequest.of(0, 100));
+        Page<PostDto> page = postDAO.getPostDTOs(0, "substring", null, null, null,
+                null, PageRequest.of(0, 100));
         assertEquals(3, page.getTotalElements());
     }
 
     @Test
     void findBySubstringEmpty() {
-        Page<PostDto> page = postDAO.getPostDTOs(0, "", null, null, PageRequest.of(0, 100));
+        Page<PostDto> page = postDAO.getPostDTOs(0, "", null, null, null,
+                null, PageRequest.of(0, 100));
         assertEquals(6, page.getTotalElements());
     }
 
     @Test
     void findBybyTime() {
         Page<PostDto> page = postDAO.getPostDTOs(0, null, LocalDateTime.now().minusMinutes(1),
-                LocalDateTime.now().plusMinutes(1), PageRequest.of(0, 100));
+                LocalDateTime.now().plusMinutes(1), null, null, PageRequest.of(0, 100));
         assertEquals(4, page.getTotalElements());
     }
 
     @Test
     void findBybyOneTime() {
         Page<PostDto> page = postDAO.getPostDTOs(0, "substring", null,
-                LocalDateTime.now().plusMinutes(1), PageRequest.of(0, 100));
+                LocalDateTime.now().plusMinutes(1), null, null, PageRequest.of(0, 100));
         assertEquals(2, page.getTotalElements());
     }
 
@@ -153,5 +167,29 @@ public class PostDAOTest {
     @Test
     void testGetWrongId() {
         assertThrows(BadRequestException.class, () -> postDAO.getPostDTO(0, 100500));
+    }
+
+    @Test
+    void findByAuthor() {
+        Page<PostDto> page = postDAO.getPostDTOs(0, null, null, null, "rob",
+                null, PageRequest.of(0, 100));
+        assertEquals(3, page.getTotalElements());
+
+    }
+
+    @Test
+    void findByTag() {
+        String[] tagnames = new String[]{"tag1"};
+        Page<PostDto> page = postDAO.getPostDTOs(0, null, null, null, null,
+                tagnames, PageRequest.of(0, 100));
+        assertEquals(2, page.getTotalElements());
+    }
+
+    @Test
+    void findByMultipleTags() {
+        String[] tagnames = new String[]{"tag1", "tag2"};
+        Page<PostDto> page = postDAO.getPostDTOs(0, null, null, null, null,
+                tagnames, PageRequest.of(0, 100));
+        assertEquals(1, page.getTotalElements());
     }
 }

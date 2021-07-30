@@ -70,11 +70,12 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     }
 
     @Override
-    public DTOWrapper find(String text, Long timestampFrom, Long timestampTo, int offset, int itemPerPage) {
+    public DTOWrapper find(String text, Long timestampFrom, Long timestampTo, String authorName, String[] tags,
+                           int offset, int itemPerPage) {
         int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
 
         Page<PostDto> page = postDAO.getPostDTOs(currentPersonId, text, getTime(timestampFrom), getTime(timestampTo),
-                getPageable(offset, itemPerPage));
+                authorName, tags, getPageable(offset, itemPerPage));
 
         List<Integer> postIds = page.getContent().stream().map(PostDto::getId).collect(toList());
 

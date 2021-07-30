@@ -47,13 +47,21 @@ public class PostDAO {
         return new PageImpl<>(results.getResults(), pageable, results.getTotal());
     }
 
-    public Page<PostDto> getPostDTOs(int viewerId, String text, LocalDateTime earliest, LocalDateTime latest, Pageable pageable) {
+    public Page<PostDto> getPostDTOs(int viewerId, String text, LocalDateTime earliest, LocalDateTime latest,
+                                     String authorName, String[] tagNames, Pageable pageable) {
         QPost post = QPost.post;
 
         Predicate where = post.deleted.isFalse();
         BooleanBuilder whereBool = new BooleanBuilder(where);
         if (nonNull(earliest)) whereBool.and(post.time.after(earliest));
         if (nonNull(latest)) whereBool.and(post.time.before(latest));
+        if (nonNull(authorName)) whereBool.and(post.author.firstName.containsIgnoreCase(authorName)
+                .or(post.author.lastName.containsIgnoreCase(authorName)));
+        if (nonNull(tagNames) && tagNames.length > 0) {
+            for (String tagName : tagNames) {
+                whereBool.and(post.tags.any().tag.eq(tagName));
+            }
+        }
         if (nonNull(text) && !text.isBlank()) {
             whereBool.and(
                     post.title.containsIgnoreCase(text)
