@@ -5,6 +5,7 @@ import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,7 +33,8 @@ public class PostDAO {
 
     private final EntityManager em;
 
-    public Page<PostDto> getPostDTOs(int viewerId, List<Integer> authorIds, String substr, Pageable pageable) {
+    public Page<PostDto> getPostDTOs(int viewerId, List<Integer> authorIds, String substr, boolean withFuturePosts,
+                                     Pageable pageable) {
         QPost post = QPost.post;
         QPerson author = QPerson.person;
 
@@ -41,6 +43,9 @@ public class PostDAO {
         if (nonNull(substr) && !substr.isBlank()) {
             whereBool.and(post.title.containsIgnoreCase(substr)
                     .or(post.postText.containsIgnoreCase(substr)));
+        }
+        if (!withFuturePosts) {
+            whereBool.and(post.time.before(LocalDateTime.now()));
         }
 
         QueryResults<PostDto> results = doPageQuery(viewerId, whereBool, pageable.getOffset(), pageable.getPageSize());
@@ -137,8 +142,12 @@ public class PostDAO {
 
         return Projections.constructor(PostDto.class,
                 post.id, post.time, author.id, author.firstName, author.lastName, author.photo, author.lastOnlineTime,
-                post.title, post.postText, post.isBlocked, post.likes.size(), QLike.like.person.id
+                post.title, post.postText, post.isBlocked, post.likes.size(),
+                QLike.like.person.id
                         .when(viewerId).then(true)
-                        .otherwise(false));
+                        .otherwise(false),
+                new CaseBuilder()
+                        .when(post.time.before(LocalDateTime.now())).then("POSTED")
+                        .otherwise("QUEUED"));
     }
 }

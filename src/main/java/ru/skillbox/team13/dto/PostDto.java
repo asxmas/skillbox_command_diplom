@@ -49,7 +49,8 @@ public class PostDto {
     private WallPostType type;
 
     public PostDto(int id, LocalDateTime time, int authorID, String firstName, String lastName, String photo,
-                   LocalDateTime lastOnline, String title, String text, Boolean blocked, Integer likes, Boolean likedByMe) {
+                   LocalDateTime lastOnline, String title, String text, Boolean blocked, Integer likes,
+                   Boolean likedByMe, String type) {
         this.id = id;
         this.time = TimeUtil.getTimestamp(time);
         this.authorID = authorID;
@@ -61,6 +62,6 @@ public class PostDto {
         this.tags = new HashSet<>();
         this.likedByMe = likedByMe;
         this.comments = new ArrayList<>();
-        this.type = WallPostType.POSTED; //todo temporary
+        this.type = WallPostType.valueOf(type);
     }
 }

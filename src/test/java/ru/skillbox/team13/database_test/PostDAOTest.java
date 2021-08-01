@@ -56,7 +56,7 @@ public class PostDAOTest {
         em.persist(t1);
         em.persist(t2);
 
-        List<Person> persons = List.of(makePerson("bob", "bobson","b@email"),
+        List<Person> persons = List.of(makePerson("bob", "bobson", "b@email"),
                 makePerson("jim", "jimson", "j@email"),
                 makePerson("rob", "robson", "r@email"));
 
@@ -99,7 +99,7 @@ public class PostDAOTest {
 
     @Test
     void fetchNullSubstr() {
-        Page<PostDto> page = postDAO.getPostDTOs(0, authorsIds, null, PageRequest.of(0, 100));
+        Page<PostDto> page = postDAO.getPostDTOs(0, authorsIds, null, true, PageRequest.of(0, 100));
         assertEquals(6, page.getTotalElements());
         assertEquals(0, page.getContent().get(5).getLikes());
         assertEquals(10, page.getContent().stream().max(Comparator.comparing(PostDto::getLikes)).get().getLikes());
@@ -110,20 +110,20 @@ public class PostDAOTest {
 
     @Test
     void fetchEmptySubstrAuthors() {
-        Page<PostDto> page = postDAO.getPostDTOs(0, authorsIds, "", PageRequest.of(1, 2));
+        Page<PostDto> page = postDAO.getPostDTOs(0, authorsIds, "", true, PageRequest.of(1, 2));
         assertEquals(6, page.getTotalElements());
         assertEquals(2, page.getContent().size());
     }
 
     @Test
     void fetchWithSubstrAuthors() {
-        Page<PostDto> page = postDAO.getPostDTOs(0, authorsIds, "substring", PageRequest.of(0, 100));
+        Page<PostDto> page = postDAO.getPostDTOs(0, authorsIds, "substring", true, PageRequest.of(0, 100));
         assertEquals(3, page.getTotalElements());
     }
 
     @Test
     void countLikesAuthors() {
-        Page<PostDto> page = postDAO.getPostDTOs(0, authorsIds, null, PageRequest.of(0, 100));
+        Page<PostDto> page = postDAO.getPostDTOs(0, authorsIds, null, true, PageRequest.of(0, 100));
         PostDto dto = page.getContent().stream().max(Comparator.comparing(PostDto::getLikes)).get();
         assertEquals(10, dto.getLikes());
     }

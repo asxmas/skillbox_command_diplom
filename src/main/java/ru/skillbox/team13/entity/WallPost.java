@@ -11,6 +11,7 @@ import javax.persistence.*;
 @Setter
 @Entity
 @NoArgsConstructor
+@Deprecated
 @Table(name = "wall_post")
 public class WallPost extends Post {
     @Enumerated(EnumType.STRING)

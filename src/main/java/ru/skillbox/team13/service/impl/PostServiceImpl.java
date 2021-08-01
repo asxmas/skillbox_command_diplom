@@ -56,7 +56,8 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
 
         List<Integer> authorIds = personDAO.getFriendsIds(currentPersonId, FriendshipStatusCode.FRIEND);
 
-        Page<PostDto> postDtoPage = postDAO.getPostDTOs(currentPersonId, authorIds, null, getPageable(offset, itemPerpage));
+        Page<PostDto> postDtoPage = postDAO.getPostDTOs(currentPersonId, authorIds, null, false,
+                getPageable(offset, itemPerpage));
 
         List<Integer> postIds = postDtoPage.getContent().stream().map(PostDto::getId).collect(toList());
         List<CommentDto> commentDtos = commentDAO.getCommentDTOs(currentPersonId, postIds);
@@ -93,8 +94,10 @@ public class PostServiceImpl implements ru.skillbox.team13.service.PostService {
     public DTOWrapper getWallForUserId(int authorId, int offset, int itemPerPage) {
         int currentPersonId = userService.getAuthorizedUser().getPerson().getId();
 
-        Page<PostDto> userPosts = postDAO.getPostDTOs(currentPersonId, List.of(authorId),
-                null, getPageable(offset, itemPerPage));
+        boolean isMyWall = currentPersonId == authorId;
+
+        Page<PostDto> userPosts = postDAO.getPostDTOs(currentPersonId, List.of(authorId), null, isMyWall,
+                getPageable(offset, itemPerPage));
 
         List<Integer> postIds = userPosts.getContent().stream().map(PostDto::getId).collect(toList());
         List<CommentDto> commentDtos = commentDAO.getCommentDTOs(currentPersonId, postIds);
