@@ -35,6 +35,7 @@ import ru.skillbox.team13.security.TokenType;
 import ru.skillbox.team13.service.UserService;
 import ru.skillbox.team13.util.TimeUtil;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -204,7 +205,7 @@ public class UserServiceImpl implements UserService {
                     "<p><a href=\"" + request.getScheme() + "://" + request.getHeader("host") + "/api/v1/account/" + route + "?link=" +
                             link + "\">" + description + "</a></p>");
         }
-        catch (Exception e) {
+        catch (MessagingException e) {
             //при любой ошибке возвращаем отрицательный ответ
             log.error("Failed to send code.");
             throw new BadRequestException("Не удалось выслать ссылку");
@@ -290,7 +291,7 @@ public class UserServiceImpl implements UserService {
 
         //получаем user'a из токена
         User user;
-        if (jwtTokenProvider.resolveTokenDate(token).after(new Date())) { user = userRepository.findByName(jwtTokenProvider.getUsername(token)).get(); }
+        if (jwtTokenProvider.resolveTokenDate(token).after(new Date())) { user = userRepository.findByEmail(jwtTokenProvider.getUsername(token)).get(); }
         else {
             log.warn("Password reset failed (expired token).");
             return null;

@@ -20,7 +20,7 @@ public class PostsController {
 
     private final PostService postService;
 
-    @GetMapping()
+    @PostMapping()
 //Поиск публикации
     ResponseEntity<DTOWrapper> findPost(@RequestBody SearchPostDto searchDto,
                                         @RequestParam(required = false, defaultValue = "0") int offset,
