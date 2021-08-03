@@ -28,8 +28,17 @@ public class PersonController {
 
     @PutMapping("me")
     //Редактирование текущего пользователя
-    public ResponseEntity<DTOWrapper> updateMyProfile(@RequestBody EditPersonDto personDTO) {
-        return ResponseEntity.ok(personService.updateMyProfile(personDTO));
+    public ResponseEntity<DTOWrapper> updateMyProfile(@RequestBody EditPersonDto dto) {
+        String fName = dto.getFirstName();
+        String lName = dto.getLastName();
+        String about = dto.getAbout();
+        String city = dto.getCity();
+        String country = dto.getCountry();
+        String phone = dto.getPhone();
+        Long bdate = dto.getBirthDate();
+        String photo = dto.getPhoto();
+
+        return ResponseEntity.ok(personService.updateMyProfile(fName, lName, about, city, country, photo, phone, bdate));
     }
 
     @DeleteMapping("me")

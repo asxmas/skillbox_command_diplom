@@ -1,13 +1,13 @@
 package ru.skillbox.team13.service;
 
 import ru.skillbox.team13.dto.DTOWrapper;
-import ru.skillbox.team13.dto.EditPersonDto;
 
 public interface PersonService {
 
     DTOWrapper getMyProfile();
 
-    DTOWrapper updateMyProfile(EditPersonDto personDTO);
+    DTOWrapper updateMyProfile(String fName, String lName, String about, String city, String country, String photo,
+                               String phone, Long bdate);
 
     DTOWrapper deleteMyProfile();
 

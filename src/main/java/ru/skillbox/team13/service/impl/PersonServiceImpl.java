@@ -56,11 +56,23 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     @Transactional
-    public DTOWrapper updateMyProfile(EditPersonDto editPersonDto) { //todo tests
+    public DTOWrapper updateMyProfile(String fName, String lName, String about, String cityName, String countryName,
+                                      String photo, String phone, Long bdate) {
+        //todo tests!
+        City city = citiesRepository.findByTitle(cityName).orElse(citiesRepository.save(new City(cityName)));
+        Country country = countryRepository.findByTitle(countryName).orElse(countryRepository.save(new Country(countryName)));
         Person myPerson = userService.getAuthorizedUser().getPerson();
-        log.debug("Updating person data for id={}.", myPerson.getId());
-        fillPersonFields(myPerson, editPersonDto);
 
+        myPerson.setCity(city);
+        myPerson.setCountry(country);
+        myPerson.setFirstName(fName);
+        myPerson.setLastName(lName);
+        myPerson.setAbout(about);
+        myPerson.setPhoto(photo);
+        myPerson.setPhone(phone);
+        myPerson.setBirthDate(TimeUtil.getTime(bdate));
+
+        log.debug("Updating person data for id={}.", myPerson.getId());
         personRepository.save(myPerson);
 
         PersonDTO newDto = PersonMapper.convertPersonToPersonDTO(myPerson);
@@ -103,35 +115,5 @@ public class PersonServiceImpl implements PersonService {
 
         Page<PersonDTO> page = personDAO.find(currentPersonId, firstName, lastName, dbEarliest, dbLatest, country, city, pageable);
         return WrapperMapper.wrap(page.getContent(), (int) page.getTotalElements(), offset, itemPerPage, true);
-    }
-
-    private void fillPersonFields(Person person, EditPersonDto dto) {
-
-        if (dto.getFirstName() != null) {
-            person.setFirstName(dto.getFirstName());
-        }
-        if (dto.getLastName() != null) {
-            person.setLastName(dto.getLastName());
-        }
-        if (dto.getPhone() != null) {
-            person.setPhone(dto.getPhone());
-        }
-        if (dto.getPhoto() != null) {
-            person.setPhoto(dto.getPhoto());
-        }
-        if (dto.getPermission() != null) {
-            person.setMessagesPermission(dto.getPermission());
-        }
-        if (dto.getCityId() != null) {
-            City city = citiesRepository.findById(dto.getCityId())
-                    .orElseThrow(() -> new BadRequestException("No city for id " + dto.getCityId() + " found."));
-            person.setCity(city);
-        }
-
-        if (dto.getCountryId() != null) {
-            Country country = countryRepository.findById(dto.getCityId())
-                    .orElseThrow(() -> new BadRequestException("No country for id " + dto.getCityId() + " found."));
-            person.setCountry(country);
-        }
     }
 }

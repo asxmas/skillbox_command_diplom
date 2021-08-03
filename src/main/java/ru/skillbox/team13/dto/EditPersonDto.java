@@ -18,7 +18,7 @@ public class EditPersonDto {
     private String lastName;
 
     @JsonProperty("birth_date")
-    private Long birthDate;
+    private Long birthDate; //todo front sends as '2000-01-01T00:00:00+03:00' (string)
 
     private String phone;
 
@@ -27,12 +27,10 @@ public class EditPersonDto {
 
     private String about;
 
-    @JsonProperty("town_id")
-    private Integer cityId;
+    private String city;
 
-    @JsonProperty("country_id")
-    private Integer countryId;
+    private String country;
 
-    @JsonProperty("messages_permission")
+    @JsonProperty("messages_permission") // unused??
     private PersonMessagePermission permission;
 }
