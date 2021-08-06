@@ -29,6 +29,7 @@ import ru.skillbox.team13.util.PageUtil;
 import ru.skillbox.team13.util.TimeUtil;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static java.util.Objects.nonNull;
 
@@ -59,8 +60,22 @@ public class PersonServiceImpl implements PersonService {
     public DTOWrapper updateMyProfile(String fName, String lName, String about, String cityName, String countryName,
                                       String photo, String phone, Long bdate) {
         //todo tests!
-        City city = citiesRepository.findByTitle(cityName).orElse(citiesRepository.save(new City(cityName)));
-        Country country = countryRepository.findByTitle(countryName).orElse(countryRepository.save(new Country(countryName)));
+        City city;
+        Optional<City> optionalCity = citiesRepository.findByTitle(cityName);
+        if (optionalCity.isEmpty()) {
+            city = new City(cityName);
+            citiesRepository.save(city);
+        }
+        else {city = optionalCity.get();}
+
+        Country country;
+        Optional<Country> optionalCountry = countryRepository.findByTitle(countryName);
+        if (optionalCountry.isEmpty()) {
+            country = new Country(countryName);
+            countryRepository.save(country);
+        }
+        else {country = optionalCountry.get();}
+
         Person myPerson = userService.getAuthorizedUser().getPerson();
 
         myPerson.setCity(city);

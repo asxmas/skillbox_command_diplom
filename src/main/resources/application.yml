@@ -38,7 +38,7 @@ server:
   port: ${PORT:8080}
 
 #сервер на котором развернут фронт(https://team13.herokuapp.com или http://localhost:8080 при расположении в static)
-server.base_url: ${BASE_URL:http://localhost:8080}
+server.base_url: ${BASE_URL:https://team13.herokuapp.com}
 
 logging:
   level:
