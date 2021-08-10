@@ -108,6 +108,7 @@ public class DialogServiceImpl implements DialogService {
         Person currentPerson = userService.getAuthorizedUser().getPerson();
         Dialog dialog = dialogRepository.findById(dialogId).get();
         Person dstPerson = recipientPerson(currentPerson, dialog);
+        if (dstPerson.isDeleted()) throw new BadRequestException("Невозможно отправить сообщение удаленному пользователю");
         Message message = createMessage(dialog, currentPerson, dstPerson, messageText);
         dialog.setLastMessage(message);
         messageRepository.save(message);
@@ -124,20 +125,19 @@ public class DialogServiceImpl implements DialogService {
         Pageable pageable = PageRequest.of(offset / itemPerPage, itemPerPage, Sort.by("id").descending());
         Dialog dialog = dialogRepository.getById(dialogId);
         if (fromMessageId == 0) {
-            try {
-                fromMessageId = messageRepository.findFirstByOrderByIdDesc().getId();
-            }
-            catch (NullPointerException e){
-                //в новом диалоге нет сообщений
+            Optional<Message> lastMessage = messageRepository.findFirstByOrderByIdDesc();
+            if (lastMessage.isEmpty()) {
+                //в диалоге нет сообщений
                 return WrapperMapper.wrap(Collections.emptyList(), 0, offset, itemPerPage, true);
             }
+        fromMessageId = lastMessage.get().getId();
         }
         Page<Message> messagePage = messageRepository.findByDialog(pageable, fromMessageId, dialogId);
         Person currentPerson = userService.getAuthorizedUser().getPerson();
         List<DialogMessageDto> results = messagePage.stream()
             .map(message -> DialogMapper.convertMessageToDialogMessageDTO(message, currentPerson.getId() == message.getAuthor().getId()))
             .collect(Collectors.toList());
-        //все выданные фронту сообщения считаю прочтенными, если их выдали получателю, необходима доработка фронта
+        //все выданные фронту сообщения считаю прочтенными, если их запрашивал получатель
         messageRepository.setStatusForGroup(MessageReadStatus.READ, currentPerson.getId(), messagePage.stream().map(m -> m.getId()).collect(Collectors.toList()));
         setUnread(dialog, recipientPerson(currentPerson, dialog));
         return WrapperMapper.wrap(results, (int) messagePage.getTotalElements(), offset, itemPerPage, true);

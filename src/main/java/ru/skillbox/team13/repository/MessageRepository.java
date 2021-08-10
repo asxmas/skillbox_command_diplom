@@ -12,6 +12,7 @@ import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.enums.MessageReadStatus;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MessageRepository extends JpaRepository<Message, Integer> {
 
@@ -22,7 +23,7 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
     @Query("select m from Message m where m.dialog.id = :dialogId and m.id <= :fromMessageId")
     Page<Message> findByDialog(Pageable pageable, int fromMessageId, int dialogId);
 
-    Message findFirstByOrderByIdDesc();
+    Optional<Message> findFirstByOrderByIdDesc();
 
     @Modifying
     @Query("update Message m set m.readStatus = :status where m.recipient.id = :personId and m.id in :messagesId")

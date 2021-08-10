@@ -48,9 +48,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements WebM
                 .anyRequest().authenticated()
                 .and()
                 .apply(new JwtConfigurer(jwtTokenProvider))
-                .and()
-//                .cors()
 //                .and()
+//                .cors()
+                .and()
                 .sessionManagement()
                     .maximumSessions(-1)
                     .sessionRegistry(sessionRegistry());
