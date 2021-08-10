@@ -1,8 +1,8 @@
 spring:
   datasource:
-    username: ${RDS_USERNAME}
-    password: ${RDS_PASSWORD}
-    url: jdbc:postgresql://${RDS_HOSTNAME:localhost}:${RDS_PORT:5432}/${RDS_DB_NAME:skillbox_team13}
+    username: postgres
+    password: afrby
+    url: jdbc:postgresql://localhost:5432}/skillbox_team13
   liquibase:
     enabled: true
     change-log: db/db.yml
@@ -32,13 +32,13 @@ spring.mail:
   properties.mail.smtp.starttls.enable: true
 
 #осуществлять отправку писем подтверждения регистрации и сброса пароля
-email.sender.active: true
+email.sender.active: false
 
 server:
   port: ${PORT:8080}
 
 #сервер на котором развернут фронт(https://team13.herokuapp.com или http://localhost:8080 при расположении в static)
-server.base_url: ${BASE_URL:https://team13.herokuapp.com}
+server.base_url: ${BASE_URL:http://localhost:8080}
 
 logging:
   level:
