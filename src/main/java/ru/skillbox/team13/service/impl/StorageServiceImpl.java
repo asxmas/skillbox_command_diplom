@@ -2,16 +2,15 @@ package ru.skillbox.team13.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FilenameUtils;
 
 import org.imgscalr.Scalr;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.mock.web.MockMultipartFile;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skillbox.team13.dto.DTOWrapper;
+import ru.skillbox.team13.entity.Person;
 import ru.skillbox.team13.entity.Storage;
 import ru.skillbox.team13.mapper.StorageMapper;
 import ru.skillbox.team13.mapper.WrapperMapper;
@@ -22,10 +21,8 @@ import ru.skillbox.team13.component.FileStore;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 import static org.apache.http.entity.ContentType.*;
 
@@ -39,7 +36,7 @@ public class StorageServiceImpl implements StorageService {
     private final UserServiceImpl userService;
 
     @Transactional
-    public DTOWrapper photoUploadDto (MultipartFile file) throws IOException {
+    public DTOWrapper photoUploadDto (String fileType, MultipartFile file) throws IOException {
         if (file.getSize() == 0) {
             return null;
         }
@@ -50,18 +47,20 @@ public class StorageServiceImpl implements StorageService {
         UUID uuid = UUID.randomUUID();
         String fileName = file.getOriginalFilename();
         String contentType = file.getContentType();
+        Person person = userService.getAuthorizedUser().getPerson();
 
+        //todo переделать под orderby
         //create storage
         Storage storage = new Storage();
         storage.setFileName(fileName);
         storage.setFileFormat(Objects.requireNonNull(contentType).replaceAll(".+/", ""));
         storage.setBytes(file.getSize());
-        storage.setRelativeFilePath(String.format("%s/%s/%s", "https://socnet-storage.s3.eu-west-2.amazonaws.com", uuid, "comp." + fileName));
+        storage.setRelativeFilePath(String.format("%s/%s/%s", "https://socnet-storage.s3.eu-west-2.amazonaws.com", uuid, fileName));
         storage.setRawFileURL(String.format("%s/%s/%s", "https://socnet-storage.s3.eu-west-2.amazonaws.com", uuid, fileName));
-        storage.setFileType("image");
+        storage.setFileType("IMAGE");
         storage.setCreatedAt(LocalDateTime.now());
-        storage.setOwnerId(userService.getAuthorizedUser().getPerson().getId());
-        storage.setPerson(userService.getAuthorizedUser().getPerson());
+        storage.setOwnerId(person.getId());
+        storage.setPerson(person);
         storageRepository.save(storage);
 
         //upload files
@@ -74,20 +73,11 @@ public class StorageServiceImpl implements StorageService {
         return WrapperMapper.wrap(StorageMapper.mapStorageToStorageDto(storage), true);
     }
 
+    public Storage getStorage(int id){
+        return storageRepository.findById(id);
+    }
+
     private MultipartFile imgResize(MultipartFile file) throws IOException {
-//        BufferedImage scaledImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_ARGB);
-//        Graphics2D g = scaledImage.createGraphics();
-//        g.drawImage(ImageIO.read(file.getInputStream()), 0, 0, 200, 200, null);
-//        g.dispose();
-//        String nameOfNewFile = "1" + file.getOriginalFilename();
-//        g.setComposite(AlphaComposite.Src);
-//
-//        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-//                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-//        g.setRenderingHint(RenderingHints.KEY_RENDERING,
-//                RenderingHints.VALUE_RENDER_QUALITY);
-//        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-//                RenderingHints.VALUE_ANTIALIAS_ON);
         BufferedImage scaledImage = Scalr.resize(ImageIO.read(file.getInputStream()), 200, 200, Scalr.OP_ANTIALIAS);
         ByteArrayOutputStream resizingImageInBufImage = new ByteArrayOutputStream();
         ImageIO.write(scaledImage, "png",resizingImageInBufImage);
@@ -154,8 +144,7 @@ public class StorageServiceImpl implements StorageService {
             }
 
             @Override
-            public void transferTo(@NotNull File file) throws IllegalStateException {
-
+            public void transferTo(@NotNull File file) throws IllegalStateException, UnsupportedOperationException {
             }
         };
     }

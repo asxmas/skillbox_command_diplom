@@ -21,10 +21,7 @@ import ru.skillbox.team13.repository.CityRepository;
 import ru.skillbox.team13.repository.CountryRepository;
 import ru.skillbox.team13.repository.PersonRepository;
 import ru.skillbox.team13.repository.QueryDSL.PersonDAO;
-import ru.skillbox.team13.service.CommentService;
-import ru.skillbox.team13.service.PersonService;
-import ru.skillbox.team13.service.PostService;
-import ru.skillbox.team13.service.UserService;
+import ru.skillbox.team13.service.*;
 import ru.skillbox.team13.util.PageUtil;
 import ru.skillbox.team13.util.TimeUtil;
 
@@ -46,6 +43,7 @@ public class PersonServiceImpl implements PersonService {
     private final CountryRepository countryRepository;
     private final PostService postsService; //todo refactor
     private final CommentService commentService;
+    private final StorageService storageService;
 
     @Override
     @Transactional(readOnly = true)
@@ -77,13 +75,14 @@ public class PersonServiceImpl implements PersonService {
         else {country = optionalCountry.get();}
 
         Person myPerson = userService.getAuthorizedUser().getPerson();
+        int photoId = Integer.parseInt(photo);
 
         myPerson.setCity(city);
         myPerson.setCountry(country);
         myPerson.setFirstName(fName);
         myPerson.setLastName(lName);
         myPerson.setAbout(about);
-        myPerson.setPhoto(photo);
+        myPerson.setPhoto(storageService.getStorage(photoId).getRelativeFilePath());
         myPerson.setPhone(phone);
         myPerson.setBirthDate(TimeUtil.getTime(bdate));
 

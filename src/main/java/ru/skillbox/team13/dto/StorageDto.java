@@ -1,18 +1,17 @@
 package ru.skillbox.team13.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-import ru.skillbox.team13.entity.Person;
+import lombok.*;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
+@Builder
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class StorageDto {
 
+    private int id;
     private String fileName;
     private String relativeFilePath;
     private String rawFileURL;
@@ -20,6 +19,5 @@ public class StorageDto {
     private long bytes;
     private String fileType;
     private LocalDateTime createdAt;
-
 
 }

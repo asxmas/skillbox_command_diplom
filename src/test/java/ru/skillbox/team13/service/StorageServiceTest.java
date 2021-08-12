@@ -91,7 +91,7 @@ public class StorageServiceTest {
     public void testUploadNotImageFile()
             throws Exception {
         MockMultipartFile file = new MockMultipartFile("file","text.txt", MediaType.TEXT_PLAIN_VALUE, "text".getBytes());
-        DTOWrapper storageDto = storageService.photoUploadDto(file);
+        DTOWrapper storageDto = storageService.photoUploadDto("IMAGE", file);
         assertNull(storageDto);
     }
 
@@ -110,7 +110,7 @@ public class StorageServiceTest {
     public void testUploadNullFile()
             throws Exception {
         MultipartFile file = new MockMultipartFile("file","image.jpeg", MediaType.IMAGE_JPEG_VALUE, new byte[0]);
-        DTOWrapper storageDto = storageService.photoUploadDto(file);
+        DTOWrapper storageDto = storageService.photoUploadDto("IMAGE", file);
         assertNull(storageDto);
     }
 
@@ -120,7 +120,7 @@ public class StorageServiceTest {
     public void testUploadFile()
             throws Exception {
         MultipartFile file = new MockMultipartFile("file","image.jpeg", MediaType.IMAGE_JPEG_VALUE, "text".getBytes(StandardCharsets.UTF_8));
-        DTOWrapper storageDto = storageService.photoUploadDto(file);
+        DTOWrapper storageDto = storageService.photoUploadDto("IMAGE", file);
         assertNotNull(storageDto);
     }
 }

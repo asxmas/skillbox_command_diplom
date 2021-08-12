@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 @RestController
-@RequestMapping("/api/v1/storage/")
+@RequestMapping("/api/v1/storage")
 @RequiredArgsConstructor
 public class StorageController {
 
@@ -27,12 +27,8 @@ public class StorageController {
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<DTOWrapper> addFile(@RequestBody MultipartFile file) throws ExecutionException, InterruptedException, IOException {
-            return new ResponseEntity<>(storageServiceImpl.photoUploadDto(file), HttpStatus.OK);
-    }
-
-    @GetMapping
-    public String test (@RequestParam int test){
-        return "Hello world " + test;
+    public ResponseEntity<DTOWrapper> addFile(@RequestParam String type,
+                                              @RequestBody MultipartFile file) throws ExecutionException, InterruptedException, IOException {
+            return new ResponseEntity<>(storageServiceImpl.photoUploadDto(type, file), HttpStatus.OK);
     }
 }

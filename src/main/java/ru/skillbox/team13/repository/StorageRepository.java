@@ -6,4 +6,6 @@ import ru.skillbox.team13.entity.Storage;
 
 public interface StorageRepository extends JpaRepository<Storage, Long> {
     Storage findByFileName(String fileName);
+    Storage findByOwnerId(int ownerId);
+    Storage findById(int id);
 }
