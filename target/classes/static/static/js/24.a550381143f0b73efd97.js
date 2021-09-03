@@ -1,0 +1,2 @@
+webpackJsonp([24],{"1tTY":function(t,e,s){"use strict";Object.defineProperty(e,"__esModule",{value:!0});var n={render:function(){var t=this.$createElement,e=this._self._c||t;return e("div",{staticClass:"success-forgot"},[e("simple-svg",{attrs:{filepath:"/static/img/success-forgot.svg"}})],1)},staticRenderFns:[]};var r=s("VU/8")({name:"ForgotFailed"},n,!1,function(t){s("Y9/F")},null,null);e.default=r.exports},"Y9/F":function(t,e){}});
+//# sourceMappingURL=24.a550381143f0b73efd97.js.map

@@ -1,7 +1,2 @@
 # Default ignored files
-/.idea
 /out
-*.xml
-!pom.xml
-*.iml
-/target

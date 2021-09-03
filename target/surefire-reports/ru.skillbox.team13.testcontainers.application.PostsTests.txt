@@ -1,0 +1,7 @@
+-------------------------------------------------------------------------------
+Test set: ru.skillbox.team13.testcontainers.application.PostsTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.096 s <<< FAILURE! - in ru.skillbox.team13.testcontainers.application.PostsTests
+ru.skillbox.team13.testcontainers.application.PostsTests  Time elapsed: 0.096 s  <<< ERROR!
+java.nio.file.InvalidPathException: Illegal char <"> at index 0: "C:\Users\asxma\AppData\Roaming\npm
+

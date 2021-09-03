@@ -1,0 +1,7 @@
+-------------------------------------------------------------------------------
+Test set: ru.skillbox.team13.testcontainers.database.LikeRepoTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.03 s <<< FAILURE! - in ru.skillbox.team13.testcontainers.database.LikeRepoTests
+ru.skillbox.team13.testcontainers.database.LikeRepoTests  Time elapsed: 0.03 s  <<< ERROR!
+java.nio.file.InvalidPathException: Illegal char <"> at index 0: "C:\Users\asxma\AppData\Roaming\npm
+

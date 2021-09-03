@@ -1,0 +1,2 @@
+webpackJsonp([26],{FWq7:function(e,t){},iH2Y:function(e,t,s){"use strict";Object.defineProperty(t,"__esModule",{value:!0});var r={render:function(){var e=this.$createElement,t=this._self._c||e;return t("div",{staticClass:"success-register"},[t("simple-svg",{attrs:{filepath:"/static/img/success-register.svg"}})],1)},staticRenderFns:[]};var i=s("VU/8")({name:"RegisterLetter"},r,!1,function(e){s("FWq7")},null,null);t.default=i.exports}});
+//# sourceMappingURL=26.6f4d9367ca62307016dc.js.map

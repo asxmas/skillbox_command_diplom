@@ -1,0 +1,2 @@
+webpackJsonp([14],{piUE:function(e,s){},xQWX:function(e,s,t){"use strict";Object.defineProperty(s,"__esModule",{value:!0});var i={render:function(){var e=this.$createElement,s=this._self._c||e;return s("div",{staticClass:"shift-email-success"},[s("simple-svg",{attrs:{filepath:"/static/img/success-forgot.svg"}})],1)},staticRenderFns:[]};var c=t("VU/8")({name:"ShiftEmailSuccess"},i,!1,function(e){t("piUE")},null,null);s.default=c.exports}});
+//# sourceMappingURL=14.4e277c707c29cfb0aae3.js.map

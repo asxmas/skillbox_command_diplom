@@ -32,13 +32,13 @@ spring.mail:
   properties.mail.smtp.starttls.enable: true
 
 #осуществлять отправку писем подтверждения регистрации и сброса пароля
-email.sender.active: true
+email.sender.active: false
 
 server:
   port: ${PORT:8080}
 
 #сервер на котором развернут фронт(https://team13.herokuapp.com или http://localhost:8080 при расположении в static)
-server.base_url: ${BASE_URL:https://team13.herokuapp.com}
+server.base_url: ${BASE_URL:http://localhost:8080}
 
 s3:
   accessKey: ${ACCESS_KEY}

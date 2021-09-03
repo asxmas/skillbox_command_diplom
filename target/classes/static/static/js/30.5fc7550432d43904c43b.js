@@ -1,0 +1,2 @@
+webpackJsonp([30],{"/oAO":function(e,s,t){"use strict";Object.defineProperty(s,"__esModule",{value:!0});var n={render:function(){var e=this.$createElement,s=this._self._c||e;return s("div",{staticClass:"shift-email-success"},[s("simple-svg",{attrs:{filepath:"/static/img/success-forgot.svg"}})],1)},staticRenderFns:[]};var c=t("VU/8")({name:"ChangeEmailSuccess"},n,!1,function(e){t("wqDM")},null,null);s.default=c.exports},wqDM:function(e,s){}});
+//# sourceMappingURL=30.5fc7550432d43904c43b.js.map

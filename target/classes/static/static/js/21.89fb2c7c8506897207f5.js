@@ -1,0 +1,2 @@
+webpackJsonp([21],{"2QiY":function(e,s){},KRt4:function(e,s,t){"use strict";Object.defineProperty(s,"__esModule",{value:!0});var n={render:function(){var e=this.$createElement,s=this._self._c||e;return s("div",{staticClass:"change-password-success"},[s("simple-svg",{attrs:{filepath:"/static/img/success-change-password.svg"}})],1)},staticRenderFns:[]};var a=t("VU/8")({name:"ForgotExpired"},n,!1,function(e){t("2QiY")},null,null);s.default=a.exports}});
+//# sourceMappingURL=21.89fb2c7c8506897207f5.js.map

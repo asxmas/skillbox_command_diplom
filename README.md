@@ -1,3 +1,3 @@
 # JavaPRO-SocialNetwork-StudyGroup-13
 
-Учебный групповой проект Skillbox по разработке прилодения социальной сети.
+Учебный групповой проект Skillbox по разработке прилодения социальной сети.# skillbox_diploms
